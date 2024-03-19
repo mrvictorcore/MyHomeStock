@@ -9,7 +9,7 @@ export const routes: Routes = [
     { path: 'inventario', component: DashboardComponent },
     { path: 'producto', component: ProductosComponent },
     { path: 'stock', component: StockProductoComponent },
-    { path: 'shopping', component: ShoppingComponent },
+    { path: 'compra', component: ShoppingComponent },
 ];
 
 @NgModule({

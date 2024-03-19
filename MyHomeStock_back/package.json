@@ -1,7 +1,7 @@
 {
-  "name": "finanzas-personales",
+  "name": "myhomestock",
   "version": "1.0.0",
-  "description": "Esta es una aplicación para la gestión de Finanzas Personales",
+  "description": "Esta es una aplicación para el contro del Stock de productos del Hogar",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",

@@ -9,7 +9,7 @@ const cors = require('cors');
 
 // Configuración de CORS
 // app.use(cors({
-//     origin: 'https://finanzaspersonales.up.railway.app', // URL de la aplicación Angular
+//     origin: 'https://myhomestock.up.railway.app', // URL de la aplicación Angular
 //     methods: ['GET', 'POST', 'PUT', 'DELETE'], // Métodos HTTP permitidos
 //     allowedHeaders: ['Content-Type', 'Authorization'] // Encabezados permitidos
 // }));
