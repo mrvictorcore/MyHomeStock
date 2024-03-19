@@ -1,6 +1,6 @@
 'use strict';
 
-const Stock = require('../models/categoria-gasto.model');
+const Stock = require('../models/stock.model');
 
 exports.findAll = function(req, res) {
   Stock.findAll(function(err, stock) {

@@ -15,6 +15,7 @@ import { StockProductoComponent } from './stock/stock-producto/stock-producto.co
 import { EditarStockComponent } from './stock/stock-producto/editar-stock/editar-stock.component';
 import { ShoppingComponent } from './shopping/shopping.component';
 import { CrearEditarCompraComponent } from './shopping/crear-editar-compra/crear-editar-compra.component';
+import { HttpClientModule } from '@angular/common/http';
 
 
 
@@ -37,6 +38,7 @@ import { CrearEditarCompraComponent } from './shopping/crear-editar-compra/crear
     FormsModule,
     BrowserAnimationsModule,
     MatDialogModule,
+    HttpClientModule
   ],
   providers: [AppService],
   bootstrap: [AppComponent]

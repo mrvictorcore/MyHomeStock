@@ -18,6 +18,6 @@ router.put('/:id', compraController.update);
 router.delete('/:id', compraController.delete);
 
 // Todos los gastos por usuario_id y null
-router.post('/find', compraController.findByUsuarioId);
+router.get('/find', compraController.findByUsuarioId);
 
 module.exports = router

@@ -1,4 +1,4 @@
-'user strict';
+'use strict';
 const getConnection = require('../../config/db.config');
 
 var Compra = function(compra){
