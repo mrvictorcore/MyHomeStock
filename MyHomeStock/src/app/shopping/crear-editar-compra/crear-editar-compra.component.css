@@ -1,0 +1,15 @@
+.custom-title{
+    font-weight: bold; font-size: 30px;
+}
+
+.custom-btn-size {
+    width: 100px; /* Establece el ancho deseado para los botones */
+  }
+
+  .custom-margin-right {
+    margin-right: 10px; /* Establece el margen derecho para separar los botones */
+  }
+
+  .bold-text {
+    font-weight: bold;
+  }

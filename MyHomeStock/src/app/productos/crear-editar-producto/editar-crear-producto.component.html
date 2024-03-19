@@ -1,0 +1,56 @@
+<div class="container-fluid">
+    <h1 class="mt-4 text-center display-4">{{ isNew ? 'Crear Producto' : 'Editar Producto' }}</h1>
+    <div class="row">
+      <!-- Formulario y botones Cancelar y Guardar a la derecha -->
+      <div class="col-lg-10 col-md-9 col-sm-8">
+        <form (ngSubmit)="guardarCrearProducto()" #productoForm="ngForm">
+          <div class="p-3 mb-5 bg-white rounded">
+            <div class="form-group">
+              <label for="nombre_producto" class="text-center">Nombre del Producto</label>
+              <input type="text" class="form-control" id="nombre_producto" name="nombre_producto" [(ngModel)]="productoTemp.nombre_producto" required>
+            </div>
+            <div class="form-group">
+              <label for="id_categoria" class="text-center">Categoría</label>
+              <select class="form-control" id="id_categoria" name="id_categoria" [(ngModel)]="productoTemp.id_categoria" required>
+                <option *ngFor="let categoria of categorias" [value]="categoria.ID">{{ categoria.Nombre_categoria }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="id_tipo" class="text-center">Tipo</label>
+              <select class="form-control" id="id_tipo" name="id_tipo" [(ngModel)]="productoTemp.id_tipo" required>
+                <option *ngFor="let tipo of tipos" [value]="tipo.ID">{{ tipo.Nombre_tipo }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="id_descripcion" class="text-center">Descripción</label>
+              <select class="form-control" id="id_descripcion" name="id_descripcion" [(ngModel)]="productoTemp.id_descripcion" required>
+                <option *ngFor="let descripcion of descripciones" [value]="descripcion.ID">{{ descripcion.Nombre_descripcion }}</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="cantidad_stock" class="text-center">Cantidad en Stock</label>
+              <input type="number" class="form-control" id="cantidad_stock" name="cantidad_stock" [(ngModel)]="productoTemp.cantidad_stock" required>
+            </div>
+            <div class="form-group">
+              <label for="cantidad_min" class="text-center">Cantidad Mínima</label>
+              <input type="number" class="form-control" id="cantidad_min" name="cantidad_min" [(ngModel)]="productoTemp.cantidad_min" required>
+            </div>
+            <div class="form-check custom-checkbox mt-3 mb-3">
+              <input type="checkbox" class="form-check-input" id="favorito" name="favorito" [(ngModel)]="productoTemp.favorito" style="display: none;">
+              Favorito
+              <label class="form-check-label" for="favorito"></label>
+            </div>
+            <div class="text-right">
+                <div class="d-inline">
+                    <button type="button" class="btn btn-secondary custom-btn-size custom-margin-right" (click)="cancelar()">Cancelar</button>
+                </div>
+                <div class="d-inline">
+                    <button type="submit" class="btn btn-primary custom-btn-size ">{{ isNew ? 'Crear' : 'Guardar' }}</button>
+                </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+</div>
+  

@@ -1,0 +1,56 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h1 class="text-center">{{ editMode ? 'Editar' : 'Crear' }} Lista de Compra</h1>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="form-group">
+        <label for="productoSelect">Selecciona un Producto:</label>
+        <select id="productoSelect" class="form-control" (change)="agregarProductoALista($event)">
+          <option *ngFor="let producto of productosDisponibles" [value]="producto.id">{{ producto.nombre_producto }}</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-borderless table-hover">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Stock</th>
+              <th>Cantidad</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let producto of productosSeleccionados">
+              <td>{{ producto.nombre_producto }}</td>
+              <td>{{ producto.cantidad_stock }}</td>
+              <td>
+                <input type="number" class="form-control" [(ngModel)]="producto.cantidad_comprar">
+              </td>
+              <td>
+                <button class="btn btn-light mx-1" (click)="borrarProductoDeLista(producto.id)">
+                  <i class="fas fa-trash-alt"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 text-center">
+      <button type="button" class="btn btn-success" (click)="guardarCompra()">Confirmar</button>
+      <button type="button" class="btn btn-secondary" (click)="cancelarCompra()">Cancelar</button>
+    </div>
+  </div>
+</div>

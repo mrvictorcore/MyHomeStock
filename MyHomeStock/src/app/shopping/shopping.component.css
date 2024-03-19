@@ -1,0 +1,29 @@
+.custom-title{
+    font-weight: bold; font-size: 30px;
+}
+
+/* Para mover el checkbox "Check Auto" a la derecha */
+.float-right {
+    float: right;
+  }
+  
+  /* Espacio entre el checkbox y el texto "Check Auto" */
+  .form-group label {
+    margin-right: 8px;
+  }
+
+  .text-center {
+    margin-right: 50px; /* Ajusta el valor del margen según tus preferencias */
+  }
+
+  .custom-btn-size {
+    width: 100px; /* Establece el ancho deseado para los botones */
+  }
+
+  .custom-margin-right {
+    margin-right: 10px; /* Establece el margen derecho para separar los botones */
+  }
+
+  .bold-text {
+    font-weight: bold;
+  }

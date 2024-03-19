@@ -1,0 +1,28 @@
+<div class="container-fluid">
+  <h1 class="mt-4 text-center display-4">Editar Producto</h1>
+  <div class="row">
+    <!-- Formulario y botones Cancelar y Guardar a la derecha -->
+    <div class="col-lg-10 col-md-9 col-sm-8">
+      <form (ngSubmit)="onSaveClick()" #productoForm="ngForm">
+        <div class="p-3 mb-5 bg-white rounded">
+          <div class="form-group">
+            <label for="cantidadStock" class="text-center">Stock Existente:</label>
+            <input type="number" class="form-control" id="cantidadStock" name="cantidadStock" [(ngModel)]="producto.cantidad_stock" required>
+          </div>
+          <div class="form-group mt-4">
+            <label for="cantidadMinima" class="text-center">Stock Mínimo:</label>
+            <input type="number" class="form-control" id="cantidadMinima" name="cantidadMinima" [(ngModel)]="producto.cantidad_min" required>
+          </div>
+          <div class="text-right mt-4">
+            <div class="d-inline">
+              <button type="button" class="btn btn-secondary custom-btn-size custom-margin-right" (click)="onCancelClick()">Cancelar</button>
+            </div>
+            <div class="d-inline">
+              <button type="submit" class="btn btn-primary custom-btn-size">Guardar</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

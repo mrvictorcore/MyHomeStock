@@ -1,0 +1,25 @@
+.custom-btn-size {
+    width: 100px; /* Establece el ancho deseado para los botones */
+  }
+  
+  .custom-margin-right {
+    margin-right: 10px; /* Establece el margen derecho para separar los botones */
+  }
+  
+  .custom-checkbox .form-check-input:checked + .form-check-label::before {
+    content: "\f004"; /* Ícono de corazón (puedes personalizarlo) */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: #000; /* Color del corazón cuando está seleccionado (negro) */
+    margin-left: 10px; /* Espaciado a la derecha del checkbox */
+  }
+  
+  .custom-checkbox .form-check-label::before {
+    content: "\f004"; /* Ícono de corazón (puedes personalizarlo) */
+    font-family: "Font Awesome 5 Free";
+    font-weight: 900;
+    color: #ccc; /* Color del corazón cuando no está seleccionado */
+    margin-right: 10px; /* Espaciado a la derecha del checkbox */
+  }
+  
+  

@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded">
+    <h1 class="mt-4 text-center display-4 custom-title">Compra</h1>
+    <div class="table-responsive">
+      <table class="table table-borderless table-hover mt-3">
+        <thead>
+          <tr>
+            <th class="text-center">Nombre</th>
+            <th class="text-center">Stock</th>
+            <th class="text-center">Comprar</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let producto of listaCompra" class="table-row">
+            <td class="text-center">{{ producto.nombre_producto }}</td>
+            <td class="text-center">{{ producto.cantidad_stock }}</td>
+            <td class="text-center">{{ producto.cantidad_comprar }}</td>
+            <td class="text-center">
+              <div class="d-flex flex-row align-items-center justify-content-center mb-2">
+                <input type="checkbox" [(ngModel)]="producto.seleccionado" name="comprado{{producto.id}}" (change)="onCompradoChange(producto)">
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="form-group mb-0 mr-2 float-right form-group label text-center">
+      <label for="checkAuto" class="mr-2 bold-text">Check Auto</label>
+      <input type="checkbox" [(ngModel)]="checkAuto" id="checkAuto" (change)="onCheckAutoChange()">
+    </div>
+    <div class="float-left">
+      <button class="btn btn-light" (click)="onCrearCompra()">
+        <i class="fas fa-plus"></i>
+      </button>
+    </div>
+    <div class="float-left">
+      <button class="btn btn-light" (click)="onEditarCompra()">
+        <i class="fas fa-edit"></i>
+      </button>
+    </div>
+    <div class="text-right float-right">
+      <button type="button" class="btn btn-secondary custom-btn-size custom-margin-right" (click)="onBorrarClick()">Borrar</button>
+      <button type="submit" class="btn btn-primary custom-btn-size" (click)="onConfirmarCompraClick()">Confirmar</button>
+    </div>
+  </div>
+</div>
