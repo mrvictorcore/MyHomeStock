@@ -6,11 +6,11 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 // Configuración de CORS
-// app.use(cors({
-//     origin: '*',
-//     methods: ['GET', 'POST', 'PUT', 'DELETE'],
-//     allowedHeaders: ['Content-Type', 'Authorization']
-// }));
+app.use(cors({
+    origin: 'http://localhost:4200',
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Middleware para parsear el cuerpo de las solicitudes
 app.use(express.urlencoded({ extended: true }));

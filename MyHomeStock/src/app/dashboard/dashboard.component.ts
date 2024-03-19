@@ -32,13 +32,14 @@ export class DashboardComponent implements OnInit {
 
   cambiarCantidadRestar(producto: Producto, event: any): void {
     const cantidadCambiar = event.target.value;
-    this.cantidadSeleccionada[producto.id] = parseInt(cantidadCambiar);
+    this.cantidadSeleccionada[producto.id] = parseInt(cantidadCambiar, 10);
   }
 
   restarStock(producto: Producto, cantidadSeleccionada: number): void {
     if (cantidadSeleccionada > 0 && producto.cantidad_stock >= cantidadSeleccionada) {
       const dialogRef: MatDialogRef<AlertBorrarComponent> = this.dialog.open(AlertBorrarComponent, {
-        width: '400px'
+        width: '400px',
+        data: { productName: producto.nombre_producto }
       });
 
       dialogRef.afterClosed().subscribe(result => {

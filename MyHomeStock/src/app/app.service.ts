@@ -13,153 +13,142 @@ import { HttpClient } from '@angular/common/http';
   providedIn: 'root'
 })
 export class AppService {
-  private apiUrl = 'http://localhost:5000/api';
+  private apiUrl = 'http://localhost:5000/api/v1';
 
   constructor(private http: HttpClient) { }
 
   // Métodos para Usuario
   getUsuarios(): Observable<Usuario[]> {
-    return this.http.get<Usuario[]>(`${this.apiUrl}/usuarios`);
+    return this.http.get<Usuario[]>(`${this.apiUrl}/usuario`);
   }
 
   getUsuario(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/usuarios/${id}`);
+    return this.http.get<Usuario>(`${this.apiUrl}/usuario/${id}`);
   }
 
   addUsuario(newUsuario: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.apiUrl}/usuarios`, newUsuario);
+    return this.http.post<Usuario>(`${this.apiUrl}/usuario`, newUsuario);
   }
 
   updateUsuario(newUsuario: Usuario): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.apiUrl}/usuarios/${newUsuario.ID}`, newUsuario);
+    return this.http.put<Usuario>(`${this.apiUrl}/usuario/${newUsuario.ID}`, newUsuario);
   }
 
   deleteUsuario(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/usuarios/${id}`);
+    return this.http.delete(`${this.apiUrl}/usuario/${id}`);
   }
 
   // Métodos para Producto
   getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.apiUrl}/productos`);
+    return this.http.get<Producto[]>(`${this.apiUrl}/producto`);
   }
 
   getProducto(id: number): Observable<Producto> {
-    return this.http.get<Producto>(`${this.apiUrl}/productos/${id}`);
+    return this.http.get<Producto>(`${this.apiUrl}/producto/${id}`);
   }
 
   addProductos(newProducto: Producto): Observable<Producto> {
-    return this.http.post<Producto>(`${this.apiUrl}/productos`, newProducto);
+    return this.http.post<Producto>(`${this.apiUrl}/producto`, newProducto);
   }
 
   updateProducto(newProducto: Producto): Observable<Producto> {
-    return this.http.put<Producto>(`${this.apiUrl}/productos/${newProducto.id}`, newProducto);
+    return this.http.put<Producto>(`${this.apiUrl}/producto/${newProducto.id}`, newProducto);
   }
 
   deleteProducto(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/productos/${id}`);
+    return this.http.delete(`${this.apiUrl}/producto/${id}`);
   }
 
-
-  // restarStock(ID_producto: number, cantidadRestar: number): Observable<Producto | null> {
-  //   const prod = PRODUCTOS.find(p => p.id === ID_producto);
-  //   if (prod && prod.cantidad_stock >= cantidadRestar) {
-  //     prod.cantidad_stock -= cantidadRestar;
-  //     return of(prod);
-  //   }
-  //   return of(null);
-  // }
-
-  // sumarStock(ID_producto: number, cantidadSumar: number): Observable<Producto | null> {
-  //   const prod = PRODUCTOS.find(p => p.id === ID_producto);
-  //   if (prod) {
-  //     prod.cantidad_stock += cantidadSumar;
-  //     return of(prod);
-  //   }
-  //   return of(null);
-  // }
+  restarStock(idProducto: number, cantidadRestar: number): Observable<Producto> {
+    return this.http.patch<Producto>(`${this.apiUrl}/producto/restarStock/${idProducto}`, { cantidadRestar });
+  }
+  
+  sumarStock(idProducto: number, cantidadSumar: number): Observable<Producto> {
+    return this.http.patch<Producto>(`${this.apiUrl}/producto/sumarStock/${idProducto}`, { cantidadSumar });
+  }  
 
   // Métodos para Compra
   getCompras(): Observable<Compra[]> {
-    return this.http.get<Compra[]>(`${this.apiUrl}/compras`);
+    return this.http.get<Compra[]>(`${this.apiUrl}/compra`);
   }
 
   getCompra(id: number): Observable<Compra> {
-    return this.http.get<Compra>(`${this.apiUrl}/compras/${id}`);
+    return this.http.get<Compra>(`${this.apiUrl}/compra/${id}`);
   }
 
   addCompras(newCompra: Compra): Observable<Compra> {
-    return this.http.post<Compra>(`${this.apiUrl}/compras`, newCompra);
+    return this.http.post<Compra>(`${this.apiUrl}/compra`, newCompra);
   }
 
   updateCompra(newCompra: Compra): Observable<Compra> {
-    return this.http.put<Compra>(`${this.apiUrl}/compras/${newCompra.id}`, newCompra);
+    return this.http.put<Compra>(`${this.apiUrl}/compra/${newCompra.id}`, newCompra);
   }
 
   deleteCompra(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/compras/${id}`);
+    return this.http.delete(`${this.apiUrl}/compra/${id}`);
   }
 
   // Métodos para Categoria
   getCategorias(): Observable<Categoria[]> {
-    return this.http.get<Categoria[]>(`${this.apiUrl}/categorias`);
+    return this.http.get<Categoria[]>(`${this.apiUrl}/categoria`);
   }
 
   getCategoria(id: number): Observable<Categoria> {
-    return this.http.get<Categoria>(`${this.apiUrl}/categorias/${id}`);
+    return this.http.get<Categoria>(`${this.apiUrl}/categoria/${id}`);
   }
 
   addCategoria(newCategoria: Categoria): Observable<Categoria> {
-    return this.http.post<Categoria>(`${this.apiUrl}/categorias`, newCategoria);
+    return this.http.post<Categoria>(`${this.apiUrl}/categoria`, newCategoria);
   }
 
   updateCategoria(newCategoria: Categoria): Observable<Categoria> {
-    return this.http.put<Categoria>(`${this.apiUrl}/categorias/${newCategoria.ID}`, newCategoria);
+    return this.http.put<Categoria>(`${this.apiUrl}/categoria/${newCategoria.ID}`, newCategoria);
   }
 
   deleteCategoria(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/categorias/${id}`);
+    return this.http.delete(`${this.apiUrl}/categoria/${id}`);
   }
 
   // Métodos para Tipo
   getTipos(): Observable<Tipo[]> {
-    return this.http.get<Tipo[]>(`${this.apiUrl}/tipos`);
+    return this.http.get<Tipo[]>(`${this.apiUrl}/tipo`);
   }
 
   getTipo(id: number): Observable<Tipo> {
-    return this.http.get<Tipo>(`${this.apiUrl}/tipos/${id}`);
+    return this.http.get<Tipo>(`${this.apiUrl}/tipo/${id}`);
   }
 
   addTipo(newTipo: Tipo): Observable<Tipo> {
-    return this.http.post<Tipo>(`${this.apiUrl}/tipos`, newTipo);
+    return this.http.post<Tipo>(`${this.apiUrl}/tipo`, newTipo);
   }
 
   updateTipo(newTipo: Tipo): Observable<Tipo> {
-    return this.http.put<Tipo>(`${this.apiUrl}/tipos/${newTipo.ID}`, newTipo);
+    return this.http.put<Tipo>(`${this.apiUrl}/tipo/${newTipo.ID}`, newTipo);
   }
 
   deleteTipo(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/tipos/${id}`);
+    return this.http.delete(`${this.apiUrl}/tipo/${id}`);
   }
 
   // Métodos para Descripcion
   getDescripciones(): Observable<Descripcion[]> {
-    return this.http.get<Descripcion[]>(`${this.apiUrl}/descripciones`);
+    return this.http.get<Descripcion[]>(`${this.apiUrl}/descripcion`);
   }
 
   getDescripcion(id: number): Observable<Descripcion> {
-    return this.http.get<Descripcion>(`${this.apiUrl}/descripciones/${id}`);
+    return this.http.get<Descripcion>(`${this.apiUrl}/descripcion/${id}`);
   }
 
   addDescripcion(newDescripcion: Descripcion): Observable<Descripcion> {
-    return this.http.post<Descripcion>(`${this.apiUrl}/descripciones`, newDescripcion);
+    return this.http.post<Descripcion>(`${this.apiUrl}/descripcion`, newDescripcion);
   }
 
   updateDescripcion(newDescripcion: Descripcion): Observable<Descripcion> {
-    return this.http.put<Descripcion>(`${this.apiUrl}/descripciones/${newDescripcion.ID}`, newDescripcion);
+    return this.http.put<Descripcion>(`${this.apiUrl}/descripcion/${newDescripcion.ID}`, newDescripcion);
   }
 
   deleteDescripcion(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/descripciones/${id}`);
+    return this.http.delete(`${this.apiUrl}/descripcion/${id}`);
   }
 
 }
