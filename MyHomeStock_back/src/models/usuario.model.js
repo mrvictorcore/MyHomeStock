@@ -7,11 +7,9 @@ var Usuario = function(usuario){
     this.created_at = new Date();
     this.updated_at = new Date();
 
-    this.nombre     = usuario.nombre;
-    this.apellido   = usuario.apellido;
+    this.nombre_usuario     = usuario.nombre_usuario;
+    this.contrasena   = usuario.contrasena;
     this.email      = usuario.email;
-    this.saldo      = usuario.saldo;
-    this.password   = usuario.password;
 };
 
 Usuario.existeUsuario  = function(email, result){

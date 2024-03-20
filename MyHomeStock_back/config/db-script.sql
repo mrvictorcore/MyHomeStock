@@ -1,60 +1,91 @@
 -- Elimina la base de datos
-DROP DATABASE IF EXISTS MyHomeStock;
+DROP DATABASE IF EXISTS myhomestock;
 
 -- Crear la base de datos
-CREATE DATABASE IF NOT EXISTS MyHomeStock;
-USE MyHomeStock;
+CREATE DATABASE IF NOT EXISTS myhomestock;
+USE myhomestock;
 
--- Crear tabla de Usuarios
-CREATE TABLE IF NOT EXISTS Usuarios (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Nombre_usuario VARCHAR(50) NOT NULL,
-    Contrasena VARCHAR(50) NOT NULL,
-    Email VARCHAR(100) NOT NULL
+-- Crear tabla de usuarios
+CREATE TABLE IF NOT EXISTS usuarios (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_usuario VARCHAR(50) NOT NULL,
+    contrasena VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Crear tabla de Categorías
-CREATE TABLE IF NOT EXISTS Categoria (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Nombre_categoria VARCHAR(50) NOT NULL
+-- Crear tabla de categorías
+CREATE TABLE IF NOT EXISTS categoria (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_categoria VARCHAR(50) NOT NULL,
+    usuario_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
--- Crear tabla de Tipos
-CREATE TABLE IF NOT EXISTS Tipo (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Nombre_tipo VARCHAR(50) NOT NULL
+-- Crear tabla de tipos
+CREATE TABLE IF NOT EXISTS tipo (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_tipo VARCHAR(50) NOT NULL,
+    usuario_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
 );
 
--- Crear tabla de Descripciones
-CREATE TABLE IF NOT EXISTS Descripcion (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    ID_categoria INT,
-    ID_tipo INT,
-    Nombre_descripcion VARCHAR(50) NOT NULL,
-    FOREIGN KEY (ID_categoria) REFERENCES Categoria(ID),
-    FOREIGN KEY (ID_tipo) REFERENCES Tipo(ID)
+-- Crear tabla de descripciones
+CREATE TABLE IF NOT EXISTS descripcion (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_categoria INT,
+    id_tipo INT,
+    nombre_descripcion VARCHAR(50) NOT NULL,
+    usuario_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (id_categoria) REFERENCES categoria(id),
+    FOREIGN KEY (id_tipo) REFERENCES tipo(id)
 );
 
--- Crear tabla de Productos con columna "favorito"
-CREATE TABLE IF NOT EXISTS Producto (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    Nombre_producto VARCHAR(100) NOT NULL,
-    ID_categoria INT,
-    ID_tipo INT,
-    ID_descripcion INT,
-    Cantidad_stock INT,
-    Cantidad_min_mensual INT,
-    Favorito BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (ID_categoria) REFERENCES Categoria(ID),
-    FOREIGN KEY (ID_tipo) REFERENCES Tipo(ID),
-    FOREIGN KEY (ID_descripcion) REFERENCES Descripcion(ID)
+-- Crear tabla de productos con columna "favorito"
+CREATE TABLE IF NOT EXISTS producto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre_producto VARCHAR(100) NOT NULL,
+    id_categoria INT,
+    id_tipo INT,
+    id_descripcion INT,
+    cantidad_stock INT,
+    cantidad_min_mensual INT,
+    favorito BOOLEAN DEFAULT FALSE,
+    usuario_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (id_categoria) REFERENCES categoria(id),
+    FOREIGN KEY (id_tipo) REFERENCES tipo(id),
+    FOREIGN KEY (id_descripcion) REFERENCES descripcion(id)
 );
 
--- Crear tabla de Compras
-CREATE TABLE IF NOT EXISTS Compra (
-    ID INT AUTO_INCREMENT PRIMARY KEY,
-    ID_producto INT,
-    Cantidad_comprar INT,
-    Seleccionado BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (ID_producto) REFERENCES Producto(ID)
+-- Crear tabla de compras con todos los datos del producto
+CREATE TABLE IF NOT EXISTS compra (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    id_producto INT,
+    nombre_producto VARCHAR(100),
+    id_categoria INT,
+    id_tipo INT,
+    id_descripcion INT,
+    cantidad_stock INT,
+    cantidad_min_mensual INT,
+    favorito BOOLEAN,
+    cantidad_comprar INT,
+    usuario_id INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id),
+    FOREIGN KEY (id_producto) REFERENCES producto(id),
+    FOREIGN KEY (id_categoria) REFERENCES producto(id_categoria),
+    FOREIGN KEY (id_tipo) REFERENCES producto(id_tipo),
+    FOREIGN KEY (id_descripcion) REFERENCES producto(id_descripcion)
 );

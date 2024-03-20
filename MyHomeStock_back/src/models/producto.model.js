@@ -3,14 +3,19 @@ const getConnection = require('../../config/db.config');
 
 var Producto = function(producto){
 
-    this.id            = producto.id;
-    this.created_at = new Date();
-    this.updated_at = new Date();
+    this.id                     = producto.id;
+    this.created_at             = new Date();
+    this.updated_at             = new Date();
 
-    this.descripcion   = producto.descripcion;
-    this.fecha_producto = producto.fecha_producto;
-    this.cantidad      = producto.cantidad;
-    this.usuario_id    = producto.usuario_id;
+    this.nombre_producto        = producto.nombre_producto;
+    this.id_categoria           = producto.id_categoria;
+    this.id_tipo                = producto.id_tipo;
+    this.id_descripcion         = producto.id_descripcion;
+    this.cantidad_stock         = producto.cantidad_stock;
+    this.cantidad_min_mensual   = producto.cantidad_min_mensual;
+    this.favorito               = producto.favorito;
+    this.id_tipo                = producto.id_tipo;
+    this.usuario_id             = producto.usuario_id;
     
 };
 

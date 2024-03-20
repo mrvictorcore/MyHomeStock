@@ -3,16 +3,20 @@ const getConnection = require('../../config/db.config');
 
 var Compra = function(compra){
 
-    this.id            = compra.id;
-    this.created_at = new Date();
-    this.updated_at = new Date();
+    this.id                         = compra.id;
+    this.created_at                 = new Date();
+    this.updated_at                 = new Date();
     
-    this.descripcion   = compra.descripcion;
-    this.cantidad      = compra.cantidad;
-    this.fecha_compra = compra.fecha_compra;
-    this.categoria_id    = compra.categoria_id;
-    this.tipo_compra    = compra.tipo_compra;
-    this.usuario_id    = compra.usuario_id;
+    this.id_producto                = compra.id_producto;
+    this.nombre_producto            = compra.nombre_producto;
+    this.id_categoria               = compra.id_categoria;
+    this.id_tipo                    = compra.id_tipo;
+    this.id_descripcion             = compra.id_descripcion;
+    this.cantidad_stock             = compra.cantidad_stock;
+    this.cantidad_min_mensual       = compra.cantidad_min_mensual;
+    this.favorito                   = compra.favorito;
+    this.cantidad_comprar           = compra.cantidad_comprar;
+    this.usuario_id                 = compra.usuario_id;
 };
 
 Compra.create = function (newEmp, result) {    

@@ -1,39 +1,39 @@
 'use strict';
 
-const Inventario = require('../models/inventario.model');
+const Categoria = require('../models/categoria.model');
 
 exports.findAll = function(req, res) {
-  Inventario.findAll(function(err, inventario) {
+  Categoria.findAll(function(err, categoria) {
     console.log('controller')
     if (err)
     res.send(err);
-    console.log('res', inventario);
-    res.send(inventario);
+    console.log('res', categoria);
+    res.send(categoria);
   });
 };
 
 
 exports.create = function(req, res) {
-    const new_inventario = new Inventario(req.body);
+    const new_categoria = new Categoria(req.body);
 
     //handles null error 
    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
         res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
     }else{
-        Inventario.create(new_inventario, function(err, inventario) {
+        Categoria.create(new_categoria, function(err, categoria) {
             if (err)
             res.send(err);
-            res.json({error:false,message:"Inventario añadido correctamente!",data:inventario});
+            res.json({error:false,message:"Categoria añadido correctamente!",data:categoria});
         });
     }
 };
 
 
 exports.findById = function(req, res) {
-    Inventario.findById(req.params.id, function(err, inventario) {
+    Categoria.findById(req.params.id, function(err, categoria) {
         if (err)
         res.send(err);
-        res.json(inventario);
+        res.json(categoria);
     });
 };
 
@@ -42,10 +42,10 @@ exports.update = function(req, res) {
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
         res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
     }else{
-        Inventario.update(req.params.id, new Inventario(req.body), function(err, inventario) {
+        Categoria.update(req.params.id, new Categoria(req.body), function(err, categoria) {
             if (err)
             res.send(err);
-            res.json({ error:false, message: 'Inventario actualizado correctamente' });
+            res.json({ error:false, message: 'Categoria actualizado correctamente' });
         });
     }
   
@@ -53,24 +53,24 @@ exports.update = function(req, res) {
 
 
 exports.delete = function(req, res) {
-  Inventario.delete( req.params.id, function(err, inventario) {
+  Categoria.delete( req.params.id, function(err, categoria) {
     if (err)
     res.send(err);
-    res.json({ error:false, message: 'Inventario successfully deleted' });
+    res.json({ error:false, message: 'Categoria successfully deleted' });
   });
 };
 
 exports.findByUsuarioId = function(req, res) {
-    const criteriosBusqueda = new Inventario(req.body);
+    const criteriosBusqueda = new Categoria(req.body);
 
     //handles null error 
    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
         res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
     }else{
-        Inventario.findByUsuarioId(criteriosBusqueda, function(err, inventarios) {
+        Categoria.findByUsuarioId(criteriosBusqueda, function(err, categorias) {
             if (err)
             res.send(err);
-            res.json(inventarios);
+            res.json(categorias);
         });
     }
 };
