@@ -40,7 +40,7 @@ const compraRoutes = require('./src/routes/compra.routes');
 app.use('/api/v1/compra', compraRoutes);
 
 const usuarioRoutes = require('./src/routes/usuario.routes');
-app.use('/api/v1/usuarios', usuarioRoutes);
+app.use('/api/v1/usuario', usuarioRoutes);
 
 /**
  * FIN ENRUTAMIENTOS
