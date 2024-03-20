@@ -23,20 +23,24 @@ app.get('/', (req, res) => {
 /**
  * ENRUTAMIENTOS A LAS ENTIDADES DE LA APLICACIÓN
  */
-const usuarioRoutes = require('./src/routes/usuario.routes');
-app.use('/api/v1/usuarios', usuarioRoutes);
 
-const inventarioRoutes = require('./src/routes/inventario.routes');
-app.use('/api/v1/inventario', inventarioRoutes);
+const categoriaRoutes = require('./src/routes/categoria.routes');
+app.use('/api/v1/categoria', categoriaRoutes);
+
+const descripcionRoutes = require('./src/routes/descripcion.routes');
+app.use('/api/v1/descripcion', descripcionRoutes);
 
 const productoRoutes = require('./src/routes/producto.routes');
 app.use('/api/v1/producto', productoRoutes);
 
-const stockRoutes = require('./src/routes/stock.routes');
-app.use('/api/v1/stock', stockRoutes);
+const tipoRoutes = require('./src/routes/tipo.routes');
+app.use('/api/v1/tipo', tipoRoutes);
 
 const compraRoutes = require('./src/routes/compra.routes');
 app.use('/api/v1/compra', compraRoutes);
+
+const usuarioRoutes = require('./src/routes/usuario.routes');
+app.use('/api/v1/usuarios', usuarioRoutes);
 
 /**
  * FIN ENRUTAMIENTOS
