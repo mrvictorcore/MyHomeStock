@@ -1,6 +1,8 @@
 # Dependency directories
 node_modules/
 node_modules_/
+MyHomeStock_back/node_modules/
+MyHomeStock_back/node_modules_/
 
 # Environment variables
 .env
