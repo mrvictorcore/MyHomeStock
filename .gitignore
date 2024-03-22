@@ -1,0 +1,30 @@
+# Dependency directories
+node_modules/
+node_modules_/
+
+# Environment variables
+.env
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Build files
+dist/
+build/
+
+# IDE settings
+.vscode/
+.idea/
+
+# Mac specific
+.DS_Store
+
+# Windows specific
+Thumbs.db
