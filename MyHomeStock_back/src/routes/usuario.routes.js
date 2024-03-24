@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const usuarioController = require('../controllers/usuario.controller');
 
-// Obtener todos los usuarios
+// Obtener todos los usuario
 router.get('/', usuarioController.findAll);
 
 // Verificar si un usuario existe

@@ -20,4 +20,7 @@ router.delete('/:id', compraController.delete);
 // Todos los gastos por usuario_id y null
 router.get('/find', compraController.findByUsuarioId);
 
+// Ruta para actualizar la cantidad de una compra
+router.put('/:id/cantidad', compraController.updateCantidadCompra);
+
 module.exports = router

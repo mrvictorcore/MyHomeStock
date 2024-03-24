@@ -11,7 +11,7 @@ import { AlertBorrarComponent } from './borrar-dashboard/alert-borrar.component'
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  productos: Producto[] | undefined;
+  productos: Producto[] = [];
   cantidadRestar: number[] = Array.from({ length: 10 }, (_, i) => i + 1);
   cantidadSeleccionada: { [key: number]: number } = {};
 
@@ -22,7 +22,7 @@ export class DashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.appService.getProductos().subscribe((productos) => {
-      this.productos = productos.filter(p => p.cantidad_stock > 0 || p.favorito);
+      this.productos = productos;
 
       this.productos.forEach(producto => {
         this.cantidadSeleccionada[producto.id] = 1;
@@ -36,12 +36,12 @@ export class DashboardComponent implements OnInit {
   }
 
   restarStock(producto: Producto, cantidadSeleccionada: number): void {
-    if (cantidadSeleccionada > 0 && producto.cantidad_stock >= cantidadSeleccionada) {
+    if (cantidadSeleccionada > 0 && producto.cantidad_stock != null && producto.cantidad_stock >= cantidadSeleccionada) {
       const dialogRef: MatDialogRef<AlertBorrarComponent> = this.dialog.open(AlertBorrarComponent, {
         width: '400px',
         data: { productName: producto.nombre_producto }
       });
-
+  
       dialogRef.afterClosed().subscribe(result => {
         if (result === true) {
           this.appService.restarStock(producto.id, cantidadSeleccionada).subscribe(result => {
@@ -53,6 +53,9 @@ export class DashboardComponent implements OnInit {
           });
         }
       });
+    } else {
+      console.log('Operación no permitida: cantidad seleccionada inválida o stock no disponible.');
     }
   }
+  
 }

@@ -7,6 +7,7 @@ import { Descripcion } from './models/descripcion';
 import { Observable, of } from 'rxjs';
 import { Compra } from './models/compra';
 import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
 
 
 @Injectable({
@@ -40,7 +41,11 @@ export class AppService {
 
   // Métodos para Producto
   getProductos(): Observable<Producto[]> {
-    return this.http.get<Producto[]>(`${this.apiUrl}/producto`);
+    return this.http.get<Producto[]>(`${this.apiUrl}/producto`).pipe(
+      map((productos: Producto[]) =>
+        productos.filter(p => p.cantidad_stock > 0 || p.favorito)
+      )
+    );
   }
 
   getProducto(id: number): Observable<Producto> {
@@ -65,7 +70,11 @@ export class AppService {
   
   sumarStock(idProducto: number, cantidadSumar: number): Observable<Producto> {
     return this.http.patch<Producto>(`${this.apiUrl}/producto/sumarStock/${idProducto}`, { cantidadSumar });
-  }  
+  }
+
+  toggleFavoritoProducto(id: number): Observable<Producto> {
+    return this.http.patch<Producto>(`${this.apiUrl}/productos/${id}/favorito`, {});
+  }
 
   // Métodos para Compra
   getCompras(): Observable<Compra[]> {
@@ -86,6 +95,10 @@ export class AppService {
 
   deleteCompra(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/compra/${id}`);
+  }
+
+  updateCantidadCompra(idCompra: number, nuevaCantidad: number): Observable<any> {
+    return this.http.put(`${this.apiUrl}/compra/${idCompra}/cantidad`, { nuevaCantidad });
   }
 
   // Métodos para Categoria

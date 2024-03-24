@@ -3,20 +3,13 @@ const getConnection = require('../../config/db.config');
 
 var Compra = function(compra){
 
-    this.id                         = compra.id;
-    this.created_at                 = new Date();
-    this.updated_at                 = new Date();
+    this.id             = compra.id;
+    this.id_usuario     = compra.id_usuario;
     
-    this.id_producto                = compra.id_producto;
-    this.nombre_producto            = compra.nombre_producto;
-    this.id_categoria               = compra.id_categoria;
-    this.id_tipo                    = compra.id_tipo;
-    this.id_descripcion             = compra.id_descripcion;
-    this.cantidad_stock             = compra.cantidad_stock;
-    this.cantidad_min_mensual       = compra.cantidad_min_mensual;
-    this.favorito                   = compra.favorito;
-    this.cantidad_comprar           = compra.cantidad_comprar;
-    this.usuario_id                 = compra.usuario_id;
+    this.descripcion    = compra.descripcion;
+
+    this.created_at     = new Date();
+    this.updated_at     = new Date();
 };
 
 Compra.create = function (newEmp, result) {    
@@ -33,6 +26,7 @@ Compra.create = function (newEmp, result) {
         }
     });           
 };
+
 Compra.findById = function (id, result) {
      var dbConn = getConnection();
     dbConn.query("Select * from compra where id = ? ", id, function (err, res) {             
@@ -46,6 +40,7 @@ Compra.findById = function (id, result) {
         }
     });   
 };
+
 Compra.findAll = function (result) {
      var dbConn = getConnection();
     dbConn.query("Select * from compra", function (err, res) {
@@ -60,6 +55,7 @@ Compra.findAll = function (result) {
         }
     });   
 };
+
 Compra.update = function(id, compra, result){
    var dbConn = getConnection();
     dbConn.query(
@@ -75,6 +71,7 @@ Compra.update = function(id, compra, result){
         }
     }); 
 };
+
 Compra.delete = function(id, result){
      var dbConn = getConnection(); 
     dbConn.query("DELETE FROM compra WHERE id = ?", [id], function (err, res) {
@@ -102,6 +99,19 @@ Compra.findByUsuarioId = function (req, result) {
             result(null, res);
         }
     });           
+};
+
+Compra.updateCantidadComprar = function(idCompra, nuevaCantidad, result) {
+    var dbConn = getConnection();
+    dbConn.query("UPDATE compra SET cantidad_comprar = ? WHERE id = ?", [nuevaCantidad, idCompra], function(err, res) {
+        dbConn.end();
+        if (err) {
+            console.log("error: ", err);
+            result(err, null);
+        } else {
+            result(null, res);
+        }
+    });
 };
 
 

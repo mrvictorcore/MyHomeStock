@@ -5,8 +5,8 @@ DROP DATABASE IF EXISTS myhomestock;
 CREATE DATABASE IF NOT EXISTS myhomestock;
 USE myhomestock;
 
--- Crear tabla de usuarios
-CREATE TABLE IF NOT EXISTS usuarios (
+-- Crear tabla de usuario
+CREATE TABLE IF NOT EXISTS usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     nombre VARCHAR(50) NOT NULL,
@@ -14,17 +14,17 @@ CREATE TABLE IF NOT EXISTS usuarios (
     email VARCHAR(100) NOT NULL
 );
 
--- Crear tabla de tipos
+-- Crear tabla de tipo_categoria
 CREATE TABLE IF NOT EXISTS tipo_categoria (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
 
     nombre VARCHAR(50) NOT NULL,
 
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
 );
 
--- Crear tabla de categorías
+-- Crear tabla de categoria
 CREATE TABLE IF NOT EXISTS categoria (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_tipo INT,
@@ -33,10 +33,10 @@ CREATE TABLE IF NOT EXISTS categoria (
     nombre VARCHAR(50) NOT NULL,
 
     FOREIGN KEY (id_tipo) REFERENCES tipo_categoria(id),
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
 );
 
--- Crear tabla de productos con columna "favorito"
+-- Crear tabla de producto con columna "favorito"
 CREATE TABLE IF NOT EXISTS producto (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
@@ -48,18 +48,18 @@ CREATE TABLE IF NOT EXISTS producto (
     cantidad_min_mensual INT,
     favorito BOOLEAN DEFAULT FALSE,
 
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id),
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id),
     FOREIGN KEY (id_categoria) REFERENCES categoria(id)
 );
 
--- Crear tabla de compras con todos los datos del producto
+-- Crear tabla de compra con todos los datos del producto
 CREATE TABLE IF NOT EXISTS compra (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
 
     descripcion VARCHAR(100),
 
-    FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+    FOREIGN KEY (id_usuario) REFERENCES usuario(id)
 );
 
 -- Crear tabla de compra_producto con todos los datos del producto

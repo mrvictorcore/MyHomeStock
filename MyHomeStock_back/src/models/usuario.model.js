@@ -3,18 +3,19 @@ const getConnection = require('./../../config/db.config');
 
 var Usuario = function(usuario){
 
-    this.id         = usuario.id;
-    this.created_at = new Date();
-    this.updated_at = new Date();
+    this.id             = usuario.id;
+    
+    this.nombre         = usuario.nombre;
+    this.contrasena     = usuario.contrasena;
+    this.email          = usuario.email;
 
-    this.nombre_usuario     = usuario.nombre_usuario;
-    this.contrasena   = usuario.contrasena;
-    this.email      = usuario.email;
+    this.created_at     = new Date();
+    this.updated_at     = new Date();
 };
 
 Usuario.existeUsuario  = function(email, result){
     var dbConn = getConnection();
-    dbConn.query("SELECT * FROM usuarios WHERE email = ?", email, function (err, res){
+    dbConn.query("SELECT * FROM usuario WHERE email = ?", email, function (err, res){
         dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -28,7 +29,7 @@ Usuario.existeUsuario  = function(email, result){
 
 Usuario.create = function (newEmp, result) {    
     var dbConn = getConnection();
-    dbConn.query("INSERT INTO usuarios set ?", newEmp, function (err, res) {
+    dbConn.query("INSERT INTO usuario set ?", newEmp, function (err, res) {
         dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -42,7 +43,7 @@ Usuario.create = function (newEmp, result) {
 };
 Usuario.findById = function (id, result) {
     var dbConn = getConnection();
-    dbConn.query("Select * from usuarios where id = ? ", id, function (err, res) {      
+    dbConn.query("Select * from usuario where id = ? ", id, function (err, res) {      
         dbConn.end();       
         if(err) {
             console.log("error: ", err);
@@ -55,21 +56,21 @@ Usuario.findById = function (id, result) {
 };
 Usuario.findAll = function (result) {
     var dbConn = getConnection();
-    dbConn.query("Select * from usuarios", function (err, res) {
+    dbConn.query("Select * from usuario", function (err, res) {
         dbConn.end();
         if(err) {
             console.log("error: ", err);
             result(null, err);
         }
         else{
-            console.log('usuarios : ', res);  
+            console.log('usuario : ', res);  
             result(null, res);
         }
     });   
 };
 Usuario.update = function(id, usuario, result){
     var dbConn = getConnection();
-    dbConn.query("UPDATE usuarios SET nombre=?,apellido=?,email=?,saldo=?,password=? WHERE id = ?", [usuario.nombre,usuario.apellido,usuario.email,usuario.saldo,usuario.password, id], function (err, res) {
+    dbConn.query("UPDATE usuario SET nombre=?,apellido=?,email=?,saldo=?,password=? WHERE id = ?", [usuario.nombre,usuario.apellido,usuario.email,usuario.saldo,usuario.password, id], function (err, res) {
         dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -81,7 +82,7 @@ Usuario.update = function(id, usuario, result){
 };
 Usuario.delete = function(id, result){
     var dbConn = getConnection();
-    dbConn.query("DELETE FROM usuarios WHERE id = ?", [id], function (err, res) {
+    dbConn.query("DELETE FROM usuario WHERE id = ?", [id], function (err, res) {
         dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -95,7 +96,7 @@ Usuario.delete = function(id, result){
 
 Usuario.login = function (user, result) {
     var dbConn = getConnection();
-    dbConn.query("Select * from usuarios where email = ? and password = ?", [user.email, user.password], function (err, res) {    
+    dbConn.query("Select * from usuario where email = ? and password = ?", [user.email, user.password], function (err, res) {    
         dbConn.end();         
         if(err) {
             console.log("error: ", err);

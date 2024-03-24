@@ -5,8 +5,8 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Categoria } from '../models/categoria';
 import { Tipo } from '../models/tipo';
 import { Descripcion } from '../models/descripcion';
-import { AlertBorrarProductoComponent } from './borrar-producto/alert-borrar-producto.component';
 import { EditarCrearProductoComponent } from './crear-editar-producto/editar-crear-producto.component';
+import { AlertBorrarProductoComponent } from './borrar-producto/alert-borrar-producto.component';
 
 @Component({
   selector: 'app-productos',
@@ -15,87 +15,62 @@ import { EditarCrearProductoComponent } from './crear-editar-producto/editar-cre
 })
 export class ProductosComponent implements OnInit {
   productos: Producto[] = [];
-  categoria: Categoria[] | undefined;
-  tipo: Tipo[] | undefined;
-  descripcion: Descripcion[] | undefined;
+  categorias: Categoria[] = [];
+  tipos: Tipo[] = [];
+  descripciones: Descripcion[] = [];
 
   nombresCategorias: { [key: number]: string } = {};
   nombresTipos: { [key: number]: string } = {};
   nombresDescripciones: { [key: number]: string } = {};
 
-  constructor(
-    private appService: AppService,
-    private dialog: MatDialog
-  ){}
+  constructor(private appService: AppService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-
     this.obtenerProductos();
-    
-    this.appService.getCategorias().subscribe(categorias => {
-        this.categoria = categorias;
-        this.categoria.forEach(categorias => {
-        this.nombresCategorias[categorias.ID] = categorias.Nombre_categoria;
-      });
-    });
-
-      this.appService.getTipos().subscribe(tipos => {
-        this.tipo = tipos;
-        this.tipo.forEach(tipos => {
-        this.nombresTipos[tipos.ID] = tipos.Nombre_tipo;
-      });
-    });
-
-    this.appService.getDescripciones().subscribe(descripciones => {
-      this.descripcion = descripciones;
-      this.descripcion.forEach(descripciones => {
-        this.nombresDescripciones[descripciones.ID] = descripciones.Nombre_descripcion;
-      });
-    });
+    this.obtenerCategorias();
+    this.obtenerTipos();
+    this.obtenerDescripciones();
   }
 
   obtenerProductos(): void {
-    this.appService.getProductos().subscribe(productos => {
-      this.productos = productos;
-    });
-  }
-
-  onBorrarClick(producto: Producto): void {
-    const dialogRef: MatDialogRef<AlertBorrarProductoComponent> = this.dialog.open(AlertBorrarProductoComponent, {
-      width: '400px'
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.appService.deleteProducto(producto.id).subscribe(() => {
-          this.productos = this.productos.filter(p => p.id !== producto.id);
-        }, error => {
-          console.log('Error al eliminar el producto: ', error);
-        });
+    this.appService.getProductos().subscribe({
+      next: (productos) => {
+        this.productos = productos;
+      },
+      error: (error) => {
+        console.error('Error al obtener los productos: ', error);
       }
     });
   }
 
-  onEditarClick(producto: Producto): void {
-    const dialogRef: MatDialogRef<EditarCrearProductoComponent> = this.dialog.open(EditarCrearProductoComponent, {
-      width: '400px',
-      data: { producto } 
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.appService.updateProducto(result).subscribe(updatedProduct => {
-          if (updatedProduct) {
-            this.obtenerProductos();
-          } else {
-            console.log('Error al editar el producto.');
-          }
-        });
-      }
+  obtenerCategorias(): void {
+    this.appService.getCategorias().subscribe(categorias => {
+      this.categorias = categorias;
+      categorias.forEach(cat => {
+        this.nombresCategorias[cat.ID] = cat.Nombre_categoria;
+      });
     });
   }
 
-  onCrearProductoClick(): void {
+  obtenerTipos(): void {
+    this.appService.getTipos().subscribe((tipos:any) => {
+      this.tipos = tipos && tipos["code"] ? new Array() : tipos;
+      this.tipos.forEach((tipo:any) => {
+        this.nombresTipos[tipo.ID] = tipo.Nombre_tipo;
+      });
+    });
+  }
+
+  obtenerDescripciones(): void {
+    this.appService.getDescripciones().subscribe(descripciones => {
+      this.descripciones = descripciones;
+      descripciones.forEach(desc => {
+        this.nombresDescripciones[desc.ID] = desc.Nombre_descripcion;
+      });
+    });
+  }
+
+ onCrearProductoClick(): void {
     const nuevoProducto: Producto = {
       id: 0, 
       nombre_producto: '', 
@@ -127,17 +102,57 @@ export class ProductosComponent implements OnInit {
     });
   }
 
-  onFavoritosClick(producto: Producto): void {
-    producto.favorito = !producto.favorito;
-  
-    this.appService.updateProducto(producto).subscribe(updatedProduct => {
-      if (updatedProduct) {
-        this.obtenerProductos();
-      } else {
-        console.log('Error al actualizar el producto.');
+  onBorrarClick(producto: Producto): void {
+    const dialogRef = this.dialog.open(AlertBorrarProductoComponent, {
+      width: '400px',
+      data: { producto }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === true) {
+        this.appService.deleteProducto(producto.id).subscribe({
+          next: () => {
+            this.productos = this.productos.filter(p => p.id !== producto.id);
+          },
+          error: (error) => {
+            console.error('Error al eliminar el producto: ', error);
+          }
+        });
       }
     });
   }
-  
 
+  onEditarClick(producto: Producto): void {
+    const dialogRef = this.dialog.open(EditarCrearProductoComponent, {
+      width: '400px',
+      data: { producto }
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.appService.updateProducto(result).subscribe({
+          next: (updatedProducto) => {
+            const index = this.productos.findIndex(p => p.id === updatedProducto.id);
+            if (index !== -1) {
+              this.productos[index] = updatedProducto;
+            }
+          },
+          error: (error) => {
+            console.error('Error al editar el producto: ', error);
+          }
+        });
+      }
+    });
+  }
+
+  onFavoritosClick(producto: Producto): void {
+    this.appService.toggleFavoritoProducto(producto.id).subscribe(() => {
+      const index = this.productos.findIndex(p => p.id === producto.id);
+      if (index !== -1) {
+        this.productos[index].favorito = !this.productos[index].favorito;
+      }
+    }, error => {
+      console.log('Error al actualizar el estado de favoritos del producto: ', error);
+    });
+  }
 }

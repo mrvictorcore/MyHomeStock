@@ -74,3 +74,16 @@ exports.findByUsuarioId = function(req, res) {
         });
     }
 };
+
+exports.updateCantidadCompra = function(req, res) {
+    let idCompra = req.params.id;
+    let nuevaCantidad = req.body.nuevaCantidad;
+
+    Compra.updateCantidadComprar(idCompra, nuevaCantidad, function(err, compra) {
+        if (err) {
+            res.status(500).send(err);
+        } else {
+            res.send({ message: "Cantidad actualizada correctamente" });
+        }
+    });
+};

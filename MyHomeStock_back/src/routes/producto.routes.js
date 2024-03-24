@@ -20,4 +20,10 @@ router.delete('/:id', productoController.delete);
 // Todos los productos por usuario_id y null
 router.post('/find', productoController.findByUsuarioId);
 
+// Ruta para restar stock
+router.post('/restarStock', productoController.restarStock);
+
+// Ruta para sumar stock
+router.post('/sumarStock', productoController.sumarStock);
+
 module.exports = router

@@ -1,23 +1,20 @@
 'user strict';
 const getConnection = require('../../config/db.config');
 
-var Descripcion = function(descripcion){
+var CompraProducto = function(compra_producto){
 
-    this.id                 = descripcion.id;
+    this.id_compra          = compra_producto.id_compra;
+    this.id_producto        = compra_producto.id_producto;
+    
+    this.cantidad           = compra_producto.cantidad;
+
     this.created_at         = new Date();
     this.updated_at         = new Date();
-    
-    this.descripcion        = descripcion.descripcion;
-    this.cantidad           = descripcion.cantidad;
-    this.fecha_descripcion  = descripcion.fecha_descripcion;
-    this.categoria_id       = descripcion.categoria_id;
-    this.tipo_descripcion   = descripcion.tipo_descripcion;
-    this.usuario_id         = descripcion.usuario_id;
 };
 
-Descripcion.create = function (newEmp, result) {    
+CompraProducto.create = function (newEmp, result) {    
      var dbConn = getConnection();
-    dbConn.query("INSERT INTO descripcion set ?", newEmp, function (err, res) {
+    dbConn.query("INSERT INTO compra_producto set ?", newEmp, function (err, res) {
         dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -29,9 +26,9 @@ Descripcion.create = function (newEmp, result) {
         }
     });           
 };
-Descripcion.findById = function (id, result) {
+CompraProducto.findById = function (id, result) {
      var dbConn = getConnection();
-    dbConn.query("Select * from descripcion where id = ? ", id, function (err, res) {             
+    dbConn.query("Select * from compra_producto where id = ? ", id, function (err, res) {             
         dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -42,25 +39,25 @@ Descripcion.findById = function (id, result) {
         }
     });   
 };
-Descripcion.findAll = function (result) {
+CompraProducto.findAll = function (result) {
      var dbConn = getConnection();
-    dbConn.query("Select * from descripcion", function (err, res) {
+    dbConn.query("Select * from compra_producto", function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
             result(null, err);
         }
         else{
-            console.log('descripcion : ', res);  
+            console.log('compra_producto : ', res);  
             result(null, res);
         }
     });   
 };
-Descripcion.update = function(id, descripcion, result){
+CompraProducto.update = function(id, compra_producto, result){
    var dbConn = getConnection();
     dbConn.query(
-        "UPDATE descripcion SET descripcion=?,cantidad=?,fecha_descripcion=?,categoria_id=?,tipo_descripcion=?,usuario_id=? WHERE id = ?", 
-        [descripcion.descripcion,descripcion.cantidad,descripcion.fecha_descripcion,descripcion.categoria_id,descripcion.tipo_descripcion,descripcion.usuario_id, id], 
+        "UPDATE compra_producto SET compra_producto=?,cantidad=?,fecha_descripcion=?,categoria_id=?,tipo_descripcion=?,usuario_id=? WHERE id = ?", 
+        [compra_producto.compra_producto,compra_producto.cantidad,compra_producto.fecha_descripcion,compra_producto.categoria_id,compra_producto.tipo_descripcion,compra_producto.usuario_id, id], 
     function (err, res) {
         dbConn.end();
         if(err) {
@@ -71,9 +68,9 @@ Descripcion.update = function(id, descripcion, result){
         }
     }); 
 };
-Descripcion.delete = function(id, result){
+CompraProducto.delete = function(id, result){
      var dbConn = getConnection(); 
-    dbConn.query("DELETE FROM descripcion WHERE id = ?", [id], function (err, res) {
+    dbConn.query("DELETE FROM compra_producto WHERE id = ?", [id], function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -85,20 +82,20 @@ Descripcion.delete = function(id, result){
     }); 
 };
 
-Descripcion.findByUsuarioId = function (req, result) {    
+CompraProducto.findByUsuarioId = function (req, result) {    
      var dbConn = getConnection();
-    dbConn.query("Select * from descripcion where usuario_id = ? ", req.usuario_id, function (err, res) {
+    dbConn.query("Select * from compra_producto where usuario_id = ? ", req.usuario_id, function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
             result(null, err);
         }
         else{
-            console.log('descripcion : ', res);  
+            console.log('compra_producto : ', res);  
             result(null, res);
         }
     });           
 };
 
 
-module.exports= Descripcion;
+module.exports= CompraProducto;

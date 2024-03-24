@@ -4,11 +4,13 @@ const getConnection = require('../../config/db.config');
 var Categoria = function(categoria){
 
     this.id                 = categoria.id;
+    this.id_tipo            = categoria.id_tipo;
+    this.id_usuario         = categoria.id_usuario;
+
+    this.nombre             = categoria.nombre;
+
     this.created_at         = new Date();
     this.updated_at         = new Date();
-
-    this.nombre_categoria   = categoria.nombre_categoria;
-    this.usuario_id         = categoria.usuario_id;
 };
 
 Categoria.create = function (newEmp, result) {    

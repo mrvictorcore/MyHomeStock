@@ -1,20 +1,20 @@
 'user strict';
 const getConnection = require('../../config/db.config');
 
-var Tipo = function(tipo){
+var TipoCategoria = function(tipo_categoria){
 
-    this.id             = tipo.id;
+    this.id             = tipo_categoria.id;
+    this.id_usuario     = tipo_categoria.id_usuario;
+
+    this.nombre         = tipo_categoria.nombre;
+    
     this.created_at     = new Date();
     this.updated_at     = new Date();
-
-    this.nombre_tipo    = tipo.nombre_tipo;
-    this.usuario_id     = tipo.usuario_id;
-    
 };
 
-Tipo.create = function (newEmp, result) {    
+TipoCategoria.create = function (newEmp, result) {    
     var dbConn = getConnection();
-    dbConn.query("INSERT INTO tipo set ?", newEmp, function (err, res) {
+    dbConn.query("INSERT INTO tipo_categoria set ?", newEmp, function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -26,9 +26,9 @@ Tipo.create = function (newEmp, result) {
         }
     });           
 };
-Tipo.findById = function (id, result) {
+TipoCategoria.findById = function (id, result) {
     var dbConn = getConnection();
-    dbConn.query("Select * from tipo where id = ? ", id, function (err, res) {             
+    dbConn.query("Select * from tipo_categoria where id = ? ", id, function (err, res) {             
     dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -39,23 +39,23 @@ Tipo.findById = function (id, result) {
         }
     });   
 };
-Tipo.findAll = function (result) {
+TipoCategoria.findAll = function (result) {
     var dbConn = getConnection();
-    dbConn.query("Select * from tipo", function (err, res) {
+    dbConn.query("Select * from tipo_categoria", function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
             result(null, err);
         }
         else{
-            console.log('tipo : ', res);  
+            console.log('tipo_categoria : ', res);  
             result(null, res);
         }
     });   
 };
-Tipo.update = function(id, tipo, result){
+TipoCategoria.update = function(id, tipo_categoria, result){
   var dbConn = getConnection();
-    dbConn.query("UPDATE tipo SET descripcion=?,fecha_tipo=?,cantidad=?,usuario_id=? WHERE id = ?", [tipo.descripcion,tipo.fecha_tipo,tipo.cantidad,tipo.usuario_id, id], function (err, res) {
+    dbConn.query("UPDATE tipo_categoria SET descripcion=?,fecha_tipo_categoria=?,cantidad=?,usuario_id=? WHERE id = ?", [tipo_categoria.descripcion,tipo_categoria.fecha_tipo_categoria,tipo_categoria.cantidad,tipo_categoria.usuario_id, id], function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -65,9 +65,9 @@ Tipo.update = function(id, tipo, result){
         }
     }); 
 };
-Tipo.delete = function(id, result){
+TipoCategoria.delete = function(id, result){
     var dbConn = getConnection(); 
-    dbConn.query("DELETE FROM tipo WHERE id = ?", [id], function (err, res) {
+    dbConn.query("DELETE FROM tipo_categoria WHERE id = ?", [id], function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -79,19 +79,19 @@ Tipo.delete = function(id, result){
     }); 
 };
 
-Tipo.findByUsuarioId = function (req, result) {    
+TipoCategoria.findByUsuarioId = function (req, result) {    
     var dbConn = getConnection();
-    dbConn.query("Select * from tipo where usuario_id = ? ", req.usuario_id, function (err, res) {
+    dbConn.query("Select * from tipo_categoria where usuario_id = ? ", req.usuario_id, function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
             result(null, err);
         }
         else{
-            console.log('tipo : ', res);  
+            console.log('tipo_categoria : ', res);  
             result(null, res);
         }
     });           
 };
 
-module.exports= Tipo;
+module.exports= TipoCategoria;
