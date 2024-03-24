@@ -1,23 +1,23 @@
 const express = require('express')
 const router = express.Router()
-const compra_productoController = require('../controllers/compra_producto.controller');
+const CompraProductoController = require('../controllers/compra_producto.controller');
 
-// Todas las compra_producto
-router.get('/', compra_productoController.findAll);
+// Todas las CompraProducto
+router.get('/', CompraProductoController.findAll);
 
-// Crear una nueva compra_producto
-router.post('/', compra_productoController.create);
+// Crear una nueva CompraProducto
+router.post('/', CompraProductoController.create);
 
-// Devuelve una única compra_producto por su id
-router.get('/:id', compra_productoController.findById);
+// Devuelve una única CompraProducto por su id
+router.get('/:id', CompraProductoController.findById);
 
-// Actualizar una compra_producto por su id
-router.put('/:id', compra_productoController.update);
+// Actualizar una CompraProducto por su id
+router.put('/:id', CompraProductoController.update);
 
-// Borrar una compra_producto por su id
-router.delete('/:id', compra_productoController.delete);
+// Borrar una CompraProducto por su id
+router.delete('/:id', CompraProductoController.delete);
 
 // Todos los gastos por usuario_id y null
-router.post('/find', compra_productoController.findByUsuarioId);
+router.post('/find', CompraProductoController.findByUsuarioId);
 
 module.exports = router

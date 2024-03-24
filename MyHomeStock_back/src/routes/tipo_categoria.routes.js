@@ -1,23 +1,23 @@
 const express = require('express')
 const router = express.Router()
-const tipo_categoriaController = require('../controllers/tipo_categoria.controller');
+const TipoCategoriaController = require('../controllers/tipo_categoria.controller');
 
-// Todas las tipo_categorias
-router.get('/', tipo_categoriaController.findAll);
+// Todas las TipoCategorias
+router.get('/', TipoCategoriaController.findAll);
 
-// Crear una nueva tipo_categoria
-router.post('/', tipo_categoriaController.create);
+// Crear una nueva TipoCategoria
+router.post('/', TipoCategoriaController.create);
 
-// Devuelve una única tipo_categoria por su id
-router.get('/:id', tipo_categoriaController.findById);
+// Devuelve una única TipoCategoria por su id
+router.get('/:id', TipoCategoriaController.findById);
 
-// Actualizar una tipo_categoria por su id
-router.put('/:id', tipo_categoriaController.update);
+// Actualizar una TipoCategoria por su id
+router.put('/:id', TipoCategoriaController.update);
 
-// Borrar una tipo_categoria por su id
-router.delete('/:id', tipo_categoriaController.delete);
+// Borrar una TipoCategoria por su id
+router.delete('/:id', TipoCategoriaController.delete);
 
 // Todos los gastos por usuario_id y null
-router.post('/find', tipo_categoriaController.findByUsuarioId);
+router.post('/find', TipoCategoriaController.findByUsuarioId);
 
 module.exports = router

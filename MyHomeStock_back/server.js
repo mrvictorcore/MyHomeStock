@@ -27,14 +27,14 @@ app.get('/', (req, res) => {
 const categoriaRoutes = require('./src/routes/categoria.routes');
 app.use('/api/v1/categoria', categoriaRoutes);
 
-const descripcionRoutes = require('./src/routes/descripcion.routes');
-app.use('/api/v1/descripcion', descripcionRoutes);
+const CompraProductoRoutes = require('./src/routes/compra_producto.routes');
+app.use('/api/v1/compra_producto', CompraProductoRoutes);
 
 const productoRoutes = require('./src/routes/producto.routes');
 app.use('/api/v1/producto', productoRoutes);
 
-const tipoRoutes = require('./src/routes/tipo.routes');
-app.use('/api/v1/tipo', tipoRoutes);
+const TipoCategoriaRoutes = require('./src/routes/tipo_categoria.routes');
+app.use('/api/v1/tipo_categoria', TipoCategoriaRoutes);
 
 const compraRoutes = require('./src/routes/compra.routes');
 app.use('/api/v1/compra', compraRoutes);
