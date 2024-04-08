@@ -20,10 +20,10 @@ router.delete('/:id', productoController.delete);
 // Todos los productos por usuario_id y null
 router.post('/find', productoController.findByUsuarioId);
 
-// Ruta para restar stock
-router.post('/restarStock', productoController.restarStock);
+// Ruta para ajustar el stock de un producto
+router.patch('/ajustarStock/:id', productoController.ajustarStock);
 
-// Ruta para sumar stock
-router.post('/sumarStock', productoController.sumarStock);
+// Cambiar el estado de favorito de un producto
+router.patch('/:id/toggleFavorito', productoController.toggleFavorito);
 
 module.exports = router

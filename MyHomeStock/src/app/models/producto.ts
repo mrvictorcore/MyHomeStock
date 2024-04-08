@@ -1,13 +1,12 @@
 export interface Producto {
     id: number;
-    nombre_producto: string;
     id_categoria: number;
-    id_tipo: number;
-    id_descripcion: number;
+    id_usuario: number;
+
+    nombre: string;
+    descripcion: string;
     cantidad_stock: number;
-    cantidad_min: number;
+    cantidad_min_mensual: number;
     favorito: boolean;
-    cantidad_comprar: number
-    seleccionado: boolean;
 }
   

@@ -74,28 +74,25 @@ exports.findByUsuarioId = function(req, res) {
   }
 };
 
-exports.restarStock = function (req, res) {
-  let ID_producto = req.body.ID_producto;
-  let cantidadRestar = -Math.abs(req.body.cantidadRestar);
-
-  Producto.adjustStock(ID_producto, cantidadRestar, function (err, producto) {
+exports.toggleFavorito = function(req, res) {
+  Producto.toggleFavorito(req.params.id, function(err, producto) {
     if (err) {
-      res.status(500).send(err);
+      res.status(400).send(err);
     } else {
-      res.send({ message: "Stock actualizado correctamente" });
+      res.json({ message: "Estado de favorito actualizado correctamente" });
     }
   });
 };
-  
-exports.sumarStock = function (req, res) {
-  let ID_producto = req.body.ID_producto;
-  let cantidadSumar = Math.abs(req.body.cantidadSumar);
 
-  Producto.adjustStock(ID_producto, cantidadSumar, function (err, producto) {
-    if (err) {
-      res.status(500).send(err);
-    } else {
-      res.send({ message: "Stock actualizado correctamente" });
-    }
-  });
+exports.ajustarStock = function(req, res) {
+    const idProducto = req.params.id;
+    const { cantidadAjuste } = req.body;
+
+    Producto.adjustStock(idProducto, cantidadAjuste, function(err, result) {
+        if (err) {
+            res.status(400).send(err);
+        } else {
+            res.json({ message: "Stock ajustado correctamente", data: result });
+        }
+    });
 };

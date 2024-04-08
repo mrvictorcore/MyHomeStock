@@ -3,14 +3,15 @@ const getConnection = require('./../../config/db.config');
 
 var Usuario = function(usuario){
 
-    this.id             = usuario.id;
+    this.id         = usuario.id;
     
-    this.nombre         = usuario.nombre;
-    this.contrasena     = usuario.contrasena;
-    this.email          = usuario.email;
+    this.nombre     = usuario.nombre;
+    this.apellido   = usuario.apellido;
+    this.email      = usuario.email;
+    this.password   = usuario.password;
 
-    this.created_at     = new Date();
-    this.updated_at     = new Date();
+    // this.created_at     = new Date();
+    // this.updated_at     = new Date();
 };
 
 Usuario.existeUsuario  = function(email, result){
@@ -70,7 +71,7 @@ Usuario.findAll = function (result) {
 };
 Usuario.update = function(id, usuario, result){
     var dbConn = getConnection();
-    dbConn.query("UPDATE usuario SET nombre=?,apellido=?,email=?,saldo=?,password=? WHERE id = ?", [usuario.nombre,usuario.apellido,usuario.email,usuario.saldo,usuario.password, id], function (err, res) {
+    dbConn.query("UPDATE usuario SET nombre=?,apellido=?,email=?,password=? WHERE id = ?", [usuario.nombre,usuario.apellido,usuario.email,usuario.password, id], function (err, res) {
         dbConn.end();
         if(err) {
             console.log("error: ", err);

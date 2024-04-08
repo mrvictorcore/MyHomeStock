@@ -8,24 +8,32 @@ var Compra = function(compra){
     
     this.descripcion    = compra.descripcion;
 
-    this.created_at     = new Date();
-    this.updated_at     = new Date();
+    // this.created_at     = new Date();
+    // this.updated_at     = new Date();
 };
 
-Compra.create = function (newEmp, result) {    
-     var dbConn = getConnection();
-    dbConn.query("INSERT INTO compra set ?", newEmp, function (err, res) {
-        dbConn.end();
+Compra.create = function (newCompra, result) {    
+    var dbConn = getConnection();
+    dbConn.query("INSERT INTO compra set ?", newCompra, function (err, res) {
         if(err) {
             console.log("error: ", err);
             result(err, null);
         }
         else{
-            console.log(res.insertId);
-            result(null, res.insertId);
+            const insertedId = res.insertId;
+            dbConn.query("SELECT * FROM compra WHERE id = ?", insertedId, function(err, res) {
+                dbConn.end();
+                if(err) {
+                    console.log("error: ", err);
+                    result(err, null);
+                } else {
+                    result(null, res[0]);
+                }
+            });
         }
     });           
 };
+
 
 Compra.findById = function (id, result) {
      var dbConn = getConnection();
@@ -57,20 +65,21 @@ Compra.findAll = function (result) {
 };
 
 Compra.update = function(id, compra, result){
-   var dbConn = getConnection();
-    dbConn.query(
-        "UPDATE compra SET descripcion=?,cantidad=?,fecha_compra=?,categoria_id=?,tipo_compra=?,usuario_id=? WHERE id = ?", 
-        [compra.descripcion,compra.cantidad,compra.fecha_compra,compra.categoria_id,compra.tipo_compra,compra.usuario_id, id], 
-    function (err, res) {
-        dbConn.end();
-        if(err) {
-            console.log("error: ", err);
-            result(null, err);
-        }else{   
-            result(null, res);
-        }
-    }); 
-};
+    var dbConn = getConnection();
+     dbConn.query(
+         "UPDATE compra SET descripcion=? WHERE id = ?", 
+         [compra.descripcion, id], 
+     function (err, res) {
+         dbConn.end();
+         if(err) {
+             console.log("error: ", err);
+             result(null, err);
+         }else{   
+             result(null, res);
+         }
+     }); 
+ };
+ 
 
 Compra.delete = function(id, result){
      var dbConn = getConnection(); 
@@ -101,18 +110,19 @@ Compra.findByUsuarioId = function (req, result) {
     });           
 };
 
-Compra.updateCantidadComprar = function(idCompra, nuevaCantidad, result) {
-    var dbConn = getConnection();
-    dbConn.query("UPDATE compra SET cantidad_comprar = ? WHERE id = ?", [nuevaCantidad, idCompra], function(err, res) {
-        dbConn.end();
-        if (err) {
-            console.log("error: ", err);
-            result(err, null);
-        } else {
-            result(null, res);
-        }
-    });
-};
+// Compra.updateCantidadComprar = function(idCompra, nuevaCantidad, result) {
+//     var dbConn = getConnection();
+//     dbConn.query("UPDATE compra SET cantidad_comprar = ? WHERE id = ?", [nuevaCantidad, idCompra], function(err, res) {
+//         dbConn.end();
+//         if (err) {
+//             console.log("error: ", err);
+//             result(err, null);
+//         } else {
+//             result(null, res);
+//         }
+//     });
+// };
+
 
 
 module.exports= Compra;

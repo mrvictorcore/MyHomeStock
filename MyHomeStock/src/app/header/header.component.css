@@ -1,0 +1,11 @@
+.custom_img {
+    max-width: 100%; 
+    height: auto; 
+    margin-right: 10px; 
+    filter: brightness(300%) contrast(150%) saturate(150%);
+}
+
+.container_logo_img {
+    display: flex; 
+    align-items: center;
+}

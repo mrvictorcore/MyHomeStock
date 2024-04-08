@@ -18,7 +18,7 @@ export class EditarStockComponent {
   }
 
   onSaveClick(): void {
-    if (this.producto.cantidad_stock >= 0 && this.producto.cantidad_min >= 0) {
+    if (this.producto.cantidad_stock >= 0 && this.producto.cantidad_min_mensual >= 0) {
       this.dialogRef.close(this.producto);
     } else {
       console.log('Los valores de stock no pueden ser negativos.');

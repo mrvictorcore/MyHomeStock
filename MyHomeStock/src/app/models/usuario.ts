@@ -1,6 +1,8 @@
 export interface Usuario {
-  ID: number;
-  Nombre_usuario: string;
-  Contrasena: string;
-  Email: string;
+  id: number | null | undefined;
+
+  nombre: string;
+  apellido: string;
+  email: string;
+  password: string;
 }

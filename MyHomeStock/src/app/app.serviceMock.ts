@@ -2,8 +2,8 @@ import { Injectable } from '@angular/core';
 import { Usuario } from './models/usuario';
 import { Producto } from './models/producto';
 import { Categoria } from './models/categoria';
-import { Tipo } from './models/tipo';
-import { Descripcion } from './models/descripcion';
+import { Tipo } from './models/tipo_categoria';
+import { Descripcion } from './models/compra_producto';
 import { Observable, of } from 'rxjs';
 import { Compra } from './models/compra';
 

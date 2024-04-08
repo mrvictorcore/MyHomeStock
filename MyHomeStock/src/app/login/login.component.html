@@ -1,0 +1,38 @@
+<div class="container">
+  <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded loginRegister-container">
+    <h1 class="mt-4 text-center display-4 custom-title">{{ isLogin ? 'Iniciar sesión' : 'Registrar cuenta' }}</h1>
+
+    <form [formGroup]="formGroup" (ngSubmit)="loginRegister()" class="form">
+      <div *ngIf="registroExitoso || usuarioExistente" class="registro-exitoso">
+        {{ registroExitoso ? '¡Registro exitoso! Por favor, inicia sesión.' : '¡Usuario ya existe! Por favor, inicia sesión o utiliza otro correo electrónico.' }}
+      </div>
+      <div class="row">
+        <div class="col-md-6 offset-md-3">
+          <div class="form-group mb-3" *ngIf="!isLogin">
+            <input matInput type="text" formControlName="nombre" required placeholder="Nombre" class="form-control">
+          </div>
+          <div class="form-group mb-3" *ngIf="!isLogin">
+            <input matInput type="text" formControlName="apellido" required placeholder="Apellido" class="form-control">
+          </div>
+          <div class="form-group mb-3">
+            <input matInput type="email" formControlName="email" required placeholder="Correo electrónico" class="form-control">
+          </div>
+          <div class="form-group mb-3">
+            <input matInput type="password" formControlName="password" required placeholder="Contraseña" class="form-control">
+          </div>
+        </div>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="login-button btn btn-primary">{{ isLogin ? 'Iniciar sesión' : 'Registrarse' }}</button>
+      </div>
+    </form>
+
+    <div class="links text-center mt-3">
+      <ng-template #registerLink>
+        <p>¿Ya tienes una cuenta? <a class="regisLogin-link" (click)="irLogin()">Inicia sesión</a></p>
+      </ng-template>
+      <a class="forgot-password">Recuperar contraseña</a>
+    </div>
+  </div>
+</div>

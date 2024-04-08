@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { DashboardComponent } from './dashboard/dashboard.component';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import { HeaderComponent } from './header/header.component';
 import { AppRoutingModule } from './app.routes';
@@ -16,7 +16,10 @@ import { EditarStockComponent } from './stock/stock-producto/editar-stock/editar
 import { ShoppingComponent } from './shopping/shopping.component';
 import { CrearEditarCompraComponent } from './shopping/crear-editar-compra/crear-editar-compra.component';
 import { HttpClientModule } from '@angular/common/http';
-
+import { LoginComponent } from './login/login.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { CuentaUsuarioComponent } from './cuenta-usuario/cuenta-usuario.component';
+import { MatIconModule } from '@angular/material/icon';
 
 
 @NgModule({
@@ -29,7 +32,9 @@ import { HttpClientModule } from '@angular/common/http';
     EditarCrearProductoComponent,
     StockProductoComponent,
     EditarStockComponent,
-    CrearEditarCompraComponent
+    CrearEditarCompraComponent,
+    LoginComponent,
+    CuentaUsuarioComponent
   ],
   imports: [
     AppRoutingModule,
@@ -38,7 +43,10 @@ import { HttpClientModule } from '@angular/common/http';
     FormsModule,
     BrowserAnimationsModule,
     MatDialogModule,
-    HttpClientModule
+    HttpClientModule,
+    MatFormFieldModule,
+    ReactiveFormsModule,
+    MatIconModule
   ],
   providers: [AppService],
   bootstrap: [AppComponent]

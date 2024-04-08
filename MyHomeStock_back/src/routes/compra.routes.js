@@ -12,7 +12,7 @@ router.post('/', compraController.create);
 router.get('/:id', compraController.findById);
 
 // Actualizar una compra por su id
-router.put('/:id', compraController.update);
+router.put('/', compraController.update);
 
 // Borrar una compra por su id
 router.delete('/:id', compraController.delete);
@@ -21,6 +21,6 @@ router.delete('/:id', compraController.delete);
 router.get('/find', compraController.findByUsuarioId);
 
 // Ruta para actualizar la cantidad de una compra
-router.put('/:id/cantidad', compraController.updateCantidadCompra);
+// router.put('/:id/cantidad', compraController.updateCantidadCompra);
 
 module.exports = router

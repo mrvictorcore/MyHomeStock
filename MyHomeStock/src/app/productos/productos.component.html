@@ -6,8 +6,8 @@
         <thead>
           <tr>
             <th class="text-center">Nombre</th>
-            <th class="text-center">Categoría</th>
             <th class="text-center">Tipo</th>
+            <th class="text-center">Categoría</th>
             <th class="text-center">Descripción</th>
             <th class="text-center">Favorito</th>
             <th class="text-center">Acciones</th>
@@ -15,10 +15,10 @@
         </thead>
         <tbody>
           <tr *ngFor="let producto of productos" class="table-row">
-            <td class="text-center">{{ producto.nombre_producto }}</td>
-            <td class="text-center">{{ nombresCategorias[producto.id_categoria] }}</td>
-            <td class="text-center">{{ nombresTipos[producto.id_tipo] }}</td>
-            <td class="text-center">{{ nombresDescripciones[producto.id_descripcion] }}</td>
+            <td class="text-center">{{ producto.nombre }}</td>
+            <td class="text-center">{{ producto.nombreTipoCategoria }}</td>
+            <td class="text-center">{{ producto.nombreCategoria }}</td>
+            <td class="text-center">{{ producto.descripcion }}</td>
             <td class="text-center">{{ producto.favorito ? 'Sí' : 'No' }}</td>
             <td class="text-center">
               <div class="d-flex flex-row align-items-center justify-content-center mb-2">

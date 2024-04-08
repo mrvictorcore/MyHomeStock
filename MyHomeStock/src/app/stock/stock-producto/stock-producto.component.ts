@@ -26,6 +26,15 @@ export class StockProductoComponent implements OnInit {
       this.productos = productos.filter((producto) => {
         return producto.favorito || producto.cantidad_stock > 0;
       });
+
+      this.productos.forEach(producto => {
+        if (producto.favorito && producto.cantidad_stock === null) {
+          producto.cantidad_stock = 0;
+        }
+        if (producto.favorito && producto.cantidad_min_mensual === null) {
+          producto.cantidad_min_mensual = 0;
+        }
+      });
     });
   }
 

@@ -5,3 +5,7 @@
 .custom-margin-right {
     margin-right: 10px; /* Establece el margen derecho para separar los botones */
 }
+
+.custom-nombre-producto{
+    font-weight: bold; font-size: 25px;
+}

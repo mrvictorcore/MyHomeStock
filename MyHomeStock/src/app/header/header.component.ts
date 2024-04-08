@@ -1,4 +1,6 @@
-import { Component, HostListener } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
+import { AppService } from '../app.service';
+import { Subject } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -6,10 +8,33 @@ import { Component, HostListener } from '@angular/core';
   styleUrls: ['./header.component.css']
 })
 
-export class HeaderComponent {
+export class HeaderComponent implements OnInit{
+  isRegister: boolean = false;
+  nombreUsuario!: string;
 
+  constructor (
+    private appService: AppService,
+    private cdr: ChangeDetectorRef
+  ){}
 
-
+  ngOnInit(): void {
+    this.appService.isLogin().subscribe(isLogin => {
+      if(!isLogin) {
+        this.isRegister = false;
+      } else {
+        this.isRegister = true;
+        const usuario: any = this.appService.getUsuarioEnSession();
+        this.appService.getUsuario(usuario).subscribe((user: any)  => {
+          this.nombreUsuario = user ? user[0]['nombre'] : 'Nombre Usuario';
+        });
+        
+      }
+    });
+  }
+  
+  sessionOff(){
+    this.appService.removeUsuarioEnSession();
+  }
   
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: Event): void {

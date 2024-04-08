@@ -1,15 +1,32 @@
+
 .custom-title{
-    font-weight: bold; font-size: 30px;
+  margin: 10px auto;
+  margin-top: 25px;
+  font-weight: bold; font-size: 30px;
 }
 
 .custom-btn-size {
-    width: 100px; /* Establece el ancho deseado para los botones */
-  }
+  width: 100px;
+}
 
-  .custom-margin-right {
-    margin-right: 10px; /* Establece el margen derecho para separar los botones */
-  }
+.custom-margin-right {
+  margin-right: 10px;
+}
 
-  .bold-text {
-    font-weight: bold;
-  }
+.bold-text {
+  font-weight: bold;
+}
+
+.custom-select {
+  width: 90%;
+  margin: 10px auto;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.custom-description-text {
+  width: 90%;
+  margin: 10px auto;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}

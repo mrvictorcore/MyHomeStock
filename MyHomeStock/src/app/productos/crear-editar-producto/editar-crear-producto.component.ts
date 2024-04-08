@@ -3,8 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Producto } from '../../models/producto';
 import { AppService } from '../../app.service';
 import { Categoria } from '../../models/categoria';
-import { Descripcion } from '../../models/descripcion';
-import { Tipo } from '../../models/tipo';
+import { TipoCategoria } from '../../models/tipo_categoria';
 
 @Component({
   selector: 'app-editar-crear-producto',
@@ -16,8 +15,7 @@ export class EditarCrearProductoComponent implements OnInit {
   productoOriginal: Producto;
   productoTemp: Producto;
   categorias: Categoria[] | undefined;
-  tipos: Tipo[] | undefined;
-  descripciones: Descripcion[] | undefined;
+  tipos: TipoCategoria[] | undefined;
 
   constructor(
     public dialogRef: MatDialogRef<EditarCrearProductoComponent>,
@@ -35,12 +33,8 @@ export class EditarCrearProductoComponent implements OnInit {
       this.categorias = categorias;
     });
 
-    this.appService.getTipos().subscribe(tipos => {
+    this.appService.getTiposCategorias().subscribe(tipos => {
       this.tipos = tipos;
-    });
-
-    this.appService.getDescripciones().subscribe(descripciones => {
-      this.descripciones = descripciones;
     });
   }
 

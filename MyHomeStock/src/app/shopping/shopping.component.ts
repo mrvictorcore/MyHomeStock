@@ -1,138 +1,241 @@
 import { Component, OnInit } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { AppService } from '../app.service';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { CompraProducto } from '../models/compra_producto';
+import { CrearEditarCompraComponent } from './crear-editar-compra/crear-editar-compra.component';
 import { Compra } from '../models/compra';
 import { ConfirmarCompraComponent } from './confirmar-compra/confirmar-compra.component';
-import { CrearEditarCompraComponent } from './crear-editar-compra/crear-editar-compra.component';
-import { BorrarCompraComponent } from './borrar-compra/borrar-compra.component';
+import { Observable, catchError, forkJoin, of } from 'rxjs';
+import { ComprasUpdateService } from '../compras-update.service';
 
 @Component({
   selector: 'app-shopping',
   templateUrl: './shopping.component.html',
   styleUrls: ['./shopping.component.css']
 })
-export class ShoppingComponent implements OnInit{
+export class ShoppingComponent implements OnInit {
+  id_usuario: number = 1;
+
   listaCompra: Compra[] = [];
-  checkAuto: boolean = false;
-  existeListaActiva: boolean = false;
+  listaCompraSeleccionada: number = 1;
+
+  productosComprar: CompraProducto[] = [];
+  productosFiltradosListaCompra: CompraProducto[] = [];
+  todosSeleccionados: boolean = false;
+  cantidadRestar: number[] = [];
+  cantidadSeleccionada: { [key: number]: number } = {};
 
   constructor(
-    private appService: AppService,
+    private appService: AppService, 
     private dialog: MatDialog,
-  ){}
+    private comprasUpdate: ComprasUpdateService
+  ) {}
 
   ngOnInit(): void {
-    this.cargarCompras();
+    this.cargarProductosListaCompra();
+    this.actualizacionesCompra();
   }
 
-  cargarCompras() {
-    this.appService.getCompras().subscribe(compras => {
-      this.listaCompra = compras;
-      this.existeListaActiva = this.listaCompra.length > 0;
+  actualizacionesCompra(): void {
+    this.comprasUpdate.compraActualizada$.subscribe(() => {
+      this.cargarProductosListaCompra();
     });
   }
 
-  onCompradoChange(compra: Compra) {
-    this.appService.updateCompra(compra).subscribe();
-  }
-
+  cargarProductosListaCompra(): void {
+    this.appService.getCompraProductos().subscribe((productos) => {
+      this.productosComprar = productos;
+      this.filtrarProductosPorCompraSeleccionada();
   
-  onCheckAutoChange() {
-    this.listaCompra.forEach((producto) => {
-      producto.seleccionado = this.checkAuto;
-      this.appService.updateCompra(producto).subscribe();
+      this.productosComprar.forEach(producto => {
+        this.cantidadSeleccionada[producto.id] = producto.cantidad;
+      });
+    });
+
+    this.appService.getCompras().subscribe((compra) => {
+      this.listaCompra = compra;
     });
   }
 
-
-  onCrearCompra() {
-    if (this.existeListaActiva) {
-      alert("Ya existe una lista de compras creada.");
-    } else {
-      const dialogRef = this.dialog.open(CrearEditarCompraComponent, {
-        width: '400px',
-        data: {}
-      });
-
-      dialogRef.afterClosed().subscribe((comprasActualizadas: Compra[]) => {
-        if (comprasActualizadas) {
-          this.listaCompra = comprasActualizadas;
-          this.existeListaActiva = this.listaCompra.length > 0;
-        }
-      });
-    }
-  }
-
-  onEditarCompra() {
-    if (this.listaCompra && this.listaCompra.length > 0) {
-      const dialogRef = this.dialog.open(CrearEditarCompraComponent, {
-        width: '400px',
-        data: {
-          listaCompra: [...this.listaCompra],
-          edit: true
-        }
-      });
-  
-      dialogRef.afterClosed().subscribe((comprasActualizadas: Compra[]) => {
-        if (comprasActualizadas) {
-          this.cargarCompras();
-        }
-      });
-    } else {
-      alert("No hay ninguna lista de compras creada para editar.");
-    }
-  }
-  
-
-
-  onBorrarClick() {
-    const productosSeleccionados = this.listaCompra.filter(compra => compra.seleccionado);
-
-    if (productosSeleccionados.length > 0) {
-      const dialogRef = this.dialog.open(BorrarCompraComponent, {
-        width: '400px',
-        data: { productos: productosSeleccionados }
-      });
-
-      dialogRef.afterClosed().subscribe(confirmed => {
-        if (confirmed) {
-          productosSeleccionados.forEach(compra => {
-            this.appService.deleteCompra(compra.id).subscribe(() => {
-            });
-          });
-          this.cargarCompras();
-        }
-      });
-    } else {
-      alert("Por favor, seleccione al menos un elemento para borrar.");
-    }
-  }
-
-
-  onConfirmarCompraClick() {
-    const productosSeleccionados = this.listaCompra.filter(compra => compra.seleccionado);
-  
-    if (productosSeleccionados.length === 0) {
-      alert("No hay productos seleccionados para confirmar.");
+  filtrarProductosPorCompraSeleccionada(): void {
+    if (!this.listaCompraSeleccionada) {
+      this.productosFiltradosListaCompra = this.productosComprar.filter(producto => producto.id_compra === 1);
       return;
     }
-  
-    const dialogRef = this.dialog.open(ConfirmarCompraComponent, {
-      width: '400px',
-      data: productosSeleccionados,
-    });
-  
-    dialogRef.afterClosed().subscribe(confirmed => {
-      if (confirmed) {
-        productosSeleccionados.forEach(compra => {
-          this.appService.sumarStock(compra.id_producto, compra.cantidad_comprar).subscribe();
-          
-          this.appService.deleteCompra(compra.id).subscribe();
-        });
+    this.productosFiltradosListaCompra = this.productosComprar.filter(producto => producto.id_compra === this.listaCompraSeleccionada);
+  }
 
-        this.cargarCompras();
+  generarRangoCantidadRestar(producto: CompraProducto): number[] {
+    const cantidadRestar = [];
+    for (let i = producto.cantidad; i >= 1; i--) {
+      cantidadRestar.push(i);
+    }
+    return cantidadRestar;
+  }
+
+  seleccionarTodos(): void {
+    this.productosFiltradosListaCompra.forEach((producto) => {
+      producto.seleccionado = this.todosSeleccionados;
+      console.log(producto.seleccionado);
+    });
+  }
+
+  cambiarCantidadRestar(producto: CompraProducto, event: any): void {
+    this.cantidadSeleccionada[producto.id] = parseInt(event.target.value, 10);
+  }
+
+  actualizarStock(): Observable<any> {
+    const operaciones = this.productosFiltradosListaCompra.filter(p => p.seleccionado).map(p => {
+      const ajusteStock$ = this.appService.ajustarStock(p.id_producto, this.cantidadSeleccionada[p.id]).pipe(
+        catchError(err => {
+          console.error('Error al ajustar el stock: ', err);
+          return of(null);
+        })
+      );
+
+      const compraProductoActualizado: CompraProducto = {
+        id: p.id,
+        id_compra: p.id_compra,
+        id_producto: p.id_producto,
+        cantidad: p.cantidad - this.cantidadSeleccionada[p.id],
+        seleccionado: p.seleccionado
+      };
+
+      const actualizarCompraProducto$ = this.appService.updateCompraProducto(compraProductoActualizado).pipe(
+        catchError(err => {
+          console.error('Error al actualizar CompraProducto: ', err );
+          return of(null);
+        })
+      );
+
+      return forkJoin([ajusteStock$, actualizarCompraProducto$]);
+    });
+
+    return forkJoin(operaciones);
+  }
+  
+  onCrearCompra(): void {
+    const nuevaCompra: Compra = {
+      id: 0,
+      id_usuario: this.id_usuario,
+      descripcion: '',
+    };
+    
+    const dialogRef = this.dialog.open(CrearEditarCompraComponent, {
+      width: '400px',
+      data: { edit: false}
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.cargarProductosListaCompra();
       }
     });
   }
+
+  onEditarCompra(): void {
+    const compraSeleccionada = this.listaCompra.find(compra => compra.id === this.listaCompraSeleccionada);
+
+    if (compraSeleccionada) {
+      const dialogRef = this.dialog.open(CrearEditarCompraComponent, {
+        width: '400px',
+        data: { edit: true, listaCompra: compraSeleccionada, id: compraSeleccionada.id }
+      });
+
+      dialogRef.afterClosed().subscribe(result => {
+        if (result) {
+          this.cargarProductosListaCompra();
+        }
+      });
+    } else {
+      console.error('Compra seleccionada no encontrada');
+    }
+  }
+
+  onConfirmarClick(): void {
+    const dialogRef = this.dialog.open(ConfirmarCompraComponent, {
+      width: '400px',
+      data: { edit: false }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.actualizarStock().subscribe(() =>{
+          this.comprobarProductosACero();
+        });
+        this.verificarYBorrarListaCompraSiEstaVacia();
+        this.cargarProductosListaCompra();
+      }
+    });
+  }
+
+  onBorrarClick(): void {
+    const compraId = this.listaCompraSeleccionada;
+    
+    if (!compraId) {
+      console.error('No hay una compra seleccionada para borrar');
+      return;
+    }
+    
+    if (!confirm('¿Estás seguro de querer borrar esta compra y todos sus productos?')) {
+      return;
+    }
+
+    const productosABorrar = this.productosComprar.filter(p => p.id_compra === compraId);
+    
+    if (productosABorrar.length > 0) {
+      const operacionesBorradoProductos = productosABorrar.map(producto => 
+        this.appService.deleteCompraProducto(producto.id));
+
+      forkJoin(operacionesBorradoProductos).subscribe({
+        next: () => this.borrarCompra(compraId),
+        error: err => console.error('Error al borrar productos de la compra:', err),
+      });
+    } else {
+      this.borrarCompra(compraId);
+    }
+  }
+
+  comprobarProductosACero(): void {
+    const productosABorrar = this.productosComprar.filter(producto => producto.cantidad === 0);
   
+    if (productosABorrar.length > 0) {
+      const operacionesBorrado = productosABorrar.map(producto =>
+        this.appService.deleteCompraProducto(producto.id)
+      );
+  
+      forkJoin(operacionesBorrado).subscribe({
+        next: () => {
+          console.log('Productos con cantidad 0 borrados');
+          this.cargarProductosListaCompra();
+          this.verificarYBorrarListaCompraSiEstaVacia();
+        },
+        error: (err) => console.error('Error al borrar productos:', err)
+      });
+    } else {
+      this.verificarYBorrarListaCompraSiEstaVacia();
+    }
+  }
+
+  verificarYBorrarListaCompraSiEstaVacia(): void {
+    const productosDeLaListaSeleccionada = this.productosComprar.filter(producto => producto.id_compra === this.listaCompraSeleccionada);
+    
+    if (productosDeLaListaSeleccionada.length === 0) {
+      this.borrarCompra(this.listaCompraSeleccionada);
+    } else {
+      this.cargarProductosListaCompra();
+      console.log('La lista de compra seleccionada aún tiene productos.');
+    }
+  }
+
+  borrarCompra(compraId: number): void {
+    this.appService.deleteCompra(compraId).subscribe({
+      next: () => {
+        console.log('Compra borrada con éxito');
+        this.comprasUpdate.notificarCompraActualizada();
+        this.cargarProductosListaCompra();
+      },
+      error: (err) => console.error('Error al borrar la compra:', err),
+    });
+  }
 }

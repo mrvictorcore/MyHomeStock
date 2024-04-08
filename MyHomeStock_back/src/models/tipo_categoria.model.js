@@ -8,8 +8,8 @@ var TipoCategoria = function(tipo_categoria){
 
     this.nombre         = tipo_categoria.nombre;
     
-    this.created_at     = new Date();
-    this.updated_at     = new Date();
+    // this.created_at     = new Date();
+    // this.updated_at     = new Date();
 };
 
 TipoCategoria.create = function (newEmp, result) {    

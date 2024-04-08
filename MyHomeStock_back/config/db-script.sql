@@ -10,8 +10,9 @@ CREATE TABLE IF NOT EXISTS usuario (
     id INT AUTO_INCREMENT PRIMARY KEY,
 
     nombre VARCHAR(50) NOT NULL,
-    contrasena VARCHAR(50) NOT NULL,
-    email VARCHAR(100) NOT NULL
+    apellido VARCHAR(50) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    password VARCHAR(50) NOT NULL
 );
 
 -- Crear tabla de tipo_categoria
@@ -36,7 +37,7 @@ CREATE TABLE IF NOT EXISTS categoria (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id)
 );
 
--- Crear tabla de producto con columna "favorito"
+-- Crear tabla de producto
 CREATE TABLE IF NOT EXISTS producto (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
@@ -52,7 +53,7 @@ CREATE TABLE IF NOT EXISTS producto (
     FOREIGN KEY (id_categoria) REFERENCES categoria(id)
 );
 
--- Crear tabla de compra con todos los datos del producto
+-- Crear tabla de compra 
 CREATE TABLE IF NOT EXISTS compra (
     id INT AUTO_INCREMENT PRIMARY KEY,
     id_usuario INT,
@@ -62,8 +63,9 @@ CREATE TABLE IF NOT EXISTS compra (
     FOREIGN KEY (id_usuario) REFERENCES usuario(id)
 );
 
--- Crear tabla de compra_producto con todos los datos del producto
+-- Crear tabla de compra_producto
 CREATE TABLE IF NOT EXISTS compra_producto (
+    id INT AUTO_INCREMENT PRIMARY KEY,
     id_compra INT,
     id_producto INT,
 

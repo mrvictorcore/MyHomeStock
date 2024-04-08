@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Producto } from '../models/producto';
 import { AppService } from '../app.service';
 import { MatDialog } from '@angular/material/dialog';
-import { MatDialogRef } from '@angular/material/dialog';
 import { AlertBorrarComponent } from './borrar-dashboard/alert-borrar.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-dashboard',
@@ -15,47 +15,57 @@ export class DashboardComponent implements OnInit {
   cantidadRestar: number[] = Array.from({ length: 10 }, (_, i) => i + 1);
   cantidadSeleccionada: { [key: number]: number } = {};
 
-  constructor(
-    private appService: AppService,
-    private dialog: MatDialog
-  ){}
+  constructor (
+    private appService: AppService, 
+    private dialog: MatDialog,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
-    this.appService.getProductos().subscribe((productos) => {
-      this.productos = productos;
+    this.appService.isLogin().subscribe(isLogin => {
+      if(!isLogin)
+        this.router.navigate(['/login']);
+      this.cargarProductos();
+    });
+  }
 
-      this.productos.forEach(producto => {
-        this.cantidadSeleccionada[producto.id] = 1;
+  cargarProductos(): void {
+    this.appService.getProductos().subscribe((productos) => {
+      this.productos = productos.filter(prod => prod.cantidad_stock > 0 || prod.favorito);
+      this.productos.forEach(p => {
+        this.cantidadSeleccionada[p.id] = 1;
+        if (p.cantidad_stock === null) {
+          p.cantidad_stock = 0;
+        }
       });
     });
   }
 
   cambiarCantidadRestar(producto: Producto, event: any): void {
-    const cantidadCambiar = event.target.value;
-    this.cantidadSeleccionada[producto.id] = parseInt(cantidadCambiar, 10);
+    const cantidad = parseInt(event.target.value, 10);
+    this.cantidadSeleccionada[producto.id] = cantidad;
   }
 
-  restarStock(producto: Producto, cantidadSeleccionada: number): void {
-    if (cantidadSeleccionada > 0 && producto.cantidad_stock != null && producto.cantidad_stock >= cantidadSeleccionada) {
-      const dialogRef: MatDialogRef<AlertBorrarComponent> = this.dialog.open(AlertBorrarComponent, {
+  restarStock(producto: Producto): void {
+    const cantidadARestar = -Math.abs(this.cantidadSeleccionada[producto.id]);
+    if (-cantidadARestar <= producto.cantidad_stock) {
+      const dialogRef = this.dialog.open(AlertBorrarComponent, {
         width: '400px',
-        data: { productName: producto.nombre_producto }
+        data: { productName: producto.nombre }
       });
   
-      dialogRef.afterClosed().subscribe(result => {
-        if (result === true) {
-          this.appService.restarStock(producto.id, cantidadSeleccionada).subscribe(result => {
-            if (result) {
-              producto.cantidad_stock = result.cantidad_stock;
-            } else {
-              console.log('Error al restar el stock del producto. Producto no encontrado o cantidad insuficiente');
-            }
+      dialogRef.afterClosed().subscribe(confirmed => {
+        if (confirmed) {
+          this.appService.ajustarStock(producto.id, cantidadARestar).subscribe(() => {
+            producto.cantidad_stock += cantidadARestar;
+          }, error => {
+            console.error('Error al ajustar el stock del producto:', error);
           });
         }
       });
     } else {
-      console.log('Operación no permitida: cantidad seleccionada inválida o stock no disponible.');
+      console.error('Operación no permitida: cantidad seleccionada inválida o stock insuficiente.');
     }
   }
-  
+
 }

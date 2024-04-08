@@ -1,0 +1,30 @@
+<div class="container">
+    <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded loginRegister-container">
+        <h1 class="mt-4 text-center display-4 custom-title">Datos del Usuario</h1>
+        <form [formGroup]="formGroup" (ngSubmit)="guardarCambios()" class="form">
+        <div class="row">
+            <div class="col-md-6 offset-md-3">
+                <div class="form-group mb-3">
+                    <input matInput type="text" formControlName="nombre" id="nombre" name="nombre" required placeholder="Nombre" class="form-control">
+                </div>
+                <div class="form-group mb-3">
+                    <input matInput type="text" formControlName="apellido" id="apellido" name="apellido" required placeholder="Apellido" class="form-control">
+                </div>
+                <div class="form-group mb-3">
+                    <input matInput type="email" formControlName="email" id="email" name="email" required placeholder="Correo electrónico" class="form-control">
+                </div>
+                <div class="form-group mb-3 input-container">
+                    <input matInput type="password" formControlName="password" [type]="verContrasena ? 'text' : 'password'" id="password" name="password" required placeholder="Contraseña" class="form-control">
+                    <button mat-icon-button matSuffix (click)="mostrarContrasena()">
+                        <mat-icon>{{ !verContrasena ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                </div>                
+            </div>
+        </div>
+        <div class="text-center button-container">
+            <button [disabled]="!formGroup.dirty" type="submit" class="login-button btn btn-primary main-button">Guardar</button>
+            <button mat-button (click)="deshacerCambios()" class="btn btn-secondary">Cancelar</button>
+        </div>        
+        </form>
+    </div>
+</div>  

@@ -62,8 +62,7 @@ exports.delete = function(req, res) {
 
 exports.findByUsuarioId = function(req, res) {
     const criteriosBusqueda = new CompraProducto(req.body);
-    //handles null error
-   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
+    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
         res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
     }else{
         CompraProducto.findByUsuarioId(criteriosBusqueda, function(err, descripcions) {
@@ -72,4 +71,13 @@ exports.findByUsuarioId = function(req, res) {
             res.json(descripcions);
         });
     }
+};
+
+exports.findByCompraId = function(req, res) {
+    CompraProducto.findByCompraId(req.params.id, function(err, compra_producto) {
+        if (err) {
+            res.send(err);
+        }
+        res.json(compra_producto);
+    });
 };

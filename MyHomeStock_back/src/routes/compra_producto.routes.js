@@ -20,4 +20,7 @@ router.delete('/:id', CompraProductoController.delete);
 // Todos los gastos por usuario_id y null
 router.post('/find', CompraProductoController.findByUsuarioId);
 
+// Todos los productos de una compra específica por ID de la compra
+router.get('/:id/productos', CompraProductoController.findByCompraId);
+
 module.exports = router

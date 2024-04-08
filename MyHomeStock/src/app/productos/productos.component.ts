@@ -3,8 +3,7 @@ import { AppService } from '../app.service';
 import { Producto } from '../models/producto';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { Categoria } from '../models/categoria';
-import { Tipo } from '../models/tipo';
-import { Descripcion } from '../models/descripcion';
+import { TipoCategoria } from '../models/tipo_categoria';
 import { EditarCrearProductoComponent } from './crear-editar-producto/editar-crear-producto.component';
 import { AlertBorrarProductoComponent } from './borrar-producto/alert-borrar-producto.component';
 
@@ -14,74 +13,54 @@ import { AlertBorrarProductoComponent } from './borrar-producto/alert-borrar-pro
   styleUrls: ['./productos.component.css']
 })
 export class ProductosComponent implements OnInit {
-  productos: Producto[] = [];
+  productos: any[] = [];
   categorias: Categoria[] = [];
-  tipos: Tipo[] = [];
-  descripciones: Descripcion[] = [];
+  tipos_categoria: TipoCategoria[] = [];
 
   nombresCategorias: { [key: number]: string } = {};
   nombresTipos: { [key: number]: string } = {};
-  nombresDescripciones: { [key: number]: string } = {};
 
   constructor(private appService: AppService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
-    this.obtenerProductos();
-    this.obtenerCategorias();
-    this.obtenerTipos();
-    this.obtenerDescripciones();
+    this.cargarDatos();
+  }
+
+  cargarDatos(): void {
+    this.appService.getTiposCategorias().subscribe(tipos => {
+      this.tipos_categoria = tipos;
+      this.appService.getCategorias().subscribe(categorias => {
+        this.categorias = categorias;
+        this.obtenerProductos();
+      });
+    });
   }
 
   obtenerProductos(): void {
-    this.appService.getProductos().subscribe({
-      next: (productos) => {
-        this.productos = productos;
-      },
-      error: (error) => {
-        console.error('Error al obtener los productos: ', error);
-      }
-    });
-  }
-
-  obtenerCategorias(): void {
-    this.appService.getCategorias().subscribe(categorias => {
-      this.categorias = categorias;
-      categorias.forEach(cat => {
-        this.nombresCategorias[cat.ID] = cat.Nombre_categoria;
+    this.appService.getProductos().subscribe(productos => {
+      this.productos = productos.map(producto => {
+        const categoria = this.categorias.find(c => c.id === producto.id_categoria);
+        const tipoCategoria = categoria ? this.tipos_categoria.find(t => t.id === +categoria.id_tipo) : null;
+        return {
+          ...producto,
+          nombreCategoria: categoria ? categoria.nombre : 'Desconocida',
+          nombreTipoCategoria: tipoCategoria ? tipoCategoria.nombre : 'Desconocido'
+        };
       });
     });
   }
 
-  obtenerTipos(): void {
-    this.appService.getTipos().subscribe((tipos:any) => {
-      this.tipos = tipos && tipos["code"] ? new Array() : tipos;
-      this.tipos.forEach((tipo:any) => {
-        this.nombresTipos[tipo.ID] = tipo.Nombre_tipo;
-      });
-    });
-  }
-
-  obtenerDescripciones(): void {
-    this.appService.getDescripciones().subscribe(descripciones => {
-      this.descripciones = descripciones;
-      descripciones.forEach(desc => {
-        this.nombresDescripciones[desc.ID] = desc.Nombre_descripcion;
-      });
-    });
-  }
 
  onCrearProductoClick(): void {
     const nuevoProducto: Producto = {
       id: 0, 
-      nombre_producto: '', 
       id_categoria: 0, 
-      id_tipo: 0, 
-      id_descripcion: 0, 
+      id_usuario: 1, 
+      nombre: '', 
+      descripcion: '', 
       cantidad_stock: 0, 
-      cantidad_min: 0,
+      cantidad_min_mensual: 0,
       favorito: false,
-      cantidad_comprar: 0,
-      seleccionado: false
     };
 
     const dialogRef: MatDialogRef<EditarCrearProductoComponent> = this.dialog.open(EditarCrearProductoComponent, {
@@ -127,23 +106,18 @@ export class ProductosComponent implements OnInit {
       width: '400px',
       data: { producto }
     });
-  
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.appService.updateProducto(result).subscribe({
-          next: (updatedProducto) => {
-            const index = this.productos.findIndex(p => p.id === updatedProducto.id);
-            if (index !== -1) {
-              this.productos[index] = updatedProducto;
-            }
-          },
-          error: (error) => {
-            console.error('Error al editar el producto: ', error);
-          }
-        });
+        console.log('Actualizando producto con ID:', producto.id);
+        this.obtenerProductos();
+      } else {
+        console.log('Actualizando producto con ID:', producto.id, result);
+        console.log('No se proporcionó un producto válido para actualizar.');
       }
     });
   }
+
 
   onFavoritosClick(producto: Producto): void {
     this.appService.toggleFavoritoProducto(producto.id).subscribe(() => {

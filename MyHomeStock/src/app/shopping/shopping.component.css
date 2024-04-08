@@ -27,3 +27,7 @@
   .bold-text {
     font-weight: bold;
   }
+
+  .custom-select {
+    width: 30%;
+  }

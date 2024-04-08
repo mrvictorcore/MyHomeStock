@@ -3,13 +3,14 @@ const getConnection = require('../../config/db.config');
 
 var CompraProducto = function(compra_producto){
 
+    this.id                 = compra_producto.id;
     this.id_compra          = compra_producto.id_compra;
     this.id_producto        = compra_producto.id_producto;
     
     this.cantidad           = compra_producto.cantidad;
 
-    this.created_at         = new Date();
-    this.updated_at         = new Date();
+    // this.created_at         = new Date();
+    // this.updated_at         = new Date();
 };
 
 CompraProducto.create = function (newEmp, result) {    
@@ -26,6 +27,7 @@ CompraProducto.create = function (newEmp, result) {
         }
     });           
 };
+
 CompraProducto.findById = function (id, result) {
      var dbConn = getConnection();
     dbConn.query("Select * from compra_producto where id = ? ", id, function (err, res) {             
@@ -39,9 +41,10 @@ CompraProducto.findById = function (id, result) {
         }
     });   
 };
+
 CompraProducto.findAll = function (result) {
      var dbConn = getConnection();
-    dbConn.query("Select * from compra_producto", function (err, res) {
+    dbConn.query("SELECT cp.id, cp.id_compra, cp.id_producto, cp.cantidad, p.nombre AS nombre_producto FROM compra_producto cp JOIN producto p ON cp.id_producto = p.id", function (err, res) {
     dbConn.end();
         if(err) {
             console.log("error: ", err);
@@ -53,11 +56,11 @@ CompraProducto.findAll = function (result) {
         }
     });   
 };
-CompraProducto.update = function(id, compra_producto, result){
-   var dbConn = getConnection();
-    dbConn.query(
-        "UPDATE compra_producto SET compra_producto=?,cantidad=?,fecha_descripcion=?,categoria_id=?,tipo_descripcion=?,usuario_id=? WHERE id = ?", 
-        [compra_producto.compra_producto,compra_producto.cantidad,compra_producto.fecha_descripcion,compra_producto.categoria_id,compra_producto.tipo_descripcion,compra_producto.usuario_id, id], 
+
+CompraProducto.update = function(id, compra_producto, result) {
+    var dbConn = getConnection();
+    dbConn.query("UPDATE compra_producto SET id_compra=?, id_producto=?, cantidad=? WHERE id = ?",
+                 [compra_producto.id_compra, compra_producto.id_producto, compra_producto.cantidad, id], 
     function (err, res) {
         dbConn.end();
         if(err) {
@@ -68,6 +71,7 @@ CompraProducto.update = function(id, compra_producto, result){
         }
     }); 
 };
+
 CompraProducto.delete = function(id, result){
      var dbConn = getConnection(); 
     dbConn.query("DELETE FROM compra_producto WHERE id = ?", [id], function (err, res) {
@@ -95,6 +99,20 @@ CompraProducto.findByUsuarioId = function (req, result) {
             result(null, res);
         }
     });           
+};
+
+CompraProducto.findByCompraId = function (idCompra, result) {
+    var dbConn = getConnection();
+    dbConn.query("SELECT * FROM compra_producto WHERE id_compra = ?", [idCompra], function (err, res) {
+        dbConn.end();
+        if (err) {
+            console.log("error: ", err);
+            result(null, err);
+        } else {
+            console.log('compra_producto : ', res);
+            result(null, res);
+        }
+    });
 };
 
 

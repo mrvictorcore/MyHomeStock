@@ -2,6 +2,7 @@
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand">
+        <img src="assets/myhomestock_favicon_50x50.png" alt="Logo de MyHomeStock" class="custom_img">
         MyHomeStock
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" 
@@ -21,27 +22,27 @@
         </ul>
 
         <ul class="navbar-nav navbar-right">
-        <li class="nav-item">
+        <li class="nav-item" *ngIf="!isRegister">
             <a class="nav-link active" aria-current="page" href="/login">Login</a>
           </li>
-          <li class="nav-item">
+          <li class="nav-item" *ngIf="!isRegister">
             <a class="nav-link" href="/register">Registro</a>
           </li>
         </ul>
 
         <ul class="navbar-nav navbar-right">
-          <li class="nav-item dropdown">
+          <li class="nav-item dropdown" *ngIf="isRegister">
             <a class="nav-link dropdown-toggle" href="" id="navbarDropdown" role="button" 
             data-bs-toggle="dropdown" aria-haspopup aria-expanded="false">
-              Nombre Usuario
+              {{nombreUsuario}}
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
               <li><a class="dropdown-item" href="/stock">Stock</a></li>
               <li><a class="dropdown-item" href="/producto">Productos</a></li>
               <li><a class="dropdown-item" href="/Caracteristicas">Características</a></li>
               <div><hr class="dropdown-divider"></div>
-              <li><a class="dropdown-item" href="">Cuenta</a></li>
-              <li><a class="dropdown-item" href="">Salir</a></li>
+              <li><a class="dropdown-item" href="/cuenta">Cuenta</a></li>
+              <li><a class="dropdown-item" href="/login" (click)="sessionOff()">Salir</a></li>
             </div>
           </li>
         </ul>

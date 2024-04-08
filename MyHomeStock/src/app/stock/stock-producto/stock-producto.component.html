@@ -13,9 +13,9 @@
           </thead>
           <tbody>
             <tr *ngFor="let producto of productos" class="table-row">
-              <td class="text-center">{{ producto.nombre_producto }}</td>
+              <td class="text-center">{{ producto.nombre }}</td>
               <td class="text-center">{{ producto.cantidad_stock }}</td>
-              <td class="text-center">{{ producto.cantidad_min }}</td>
+              <td class="text-center">{{ producto.cantidad_min_mensual }}</td>
               <td class="text-center">
                 <div class="form-group mb-0 mr-2">
                   <button class="btn btn-light mx-1" (click)="onUpdateStockClick(producto)">

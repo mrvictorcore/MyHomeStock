@@ -11,16 +11,16 @@
       </thead>
       <tbody>
         <tr *ngFor="let producto of productos" class="table-row">
-          <td class="text-center">{{ producto.nombre_producto }}</td>
+          <td class="text-center">{{ producto.nombre }}</td>
           <td class="text-center">{{ producto.cantidad_stock }}</td>
           <td class="text-center">
             <div class="d-flex flex-row align-items-center justify-content-center mb-2">
               <div class="form-group mb-0 mr-2">
-                <select id="cantidadSeleccionada" class="form-control form-control-sm" [(ngModel)]="cantidadSeleccionada[producto.id]" (change)="cambiarCantidadRestar(producto, $event)">
+                <select class="form-control form-control-sm" [(ngModel)]="cantidadSeleccionada[producto.id]" (change)="cambiarCantidadRestar(producto, $event)">
                   <option *ngFor="let cantidad of cantidadRestar" [value]="cantidad">{{ cantidad }}</option>
                 </select>
               </div>
-              <button class="btn btn-light btn-sm" (click)="restarStock(producto, cantidadSeleccionada[producto.id])">
+              <button class="btn btn-light btn-sm" (click)="restarStock(producto)">
                 <i class="fa fa-minus" aria-hidden="true"></i>
               </button>
             </div>
