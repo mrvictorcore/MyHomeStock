@@ -65,7 +65,6 @@ CREATE TABLE IF NOT EXISTS compra (
 
 -- Crear tabla de compra_producto
 CREATE TABLE IF NOT EXISTS compra_producto (
-    id INT AUTO_INCREMENT PRIMARY KEY,
     id_compra INT,
     id_producto INT,
 

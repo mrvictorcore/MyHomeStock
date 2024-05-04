@@ -1,87 +1,182 @@
-'use strict';
+import { Compra } from '../models/compra.model.js';
+import { isFunction, handleResponse } from '../../config/helpers/dbUtils.js';
 
-const Compra = require('../models/compra.model');
-
-exports.findAll = function(req, res) {
-  Compra.findAll(function(err, compra) {
-    console.log('controller');
-    if (err)
-      res.status(500).json({ error: true, message: err.message });
-    else
-      res.status(200).json(compra);
-  });
-};
-
-exports.create = function(req, res) {
-  const new_compra = new Compra(req.body);
-
-  if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-      res.status(400).json({ error: true, message: 'Por favor añada todos los campos requeridos' });
-  } else {
-      Compra.create(new_compra, function(err, compra) {
-          if (err) {
-              res.status(500).json({ error: true, message: err.message });
-          } else {
-              res.status(201).json({ error: false, message: "Compra añadida correctamente!", data: compra });
-          }
-      });
-  }
-};
-
-
-exports.findById = function(req, res) {
-    Compra.findById(req.params.id, function(err, compra) {
-        if (err)
-          res.status(500).json({ error: true, message: err.message });
-        else
-          res.status(200).json(compra);
-    });
-};
-
-exports.update = function(req, res) {
-  if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-      res.status(400).json({ error: true, message: 'Por favor añada todos los campos requeridos' });
-  } else {
-      Compra.update(req.body.id, new Compra(req.body), function(err, compra) {
-          if (err)
-              res.status(500).json({ error: true, message: err.message });
-          else
-              res.status(200).json({ error: false, message: 'Compra actualizada correctamente' });
-      });
-  }  
-};
-
-exports.delete = function(req, res) {
-    Compra.delete(req.params.id, function(err, compra) {
-        if (err)
-          res.status(500).json({ error: true, message: err.message });
-        else
-          res.status(200).json({ error: false, message: 'Compra eliminada correctamente' });
-    });
-};
-
-exports.findByUsuarioId = function(req, res) {
-    if (!req.body.usuario_id) {
-        res.status(400).json({ error: true, message: 'Por favor proporcione el ID del usuario' });
-    } else {
-        Compra.findByUsuarioId(req.body.usuario_id, function(err, compras) {
-            if (err)
-              res.status(500).json({ error: true, message: err.message });
-            else
-              res.status(200).json(compras);
+export const findAll = async (req, res) => {
+    try {
+        const data_compra = await new Promise((resolve, reject) => {
+            Compra.findAll((err, data_compra) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data_compra);
+                }
+            });
         });
+
+        if (isFunction(handleResponse)) {
+            handleResponse(res, () => Promise.resolve(data_compra));
+        } else {
+            console.error('handleResponse no es una función válida');
+        }
+    } catch (err) {
+        handleResponse(res, () => Promise.reject(err));
     }
 };
 
-// exports.updateCantidadCompra = function(req, res) {
-//     const idCompra = req.params.id;
-//     const nuevaCantidad = req.body.nuevaCantidad;
+export const create = async (req, res) => {
+    try {
+        if (Object.keys(req.body).length === 0) {
+            res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos' });
+        } else {
+            const newCompra = new Compra(req.body);
+            const data_compra = await new Promise((resolve, reject) => {
+                Compra.create(newCompra, (err, data_compra) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(data_compra);
+                    }
+                });
+            });
 
-//     Compra.updateCantidadComprar(idCompra, nuevaCantidad, function(err, compra) {
-//         if (err) {
-//             res.status(500).json({ error: true, message: err.message });
-//         } else {
-//             res.status(200).json({ error: false, message: "Cantidad actualizada correctamente" });
-//         }
-//     });
-// };
+            if (isFunction(handleResponse)) {
+                handleResponse(res, () => Promise.resolve(data_compra));
+            } else {
+                console.error('handleResponse no es una función válida');
+            }
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: err.message });
+    }
+};
+
+export const findById = async (req, res) => {
+    const idCompra = req.params.id;
+
+    try {
+        const data_compra = await new Promise((resolve, reject) => {
+            Compra.findById(idCompra, (err, data_compra) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data_compra);
+                }
+            });
+        });
+
+        if (isFunction(handleResponse)) {
+            handleResponse(res, () => Promise.resolve(data_compra));
+        } else {
+            console.error('handleResponse no es una función válida');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: err.message });
+    }
+};
+
+export const update = async (req, res) => {
+    if (req.body.constructor === Object && Object.keys(req.body).length === 0) {
+        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos' });
+    } else {
+        const newCompra = req.body;
+        const idCompra = req.params.id;
+
+        try {
+            const data_compra = await new Promise((resolve, reject) => {
+                Compra.update(idCompra, new Compra(newCompra), (err, data_compra) => {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(data_compra);
+                    }
+                });
+            });
+
+            if (isFunction(handleResponse)) {
+                handleResponse(res, () => Promise.resolve(data_compra));
+            } else {
+                console.error('handleResponse no es una función válida');
+            }
+        } catch (err) {
+            console.error(err);
+            res.status(500).json({ error: true, message: err.message });
+        }
+    }
+};
+
+export const remove = async (req, res) => {
+    const idCompra = req.params.id;
+
+    try {
+        const data_compra = await new Promise((resolve, reject) => {
+            Compra.remove(idCompra, (err, data_compra) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data_compra);
+                }
+            });
+        });
+
+        if (isFunction(handleResponse)) {
+            handleResponse(res, () => Promise.resolve(data_compra));
+        } else {
+            console.error('handleResponse no es una función válida');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: err.message });
+    }
+};
+
+export const findByUsuarioId = async (req, res) => {
+    const idUser = req.body.usuario_id;
+
+    try {
+        const data_compra = await new Promise((resolve, reject) => {
+            Compra.findByUsuarioId(idUser, (err, data_compra) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data_compra);
+                }
+            });
+        });
+
+        if (isFunction(handleResponse)) {
+            handleResponse(res, () => Promise.resolve(data_compra));
+        } else {
+            console.error('handleResponse no es una función válida');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: err.message });
+    }
+};
+
+export const findByDescripcion = async (req, res) => {
+    const compraDescripcion = req.params.descripcion;
+
+    try {
+        const data_compra = await new Promise((resolve, reject) => {
+            Compra.findByDescripcion(compraDescripcion, (err, data_compra) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve(data_compra);
+                }
+            });
+        });
+        
+        if (isFunction(handleResponse)) {
+            handleResponse(res, () => Promise.resolve(data_compra));
+        } else {
+            console.error('handleResponse no es una función válida');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: true, message: err.message });
+    }
+};

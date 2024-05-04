@@ -4,10 +4,10 @@ import { Producto } from './models/producto';
 import { Categoria } from './models/categoria';
 import { TipoCategoria } from './models/tipo_categoria';
 import { CompraProducto } from './models/compra_producto';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { Compra } from './models/compra';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators';
+import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'
@@ -29,12 +29,12 @@ export class AppService {
     return this.http.get<Usuario>(`${this.apiUrl}/usuario/${id}`);
   }
 
-  addUsuario(newUsuario: Usuario): Observable<Usuario> {
-    return this.http.post<Usuario>(`${this.apiUrl}/usuario`, newUsuario);
+  addUsuario(newUsuario: Usuario): Observable<Usuario[]> {
+    return this.http.post<Usuario[]>(`${this.apiUrl}/usuario`, newUsuario);
   }
 
-  updateUsuario(newUsuario: Usuario): Observable<Usuario> {
-    return this.http.put<Usuario>(`${this.apiUrl}/usuario/${newUsuario.id}`, newUsuario);
+  updateUsuario(newUsuario: Usuario): Observable<Usuario[]> {
+    return this.http.put<Usuario[]>(`${this.apiUrl}/usuario/${newUsuario.id}`, newUsuario);
   }
 
   deleteUsuario(id: number): Observable<any> {
@@ -85,16 +85,16 @@ export class AppService {
     return this.http.get<Producto[]>(`${this.apiUrl}/producto`);
   }
 
-  getProducto(id: number): Observable<Producto> {
-    return this.http.get<Producto>(`${this.apiUrl}/producto/${id}`);
+  getProducto(id: number): Observable<Producto[]> {
+    return this.http.get<Producto[]>(`${this.apiUrl}/producto/${id}`);
   }
 
-  addProductos(newProducto: Producto): Observable<Producto> {
-    return this.http.post<Producto>(`${this.apiUrl}/producto`, newProducto);
+  addProductos(newProducto: Producto): Observable<Producto[]> {
+    return this.http.post<Producto[]>(`${this.apiUrl}/producto`, newProducto);
   }
 
-  updateProducto(newProducto: Producto): Observable<Producto> {
-    return this.http.put<Producto>(`${this.apiUrl}/producto/${newProducto.id}`, newProducto);
+  updateProducto(newProducto: Producto): Observable<Producto[]> {
+    return this.http.put<Producto[]>(`${this.apiUrl}/producto/${newProducto.id}`, newProducto);
   }
 
   deleteProducto(id: number): Observable<any> {
@@ -111,21 +111,34 @@ export class AppService {
 
   // Métodos para Compra
   getCompras(): Observable<Compra[]> {
-    return this.http.get<Compra[]>(`${this.apiUrl}/compra`);
-  }
-
-  getCompra(id: number): Observable<Compra> {
-    return this.http.get<Compra>(`${this.apiUrl}/compra/${id}`);
-  }
-
-  addCompras(newCompra: Compra): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/compra`, newCompra).pipe(
-    map(res => res.data)
+    return this.http.get<{error: boolean, data: Compra[]}>(`${this.apiUrl}/compra`).pipe(
+      map(response => {
+        if (response.error) {
+          throw new Error('Error al obtener las compras');
+        }
+        return response.data;
+      }),
+      catchError(error => {
+        console.error('Error al obtener las compras', error);
+        return throwError(() => new Error('Error al obtener las compras, por favor intente más tarde'));
+      })
     );
   }
 
-  updateCompra(newCompra: Compra): Observable<Compra> {
-    return this.http.put<Compra>(`${this.apiUrl}/compra/`, newCompra);
+  getCompra(id: number): Observable<Compra[]> {
+    return this.http.get<Compra[]>(`${this.apiUrl}/compra/${id}`);
+  }
+
+  getCompraByDescripcion(descripcion: string): Observable<Compra[]> {
+    return this.http.get<Compra[]>(`${this.apiUrl}/compra/${descripcion}`);
+  }
+
+  addCompras(newCompra: Compra): Observable<Compra[]> {
+    return this.http.post<Compra[]>(`${this.apiUrl}/compra`, newCompra);
+  }
+
+  updateCompra(newCompra: Compra): Observable<Compra[]> {
+    return this.http.put<Compra[]>(`${this.apiUrl}/compra/${newCompra.id}`, newCompra);
   }
 
   deleteCompra(id: number): Observable<any> {
@@ -137,16 +150,16 @@ export class AppService {
     return this.http.get<Categoria[]>(`${this.apiUrl}/categoria`);
   }
 
-  getCategoria(id: number): Observable<Categoria> {
-    return this.http.get<Categoria>(`${this.apiUrl}/categoria/${id}`);
+  getCategoria(id: number): Observable<Categoria[]> {
+    return this.http.get<Categoria[]>(`${this.apiUrl}/categoria/${id}`);
   }
 
-  addCategoria(newCategoria: Categoria): Observable<Categoria> {
-    return this.http.post<Categoria>(`${this.apiUrl}/categoria`, newCategoria);
+  addCategoria(newCategoria: Categoria): Observable<Categoria[]> {
+    return this.http.post<Categoria[]>(`${this.apiUrl}/categoria`, newCategoria);
   }
 
-  updateCategoria(newCategoria: Categoria): Observable<Categoria> {
-    return this.http.put<Categoria>(`${this.apiUrl}/categoria/${newCategoria.id}`, newCategoria);
+  updateCategoria(newCategoria: Categoria): Observable<Categoria[]> {
+    return this.http.put<Categoria[]>(`${this.apiUrl}/categoria/${newCategoria.id}`, newCategoria);
   }
 
   deleteCategoria(id: number): Observable<any> {
@@ -158,16 +171,16 @@ export class AppService {
     return this.http.get<TipoCategoria[]>(`${this.apiUrl}/tipo_categoria`);
   }
 
-  getTipoCategoria(id: number): Observable<TipoCategoria> {
-    return this.http.get<TipoCategoria>(`${this.apiUrl}/tipo_categoria/${id}`);
+  getTipoCategoria(id: number): Observable<TipoCategoria[]> {
+    return this.http.get<TipoCategoria[]>(`${this.apiUrl}/tipo_categoria/${id}`);
   }
 
-  addTipoCategoria(newTipo: TipoCategoria): Observable<TipoCategoria> {
-    return this.http.post<TipoCategoria>(`${this.apiUrl}/tipo_categoria`, newTipo);
+  addTipoCategoria(newTipo: TipoCategoria): Observable<TipoCategoria[]> {
+    return this.http.post<TipoCategoria[]>(`${this.apiUrl}/tipo_categoria`, newTipo);
   }
 
-  updateTipoCategoria(newTipo: TipoCategoria): Observable<TipoCategoria> {
-    return this.http.put<TipoCategoria>(`${this.apiUrl}/tipo_categoria/${newTipo.id}`, newTipo);
+  updateTipoCategoria(newTipo: TipoCategoria): Observable<TipoCategoria[]> {
+    return this.http.put<TipoCategoria[]>(`${this.apiUrl}/tipo_categoria/${newTipo.id}`, newTipo);
   }
 
   deleteTipoCategoria(id: number): Observable<any> {
@@ -179,21 +192,24 @@ export class AppService {
     return this.http.get<CompraProducto[]>(`${this.apiUrl}/compra_producto`);
   }
 
-  getCompraProducto(id: number): Observable<CompraProducto> {
-    return this.http.get<CompraProducto>(`${this.apiUrl}/compra_producto/${id}`);
+  getCompraProducto(idCompra: number, idProducto: number): Observable<CompraProducto[]> {
+    return this.http.get<CompraProducto[]>(`${this.apiUrl}/compra_producto/${idCompra}/${idProducto}`);
   }
 
-  addCompraProducto(newCompraProducto: CompraProducto): Observable<CompraProducto> {
-    return this.http.post<CompraProducto>(`${this.apiUrl}/compra_producto`, newCompraProducto);
+  getProductosDeCompra(idCompra: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/compra_producto/compras/${idCompra}/productosConCantidad`);
   }
 
-  updateCompraProducto(newCompraProducto: CompraProducto): Observable<CompraProducto> {
-    return this.http.put<CompraProducto>(`${this.apiUrl}/compra_producto/${newCompraProducto.id}`, newCompraProducto);
+  addCompraProducto(newCompraProducto: CompraProducto): Observable<CompraProducto[]> {
+    return this.http.post<CompraProducto[]>(`${this.apiUrl}/compra_producto`, newCompraProducto);
   }
 
-
-  deleteCompraProducto(id: number): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/compra_producto/${id}`);
+  updateCompraProducto(idCompra: number, idProducto: number, newCompraProducto: CompraProducto): Observable<CompraProducto[]> {
+    return this.http.put<CompraProducto[]>(`${this.apiUrl}/compra_producto/${idCompra}/${idProducto}`, newCompraProducto);
+  }
+  
+  deleteCompraProducto(idCompra: number, idProducto: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/compra_producto/${idCompra}/${idProducto}`);
   }
 
 }

@@ -1,8 +1,8 @@
 'use strict';
 
-const Categoria = require('../models/categoria.model');
+import { Categoria } from '../models/categoria.model.js';
 
-exports.findAll = function(req, res) {
+export const findAll = function(req, res) {
   Categoria.findAll(function(err, categoria) {
     console.log('controller')
     if (err)
@@ -13,7 +13,7 @@ exports.findAll = function(req, res) {
 };
 
 
-exports.create = function(req, res) {
+export const create = function(req, res) {
     const new_categoria = new Categoria(req.body);
 
     //handles null error 
@@ -29,7 +29,7 @@ exports.create = function(req, res) {
 };
 
 
-exports.findById = function(req, res) {
+export const findById = function(req, res) {
     Categoria.findById(req.params.id, function(err, categoria) {
         if (err)
         res.send(err);
@@ -38,7 +38,7 @@ exports.findById = function(req, res) {
 };
 
 
-exports.update = function(req, res) {
+export const update = function(req, res) {
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
         res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
     }else{
@@ -52,15 +52,15 @@ exports.update = function(req, res) {
 };
 
 
-exports.delete = function(req, res) {
-  Categoria.delete( req.params.id, function(err, categoria) {
+export const remove = function(req, res) {
+  Categoria.remove( req.params.id, function(err, categoria) {
     if (err)
     res.send(err);
     res.json({ error:false, message: 'Categoria successfully deleted' });
   });
 };
 
-exports.findByUsuarioId = function(req, res) {
+export const findByUsuarioId = function(req, res) {
     const criteriosBusqueda = new Categoria(req.body);
 
     //handles null error 

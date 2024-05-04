@@ -1,26 +1,27 @@
-const express = require('express')
-const router = express.Router()
-const compraController = require('../controllers/compra.controller');
+import { Router } from 'express';
+import { findAll, create, findById, update, remove, findByUsuarioId, findByDescripcion } from '../controllers/compra.controller.js';
+
+const router = Router()
 
 // Todas las compras
-router.get('/', compraController.findAll);
+router.get('/', findAll);
 
 // Crear una nueva compra
-router.post('/', compraController.create);
+router.post('/', create);
 
 // Devuelve una única compra por su id
-router.get('/:id', compraController.findById);
+router.get('/:id', findById);
 
 // Actualizar una compra por su id
-router.put('/', compraController.update);
+router.put('/:id', update);
 
 // Borrar una compra por su id
-router.delete('/:id', compraController.delete);
+router.delete('/:id', remove);
 
 // Todos los gastos por usuario_id y null
-router.get('/find', compraController.findByUsuarioId);
+router.get('/find', findByUsuarioId);
 
-// Ruta para actualizar la cantidad de una compra
-// router.put('/:id/cantidad', compraController.updateCantidadCompra);
+// Ruta para obtener la descripción de una compra
+router.get('/:descripcion', findByDescripcion);
 
-module.exports = router
+export default router

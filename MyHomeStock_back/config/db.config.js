@@ -1,23 +1,23 @@
 'use strict';
 
-const mysql = require('mysql2');
+import { createPool } from 'mysql2';
 
-// Función para crear una nueva conexión
-function createNewConnection() {
+// Creación de un pool de conexiones
+const pool = createPool({
+  host: "localhost",
+  user: "root",
+  password: "",
+  database: "MyHomeStock",
+  // host: process.env.DB_HOST,
+  // user: process.env.DB_USER,
+  // password: process.env.DB_PASSWORD,
+  // database: process.env.DB_NAME,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-  //local mysql db connection
-  const connection = mysql.createConnection({
-    host     : 'localhost',
-    user     : 'root',
-    password : '',
-    database : 'MyHomeStock'
-  });
-  return connection;
+// Función para obtener una conexión del pool
+export function getConnection() {
+  return pool.promise();
 }
-// Función para obtener una conexión
-function getConnection() {
-    const connection = createNewConnection();
-    return connection;
-}
-// Exportar la función getConnection
-module.exports = getConnection;

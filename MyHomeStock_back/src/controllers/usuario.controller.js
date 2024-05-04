@@ -1,8 +1,6 @@
-'use strict';
+import { Usuario } from '../models/usuario.model.js';
 
-const Usuario = require('../models/usuario.model');
-
-exports.findAll = function(req, res) {
+export const findAll = function(req, res) {
   Usuario.findAll(function(err, usuario) {
     console.log('controller')
     if (err)
@@ -12,7 +10,7 @@ exports.findAll = function(req, res) {
   });
 };
 
-exports.existeUsuario = function(req, res){
+export const existeUsuario = function(req, res){
     const new_email = req.query.email;
 
     Usuario.existeUsuario(new_email, function(err, usuario){
@@ -24,7 +22,7 @@ exports.existeUsuario = function(req, res){
     });
 };
 
-exports.create = function(req, res) {
+export const create = function(req, res) {
     const new_usuario = new Usuario(req.body);
 
    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
@@ -39,7 +37,7 @@ exports.create = function(req, res) {
 };
 
 
-exports.findById = function(req, res) {
+export const findById = function(req, res) {
     Usuario.findById(req.params.id, function(err, usuario) {
         if (err)
         res.send(err);
@@ -48,7 +46,7 @@ exports.findById = function(req, res) {
 };
 
 
-exports.update = function(req, res) {
+export const update = function(req, res) {
     if(req.body.constructor === Object && Object.keys(req.body).length === 0){
         res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
     }else{
@@ -62,8 +60,8 @@ exports.update = function(req, res) {
 };
 
 
-exports.delete = function(req, res) {
-  Usuario.delete( req.params.id, function(err, usuario) {
+export const remove = function(req, res) {
+  Usuario.remove( req.params.id, function(err, usuario) {
     if (err)
     res.send(err);
     res.json({ error:false, message: 'Usuario successfully deleted' });
@@ -71,7 +69,7 @@ exports.delete = function(req, res) {
 };
 
 
-exports.login = function(req, res) {
+export const login = function(req, res) {
     const usuario = new Usuario(req.body);
 
     //handles null error 

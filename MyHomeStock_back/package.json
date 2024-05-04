@@ -1,6 +1,7 @@
 {
   "name": "myhomestock",
   "version": "1.0.0",
+  "type": "module",
   "description": "Esta es una aplicación para el contro del Stock de productos del Hogar",
   "main": "server.js",
   "scripts": {

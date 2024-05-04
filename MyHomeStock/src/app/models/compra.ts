@@ -1,5 +1,5 @@
 export interface Compra {
-    id?: number;
+    id: any;
     id_usuario: number;
 
     descripcion: string;

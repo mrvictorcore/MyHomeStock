@@ -1,4 +1,4 @@
-.custom-title{
+.custom-title {
     font-weight: bold; font-size: 30px;
 }
 
@@ -7,27 +7,29 @@
     float: right;
   }
   
-  /* Espacio entre el checkbox y el texto "Check Auto" */
-  .form-group label {
-    margin-right: 8px;
-  }
+/* Espacio entre el checkbox y el texto "Check Auto" */
+.form-group label {
+  margin-right: 8px;
+}
 
-  .text-center {
-    margin-right: 50px; /* Ajusta el valor del margen según tus preferencias */
-  }
+.text-center {
+  margin-right: 50px;
+}
 
-  .custom-btn-size {
-    width: 100px; /* Establece el ancho deseado para los botones */
-  }
+/* Tamaño para los botones */
+.custom-btn-size {
+  width: 100px;
+}
 
-  .custom-margin-right {
-    margin-right: 10px; /* Establece el margen derecho para separar los botones */
-  }
+/* Separación entre botones */
+.custom-margin-right {
+  margin-right: 10px;
+}
 
-  .bold-text {
-    font-weight: bold;
-  }
+.bold-text {
+  font-weight: bold;
+}
 
-  .custom-select {
-    width: 30%;
-  }
+.custom-select {
+  width: 40%;
+}

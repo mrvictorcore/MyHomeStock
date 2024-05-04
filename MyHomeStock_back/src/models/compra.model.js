@@ -1,128 +1,113 @@
-'use strict';
-const getConnection = require('../../config/db.config');
+import { getConnection } from '../../config/db.config.js';
+import { handleDbResponse } from '../../config/helpers/dbUtils.js';
 
-var Compra = function(compra){
-
-    this.id             = compra.id;
-    this.id_usuario     = compra.id_usuario;
+/**
+ * Clase Compra representa una compra en la base de datos.
+*/
+export class Compra {
+    constructor(compra) {
+        this.id             = compra.id;
+        this.id_usuario     = compra.id_usuario;
+        this.descripcion    = compra.descripcion;
+    }
     
-    this.descripcion    = compra.descripcion;
+    /**
+     * Recupera todas las compras de la base de datos.
+    */
+    static async findAll(result) {
+        const dbConn = getConnection();
 
-    // this.created_at     = new Date();
-    // this.updated_at     = new Date();
-};
-
-Compra.create = function (newCompra, result) {    
-    var dbConn = getConnection();
-    dbConn.query("INSERT INTO compra set ?", newCompra, function (err, res) {
-        if(err) {
-            console.log("error: ", err);
-            result(err, null);
+        try {
+            const [res] = await dbConn.query("SELECT * FROM compra");
+            handleDbResponse(null, res, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-        else{
+    }
+
+    /**
+     * Inserta una nueva compra en la base de datos y devuelve el objeto insertado.
+    */
+    static async create(newCompra, result) {
+        const dbConn = getConnection();
+        
+        try {
+            const [res] = await dbConn.query("INSERT INTO compra SET ?", newCompra);
             const insertedId = res.insertId;
-            dbConn.query("SELECT * FROM compra WHERE id = ?", insertedId, function(err, res) {
-                dbConn.end();
-                if(err) {
-                    console.log("error: ", err);
-                    result(err, null);
-                } else {
-                    result(null, res[0]);
-                }
-            });
+            const [compraDetails] = await dbConn.query("SELECT * FROM compra WHERE id = ?", [insertedId]);
+            handleDbResponse(null, compraDetails, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-    });           
-};
+    }
 
+    /**
+     * Busca una compra por ID.
+    */
+    static async findById(id, result) {
+        const dbConn = getConnection();
 
-Compra.findById = function (id, result) {
-     var dbConn = getConnection();
-    dbConn.query("Select * from compra where id = ? ", id, function (err, res) {             
-        dbConn.end();
-        if(err) {
-            console.log("error: ", err);
-            result(err, null);
+        try {
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE id = ?", id);
+            handleDbResponse(null, res, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-        else{
-            result(null, res);
+    }
+
+    /**
+     * Actualiza la descripción de una compra por su ID.
+    */
+    static async update(id, compra, result) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("UPDATE compra SET descripcion = ? WHERE id = ?", [compra.descripcion, id]);
+            handleDbResponse(null, res, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-    });   
-};
+    }
 
-Compra.findAll = function (result) {
-     var dbConn = getConnection();
-    dbConn.query("Select * from compra", function (err, res) {
-    dbConn.end();
-        if(err) {
-            console.log("error: ", err);
-            result(null, err);
+    /**
+     * Elimina una compra por ID.
+    */
+    static async remove(id, result) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("DELETE FROM compra WHERE id = ?", id);
+            handleDbResponse(null, res, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-        else{
-            console.log('compra : ', res);  
-            result(null, res);
+    }
+
+    /**
+     * Busca compras por el ID del usuario.
+    */
+    static async findByUsuarioId(usuario_id, result) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE usuario_id = ?", usuario_id);
+            handleDbResponse(null, res, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-    });   
-};
+    }
 
-Compra.update = function(id, compra, result){
-    var dbConn = getConnection();
-     dbConn.query(
-         "UPDATE compra SET descripcion=? WHERE id = ?", 
-         [compra.descripcion, id], 
-     function (err, res) {
-         dbConn.end();
-         if(err) {
-             console.log("error: ", err);
-             result(null, err);
-         }else{   
-             result(null, res);
-         }
-     }); 
- };
- 
-
-Compra.delete = function(id, result){
-     var dbConn = getConnection(); 
-    dbConn.query("DELETE FROM compra WHERE id = ?", [id], function (err, res) {
-    dbConn.end();
-        if(err) {
-            console.log("error: ", err);
-            result(null, err);
+    /**
+     * Busca compras por descripción.
+    */
+    static async findByDescripcion(descripcion, result) {
+        const dbConn = getConnection();
+        
+        try {
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE descripcion = ?", descripcion);
+            handleDbResponse(null, res, result);
+        } catch (err) {
+            handleDbResponse(err, null, result);
         }
-        else{
-            result(null, res);
-        }
-    }); 
-};
-
-Compra.findByUsuarioId = function (req, result) {    
-     var dbConn = getConnection();
-    dbConn.query("Select * from compra where usuario_id = ? ", req.usuario_id, function (err, res) {
-    dbConn.end();
-        if(err) {
-            console.log("error: ", err);
-            result(null, err);
-        }
-        else{
-            console.log('compra : ', res);  
-            result(null, res);
-        }
-    });           
-};
-
-// Compra.updateCantidadComprar = function(idCompra, nuevaCantidad, result) {
-//     var dbConn = getConnection();
-//     dbConn.query("UPDATE compra SET cantidad_comprar = ? WHERE id = ?", [nuevaCantidad, idCompra], function(err, res) {
-//         dbConn.end();
-//         if (err) {
-//             console.log("error: ", err);
-//             result(err, null);
-//         } else {
-//             result(null, res);
-//         }
-//     });
-// };
-
-
-
-module.exports= Compra;
+    }
+}

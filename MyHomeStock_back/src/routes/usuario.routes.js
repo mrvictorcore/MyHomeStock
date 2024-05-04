@@ -1,26 +1,27 @@
-const express = require('express');
-const router = express.Router();
-const usuarioController = require('../controllers/usuario.controller');
+import { Router } from 'express';
+import { findAll, existeUsuario, create, findById, update, remove, login } from '../controllers/usuario.controller.js';
+
+const router = Router();
 
 // Obtener todos los usuario
-router.get('/', usuarioController.findAll);
+router.get('/', findAll);
 
 // Verificar si un usuario existe
-router.get('/verificar-existencia', usuarioController.existeUsuario);
+router.get('/verificar-existencia', existeUsuario);
 
 // Crear un nuevo usuario
-router.post('/', usuarioController.create);
+router.post('/', create);
 
 // Obtener un único usuario por su ID
-router.get('/:id', usuarioController.findById);
+router.get('/:id', findById);
 
 // Actualizar un usuario por su ID
-router.put('/:id', usuarioController.update);
+router.put('/:id', update);
 
 // Eliminar un usuario por su ID
-router.delete('/:id', usuarioController.delete);
+router.delete('/:id', remove);
 
 // Inicio de sesión de usuario
-router.post('/login', usuarioController.login);
+router.post('/login', login);
 
-module.exports = router;
+export default router;

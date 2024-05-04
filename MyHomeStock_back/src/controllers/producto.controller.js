@@ -1,8 +1,6 @@
-'use strict';
+import { Producto } from '../models/producto.model.js';
 
-const Producto = require('../models/producto.model');
-
-exports.findAll = function(req, res) {
+export const findAll = function(req, res) {
   Producto.findAll(function(err, producto) {
     console.log('controller')
     if (err)
@@ -13,7 +11,7 @@ exports.findAll = function(req, res) {
 };
 
 
-exports.create = function(req, res) {
+export const create = function(req, res) {
   const new_producto = new Producto(req.body);
 
   //handles null error 
@@ -29,7 +27,7 @@ exports.create = function(req, res) {
 };
 
 
-exports.findById = function(req, res) {
+export const findById = function(req, res) {
   Producto.findById(req.params.id, function(err, producto) {
       if (err)
       res.send(err);
@@ -38,7 +36,7 @@ exports.findById = function(req, res) {
 };
 
 
-exports.update = function(req, res) {
+export const update = function(req, res) {
   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
       res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
   }else{
@@ -52,15 +50,15 @@ exports.update = function(req, res) {
 };
 
 
-exports.delete = function(req, res) {
-  Producto.delete( req.params.id, function(err, producto) {
+export const remove = function(req, res) {
+  Producto.remove( req.params.id, function(err, producto) {
     if (err)
     res.send(err);
     res.json({ error:false, message: 'Producto successfully deleted' });
   });
 };
 
-exports.findByUsuarioId = function(req, res) {
+export const findByUsuarioId = function(req, res) {
   const criteriosBusqueda = new Producto(req.body);
   //handles null error
   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
@@ -74,7 +72,7 @@ exports.findByUsuarioId = function(req, res) {
   }
 };
 
-exports.toggleFavorito = function(req, res) {
+export const toggleFavorito = function(req, res) {
   Producto.toggleFavorito(req.params.id, function(err, producto) {
     if (err) {
       res.status(400).send(err);
@@ -84,7 +82,7 @@ exports.toggleFavorito = function(req, res) {
   });
 };
 
-exports.ajustarStock = function(req, res) {
+export const ajustarStock = function(req, res) {
     const idProducto = req.params.id;
     const { cantidadAjuste } = req.body;
 

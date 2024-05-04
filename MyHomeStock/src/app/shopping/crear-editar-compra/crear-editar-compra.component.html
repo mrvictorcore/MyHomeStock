@@ -1,76 +1,78 @@
 <div class="container">
-  <div class="row">
-    <div class="col-12">
-      <h1 class="text-center custom-title">{{ editMode ? 'Editar' : 'Crear' }} Lista de Compra</h1>
-    </div>
-  </div>
-
-  <div class="row" *ngIf="editMode">
-    <div class="col-12">
-      <div class="form-group">
-        <select id="listaCompraSelect" class="form-control custom-select" [(ngModel)]="listaCompraSeleccionadaId" (change)="seleccionarCompra(listaCompraSeleccionadaId)">
-          <option value="null" disabled hidden selected>Seleccionar lista de compra</option>
-          <option *ngFor="let compra of listasCompra" [ngValue]="compra.id">{{ compra.descripcion }}</option>
-        </select>
+  <form [formGroup]="compraForm" (ngSubmit)="saveCompra()">
+    <div class="row">
+      <div class="col-12">
+        <h1 class="text-center custom-title">{{ editMode ? 'Editar' : 'Crear' }} Lista de Compra</h1>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="form-group custom-description-text">
-        <input type="text" placeholder="Descripción de la Lista" class="form-control" [(ngModel)]="nuevaDescripcionLista">
+    <div class="row" *ngIf="editMode">
+      <div class="col-12">
+        <div class="form-group">
+          <select id="listaCompraSelect" class="form-control custom-select" formControlName="listaCompraSeleccionadaId">
+            <option value="null" disabled hidden selected>Seleccionar lista de compra</option>
+            <option *ngFor="let compra of compraList" [ngValue]="compra.id">{{ compra.descripcion }}</option>
+          </select>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="form-group">
-        <select id="productoSelect" class="form-control custom-select" [(ngModel)]="productoSeleccionadoId" (change)="seleccionarProducto(productoSeleccionadoId, cantidadComprarCompraProducto)">
-          <option value="-1" disabled hidden selected>Añadir Producto</option>
-          <option *ngFor="let producto of productosDisponibles" [value]="producto.id">{{ producto.nombre }}</option>
-        </select>
+    <div class="row">
+      <div class="col-12" *ngIf="!editMode">
+        <div class="form-group custom-description-text">
+          <input type="text" placeholder="Nueva Lista" class="form-control" formControlName="descripcion">
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col-12">
-      <div class="table-responsive">
-        <table class="table table-borderless table-hover">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Stock</th>
-              <th>Cantidad</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let productoCompra  of todosLosCompraProductos">
-              <td>{{ productoCompra.nombre_producto}}</td>
-              <td>{{ obtenerStockProducto(productoCompra.id_producto)}}</td>
-              <td>
-                <input type="number" class="form-control" [(ngModel)]="productoCompra.cantidad" (ngModelChange)="cambiarCantidadComprar(productoCompra.id_producto, $event)">
-
-              </td>
-              <td>
-                <button class="btn btn-light mx-1" (click)="borrarProductoDeLista(productoCompra.id)">
-                  <i class="fas fa-trash-alt"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <div class="row">
+      <div class="col-12">
+        <div class="form-group">
+          <select class="form-control custom-select" (change)="onProductoSelect($event)">
+            <option value="" disabled selected>Seleccionar producto</option>
+            <option *ngFor="let producto of productosList" [value]="producto.id">{{ producto.nombre }}</option>
+          </select>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="row">
-    <div class="col-12 text-center">
-      <button type="button" class="btn btn-success" (click)="guardarCompra()">Confirmar</button>
-      <button type="button" class="btn btn-secondary" (click)="cancelarCompra()">Cancelar</button>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="table-responsive">
+          <table class="table table-borderless table-hover">
+            <thead>
+              <tr>
+                <th>Producto</th>
+                <th>Stock</th>
+                <th>Cantidad</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody formArrayName="productosFormArray">
+              <tr *ngFor="let productoCtrl  of productosFormArray.controls; let i = index" [formGroupName]="i">
+                <td>{{ productoCtrl.get('nombreProducto')!.value }}</td>
+                <td>{{ productoCtrl.get('stockProducto')!.value }}</td>
+                <td>
+                  <input type="number" class="form-control" formControlName="cantidad">
+                </td>
+                <td>
+                  <button type="button" class="btn btn-light mx-1" (click)="deleteProductoCompra(i)">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
+
+    <div class="row">
+      <div class="col-12 text-center">
+        <button type="submit" class="btn btn-success">Confirmar</button>
+        <button type="button" class="btn btn-secondary" (click)="abort()">Cancelar</button>
+      </div>
+    </div>
+  </form>
 </div>

@@ -1,5 +1,8 @@
-const express = require('express');
-const cors = require('cors');
+import express, { urlencoded, json } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 // Configuración de ExpressJS y servidor
 const app = express();
@@ -13,8 +16,8 @@ app.use(cors({
 }));
 
 // Middleware para parsear el cuerpo de las solicitudes
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(urlencoded({ extended: true }));
+app.use(json());
 
 app.get('/', (req, res) => {
   res.send("¡Bienvenido a la API de MyHomeStock!");
@@ -24,22 +27,22 @@ app.get('/', (req, res) => {
  * ENRUTAMIENTOS A LAS ENTIDADES DE LA APLICACIÓN
  */
 
-const categoriaRoutes = require('./src/routes/categoria.routes');
+import categoriaRoutes from './src/routes/categoria.routes.js';
 app.use('/api/v1/categoria', categoriaRoutes);
 
-const CompraProductoRoutes = require('./src/routes/compra_producto.routes');
+import CompraProductoRoutes from './src/routes/compra_producto.routes.js';
 app.use('/api/v1/compra_producto', CompraProductoRoutes);
 
-const productoRoutes = require('./src/routes/producto.routes');
+import productoRoutes from './src/routes/producto.routes.js';
 app.use('/api/v1/producto', productoRoutes);
 
-const TipoCategoriaRoutes = require('./src/routes/tipo_categoria.routes');
+import TipoCategoriaRoutes from './src/routes/tipo_categoria.routes.js';
 app.use('/api/v1/tipo_categoria', TipoCategoriaRoutes);
 
-const compraRoutes = require('./src/routes/compra.routes');
+import compraRoutes from './src/routes/compra.routes.js';
 app.use('/api/v1/compra', compraRoutes);
 
-const usuarioRoutes = require('./src/routes/usuario.routes');
+import usuarioRoutes from './src/routes/usuario.routes.js';
 app.use('/api/v1/usuario', usuarioRoutes);
 
 /**
