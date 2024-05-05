@@ -1,96 +1,158 @@
 import { Producto } from '../models/producto.model.js';
+import { handleResponse, validateFields, validateId } from '../../config/helpers/dbUtils.js';
 
-export const findAll = function(req, res) {
-  Producto.findAll(function(err, producto) {
-    console.log('controller')
-    if (err)
-    res.send(err);
-    console.log('res', producto);
-    res.send(producto);
-  });
-};
-
-
-export const create = function(req, res) {
-  const new_producto = new Producto(req.body);
-
-  //handles null error 
-  if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-      res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-  }else{
-      Producto.create(new_producto, function(err, producto) {
-          if (err)
-          res.send(err);
-          res.json({error:false,message:"Producto añadido correctamente!",data:producto});
-      });
+export const findAll = async (req, res) => {
+  try {
+    const data_producto = await Producto.findAll();
+    handleResponse(res, null, data_producto);
+  } catch (err) {
+    handleResponse(res, err);
   }
 };
 
+export const create = async (req, res) => {
+  const newProducto = req.body;
+  let errores = [];
 
-export const findById = function(req, res) {
-  Producto.findById(req.params.id, function(err, producto) {
-      if (err)
-      res.send(err);
-      res.json(producto);
-  });
-};
-
-
-export const update = function(req, res) {
-  if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-      res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-  }else{
-      Producto.update(req.params.id, new Producto(req.body), function(err, producto) {
-          if (err)
-          res.send(err);
-          res.json({ error:false, message: 'Producto actualizado correctamente' });
-      });
+  if (!newProducto || typeof newProducto !== 'object' || Object.keys(newProducto).length === 0) {
+    errores.push('No se recibieron datos completos');
   }
-  
-};
 
-
-export const remove = function(req, res) {
-  Producto.remove( req.params.id, function(err, producto) {
-    if (err)
-    res.send(err);
-    res.json({ error:false, message: 'Producto successfully deleted' });
-  });
-};
-
-export const findByUsuarioId = function(req, res) {
-  const criteriosBusqueda = new Producto(req.body);
-  //handles null error
-  if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-      res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-  }else{
-      Producto.findByUsuarioId(criteriosBusqueda, function(err, productos) {
-          if (err)
-          res.send(err);
-          res.json(productos);
-      });
+  if (!errores.length) {
+    let erroresCampos = validateFields(newProducto, ['id_usuario', 'id_categoria', 'nombre', 'descripcion', 'cantidad_stock', 'cantidad_min_mensual', 'favorito']);
+    errores = [...errores, ...erroresCampos];
   }
-};
 
-export const toggleFavorito = function(req, res) {
-  Producto.toggleFavorito(req.params.id, function(err, producto) {
-    if (err) {
-      res.status(400).send(err);
-    } else {
-      res.json({ message: "Estado de favorito actualizado correctamente" });
+  if (errores.length) {
+    res.status(400).json({error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ')});
+  } else {
+    try {
+      const data_producto = await Producto.create(newProducto);
+      handleResponse(res, null, data_producto);
+    } catch (err) {
+      handleResponse(res, err);
     }
-  });
+  }
 };
 
-export const ajustarStock = function(req, res) {
-    const idProducto = req.params.id;
-    const { cantidadAjuste } = req.body;
+export const findById = async (req, res) => {
+  const idProducto = req.params.id
+  
+  const idError = validateId(idProducto);
+  if (idError) {
+    return res.status(400).json({error: true, message: idError});
+  }
 
-    Producto.adjustStock(idProducto, cantidadAjuste, function(err, result) {
-        if (err) {
-            res.status(400).send(err);
-        } else {
-            res.json({ message: "Stock ajustado correctamente", data: result });
-        }
-    });
+  try {
+    const data_producto = await Producto.findById(idProducto);
+    handleResponse(res, null, data_producto);
+  } catch (err) {
+    handleResponse(res, err);
+  }
+};
+
+export const update = async (req, res) => {
+  const updateProducto = req.body;
+  let errores = [];
+
+  if (!updateProducto || typeof updateProducto !== 'object' || Object.keys(updateProducto).length === 0) {
+    errores.push('No se recibieron datos completos');
+  }
+
+  if (!errores.length) {
+    let erroresCampos = validateFields(updateProducto, ['id', 'id_categoria', 'nombre', 'descripcion', 'cantidad_stock', 'cantidad_min_mensual', 'favorito']);
+    errores = [...errores, ...erroresCampos];
+  }
+
+  if (errores.length) {
+    res.status(400).json({error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ')});
+  } else {
+    try {
+      const data_producto = await Producto.update(updateProducto);
+      handleResponse(res, null, data_producto);
+    } catch (err) {
+      handleResponse(res, err);
+    }
+  }
+};
+
+export const remove = async (req, res) => {
+  const idProducto = req.params.id;
+
+  const idError = validateId(idProducto);
+  if (idError) {
+    return res.status(400).json({ error: true, message: idError });
+  }
+
+  try {
+    const data_producto = await Compra.remove(idCompra);
+    handleResponse(res, null, data_producto);
+  } catch (err) {
+    handleResponse(res, err);
+  }
+};
+
+export const findByUsuarioId = async (req, res) => {
+  const idUser = req.body.usuario_id;
+
+  const idError = validateId(idUser);
+  if (idError) {
+    return res.status(400).json({ error: true, message: idError });
+  }
+
+  try {
+    const data_producto = await Compra.findByUsuarioId(idUser);
+    handleResponse(res, null, data_producto);
+  } catch (err) {
+    handleResponse(res, err);
+  }
+};
+
+export const toggleFavorito = async (req, res) => {
+  const idProducto =req.params.id;
+
+  const idError = validateId(idProducto);
+  if (idError) {
+    return res.status(400).json({ error: true, message: idError });
+  }
+
+  try {
+    const data_producto = await Producto.toggleFavorito(idProducto);
+    handleResponse(res, null, data_producto);
+  } catch (err) {
+    handleResponse(err);
+  }
+};
+
+export const ajustarStock = async (req, res) => {
+  const { idProducto, cantidadAjuste } = req.body;
+  let errores = [];
+
+  // Verificar que se haya recibido un objeto con datos para el ajuste de stock
+  if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
+    errores.push('No se recibieron datos completos para el ajuste de stock');
+  }
+
+  // Validar los campos necesarios para la operación
+  if (!errores.length) {
+    let erroresCampos = validateFields(req.body, ['idProducto', 'cantidadAjuste']);
+    errores = [...errores, ...erroresCampos];
+  }
+
+  // Validar que cantidadAjuste sea un número y no nulo
+  if (!errores.length && (typeof cantidadAjuste !== 'number' || cantidadAjuste == null)) {
+    errores.push('La cantidad de ajuste debe ser un número válido');
+  }
+
+  // Manejar los errores acumulados o proceder con el ajuste de stock
+  if (errores.length) {
+    res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
+  } else {
+    try {
+      const resultadoAjuste = await Producto.adjustStock(idProducto, cantidadAjuste);
+      handleResponse(res, null, resultadoAjuste);
+    } catch (err) {
+      handleResponse(res, err);
+    }
+  }
 };

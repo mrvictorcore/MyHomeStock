@@ -1,5 +1,4 @@
 import { getConnection } from '../../config/db.config.js';
-import { handleDbResponse } from '../../config/helpers/dbUtils.js';
 
 /**
  * Clase compraProducto representa un compraProducto en la base de datos.
@@ -12,37 +11,9 @@ export class CompraProducto {
     }
 
     /**
-     * Inserta un nuevo compraProducto en la base de datos y devuelve el objeto insertado.
+     * Recupera todos los campos de compraProductos y además, el campo nombre de la tabla producto de la base de datos.
     */
-    static async create(newCompraProducto, result) {
-        const dbConn = getConnection();
-
-        try {
-            const [res] = await dbConn.query("INSERT INTO compra_producto set ?", newCompraProducto);
-            handleDbResponse(null, result);
-        } catch (err) {
-            handleDbResponse(err, null);
-        }
-    }
-
-    /**
-     * Busca un compraProducto por su id_compra e id_producto.
-    */
-    static async findById(idCompra, idProducto, result) {
-        const dbConn = getConnection();
-
-        try {
-            const [res] = await dbConn.query("SELECT * FROM compra_producto WHERE id_compra = ? AND id_producto = ?", [idCompra, idProducto]);
-            handleDbResponse(null, res);
-        } catch (err) {
-            handleDbResponse(err, null);
-        }
-    }
-
-    /**
-     * Recupera todos los compraProductos de la base de datos.
-    */
-    static async findAll(result) {
+    static async findAll() {
         const dbConn = getConnection();
         const query = `
             SELECT cp.id_compra, cp.id_producto, cp.cantidad, p.nombre 
@@ -52,28 +23,59 @@ export class CompraProducto {
             JOIN producto p 
             ON cp.id_producto = p.id
         `;
-
+ 
         try {
             const [res] = await dbConn.query(query);
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
+        }
+    }
+
+    /**
+     * Inserta un nuevo compraProducto en la base de datos y devuelve el objeto insertado.
+    */
+    static async create(newCompraProducto) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("INSERT INTO compra_producto set ?", newCompraProducto);
+            return { affectedRows: res.affectedRows, insertId: res.insertId };
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    /**
+     * Busca un compraProducto por su id_compra e id_producto.
+    */
+    static async findById(idCompra, idProducto) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("SELECT * FROM compra_producto WHERE id_compra = ? AND id_producto = ?", [idCompra, idProducto]);
+            return res;
+        } catch (err) {
+            throw err;
         }
     }
 
     /**
      * Actualiza la cantidad de una compraProductos por su id_compra e id_producto.
     */
-    static async update(idCompra, idProducto, newCantidad, result) {
+    static async update(idCompra, idProducto, compraProducto) {
         const dbConn = getConnection();
+        const newCantidad = compraProducto.cantidad;
 
         if (newCantidad > 0) {
             try {
-                    const [res] = await dbConn.query("UPDATE compra_producto SET cantidad = ? WHERE id_compra = ? AND id_producto = ?", [newCantidad, idCompra, idProducto]);
-                    handleDbResponse(null, res, result);
-                } catch (err) {
-                    handleDbResponse(err, null, result);
-                }
+                const [res] = await dbConn.query("UPDATE compra_producto SET cantidad = ? WHERE id_compra = ? AND id_producto = ?", [newCantidad, idCompra, idProducto]);
+                return { affectedRows: res.affectedRows };
+            } catch (err) {
+                throw err;
+            } finally {
+                dbConn.end();
+            }
         } else {
             console.log('La cantidad no puede ser menor, igual a cero: ', newCantidad);
         }
@@ -82,49 +84,56 @@ export class CompraProducto {
     /**
      * Elimina una compraProductos por su id_compra e id_producto.
     */
-    static async remove(idCompra, idProducto, result) {
+    static async remove(idCompra, idProducto) {
         const dbConn = getConnection();
 
         try {
             const [res] = await dbConn.query("DELETE FROM compra_producto WHERE id_compra = ? AND id_producto = ?", [idCompra, idProducto]);
-            handleDbResponse(null, res, result);
+            return { affectedRows: res.affectedRows };
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Busca compraProductos por el ID del usuario.
     */
-    static async findByUsuarioId(usuario_id, result) {
+    static async findByUsuarioId(idUsuario) {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("Select * from compra_producto where usuario_id = ? ", usuario_id);
-            handleDbResponse(null, res, result);
+            const query = `
+                SELECT cp.* 
+                FROM compra_producto cp
+                JOIN compra c ON cp.id_compra = c.id
+                WHERE c.usuario_id = ?
+            `;
+
+            const [res] = await dbConn.query(query, [idUsuario]);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Busca compraProductos por su id de compra.
     */
-    static async findByCompraId(idCompra, result) {
+    static async findByCompraId(idCompra) {
         const dbConn = getConnection();
 
         try {
             const [res] = await dbConn.query("SELECT * FROM compra_producto WHERE id_compra = ?", [idCompra]);
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Busca todo de Productos asociados a una compra y le añade el atributo cantidad de CompraProducto.
     */
-    static async getProductosDeCompraByCompraId(idCompra, result) {
+    static async getProductosDeCompraByCompraId(idCompra) {
         const dbConn = getConnection();
         const query = `
             SELECT p.*, cp.cantidad
@@ -135,9 +144,9 @@ export class CompraProducto {
 
         try {
             const [res] = await dbConn.query(query, [idCompra]);
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 }

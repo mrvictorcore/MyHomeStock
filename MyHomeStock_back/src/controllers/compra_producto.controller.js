@@ -1,104 +1,173 @@
 import { CompraProducto } from '../models/compra_producto.model.js';
-import { isFunction, handleResponse } from '../../config/helpers/dbUtils.js';
+import { handleResponse, validateFields, validateId } from '../../config/helpers/dbUtils.js';
 
 export const findAll = async (req, res) => {
+    try {
+        const data_compra_producto = await CompraProducto.findAll();
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
+    }
+};
+
+export const create = async (req, res) => {
+    const newCompraProducto = req.body;
+    let errores = [];
+
+    if (!newCompraProducto || typeof newCompraProducto !== 'object' || Object.keys(newCompraProducto).length === 0) {
+        errores.push('No se recibieron datos completos');
+    }
+
+    if (!errores.length) {
+        let erroresCampos = validateFields(newCompraProducto, ['id_compra', 'id_producto', 'cantidad']);
+        errores = [...errores, ...erroresCampos];
+    }
+
+    if (!Number.isInteger(newCompraProducto.cantidad) || newCompraProducto.cantidad <= 0) {
+        errores.push('La cantidad debe ser un número entero positivo');
+    }
+
+    if (errores.length) {
+        res.status(400).send({ error: true, message: 'Por favor añada todos los campos requeridos: ' + errores.join(', ') });
+    } else{
+        try {
+            const data_compra_producto = await CompraProducto.create(newCompraProducto);
+            handleResponse(res, null, data_compra_producto);
+        } catch (err) {
+            handleResponse(res, err);
+        }
+    }
+};
+
+export const findById = async (req, res) => {
+    const idCompra = req.params.id_compra;
+    const idProducto = req.params.id_producto
     
-  CompraProducto.findAll(function(err, compra_producto) {
-    console.log('controller')
-    if (err)
-    res.send(err);
-    console.log('res', compra_producto);
-    res.send(compra_producto);
-  });
-};
+    const idErrorCompra = validateId(idCompra);
+    if (idErrorCompra) {
+        return res.status(400).json({ error: true, message: idErrorCompra});
+    }
 
+    const idErrorProducto = validateId(idProducto);
+    if (idErrorProducto) {
+        return res.status(400).json({ error: true, message: idErrorProducto});
+    }
 
-export const create = function(req, res) {
-    const new_descripcion = new CompraProducto(req.body);
-
-    //handles null error 
-   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        CompraProducto.create(new_descripcion, function(err, compra_producto) {
-            if (err)
-            res.send(err);
-            res.json({error:false,message:"CompraProducto añadido correctamente!",data:compra_producto});
-        });
+    try {
+        const data_compra_producto = await CompraProducto.findById(idCompra, idProducto);
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
     }
 };
 
+export const update = async (req, res) => {
+    const updateCompraProducto = req.body;
+    const idCompra = req.body.id_compra;
+    const idProducto = req.body.id_producto;
+    let errores = [];
 
-export const findById = function(req, res) {
-    CompraProducto.findById(req.params.idCompra, req.params.idProducto, function(err, compra_producto) {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json(compra_producto);
-        }
-    });
-};
-
-
-export const update = function(req, res) {
-    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        let idCompra = req.body.id_compra;
-        let idProducto = req.body.id_producto;
-        CompraProducto.update(idCompra, idProducto, req.body, function(err, compra_producto) {
-            if (err){
-                res.send(err);
-            } else {
-                res.json({ error:false, message: 'compra_producto actualizado correctamente', compra_producto});
-            }
-        });
+    if (!updateCompraProducto || typeof updateCompraProducto !== 'object' || Object.keys(updateCompraProducto).length === 0) {
+        errores.push('No se recibieron datos completos');
     }
-  
-};
+    
+    const idErrorCompra = validateId(idCompra);
+    if (idErrorCompra) {
+        return res.status(400).json({ error: true, message: idErrorCompra});
+    }
 
-export const remove = function(req, res) {
-    let idCompra = req.params.idCompra;
-    let idProducto = req.params.idProducto;
+    const idErrorProducto = validateId(idProducto);
+    if (idErrorProducto) {
+        return res.status(400).json({ error: true, message: idErrorProducto});
+    }
 
-    CompraProducto.remove( idCompra, idProducto, function(err, compra_producto) {
-        if (err) {
-            res.send(err);
-        } else {
-            res.json({ error:false, message: 'compra_producto successfully deleted', compra_producto });
+    if (!Number.isInteger(updateCompraProducto.cantidad) || updateCompraProducto.cantidad <= 0) {
+        errores.push('La cantidad debe ser un número entero positivo');
+    }
+
+    if (!errores.length) {
+        let erroresCampos = validateFields(updateCompraProducto, ['id_compra', 'id_producto', 'cantidad'])
+        errores = [...errores, ...erroresCampos];
+    }
+
+    if (errores.length) {
+        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
+    } else {
+        try {
+            const data_compra_producto = await CompraProducto.update(idCompra, idProducto, updateCompraProducto);
+            handleResponse(res, null, data_compra_producto);
+        } catch (err) {
+            handleResponse(res, err);
         }
-    });
-};
-
-export const findByUsuarioId = function(req, res) {
-    const criteriosBusqueda = new CompraProducto(req.body);
-    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        CompraProducto.findByUsuarioId(criteriosBusqueda, function(err, descripcions) {
-            if (err)
-            res.send(err);
-            res.json(descripcions);
-        });
     }
 };
 
-export const findByCompraId = function(req, res) {
-    CompraProducto.findByCompraId(req.params.id, function(err, compra_producto) {
-        if (err) {
-            res.send(err);
-        }
-        res.json(compra_producto);
-    });
+export const remove = async (req, res) => {
+    const idCompra = req.params.idCompra;
+    const idProducto = req.params.idProducto;
+
+    const idErrorCompra = validateId(idCompra);
+    if (idErrorCompra) {
+        return res.status(400).json({ error: true, message: idErrorCompra});
+    }
+
+    const idErrorProducto = validateId(idProducto);
+    if (idErrorProducto) {
+        return res.status(400).json({ error: true, message: idErrorProducto});
+    }
+
+    try {
+        const data_compra_producto = await CompraProducto.remove(idCompra, idProducto);
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
+    }
 };
 
-export const getProductosDeCompra = (req, res) => {
+export const findByUsuarioId = async (req, res) => {
+    const idUser = req.query.id_usuario;
+
+    const idErrorUser = validateId(idUser);
+    if (idErrorUser) {
+        res.status(400).json({error: true, message: idErrorUser});
+    }
+
+    try {
+        const data_compra_producto = await CompraProducto.findByUsuarioId(idUser);
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
+    }
+};
+
+export const findByCompraId = async (req, res) => {
+    const idCompra = req.params.id_compra;
+
+    const idErrorCompra = validateId(idCompra);
+    if (idErrorCompra) {
+        res.status(400).json({error: true, message: idErrorCompra});
+    }
+
+    try {
+        const data_compra_producto = await CompraProducto.findByCompraId(idCompra);
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
+    }
+};
+
+export const getProductosDeCompra = async (req, res) => {
     const idCompra = req.params.id;
-    CompraProducto.getProductosDeCompraByCompraId(idCompra, (err, productos) => {
-        if (err) {
-            return res.status(500).send({ succes: false, message: "Ocurrió un error al obtener los productos de la compra" });
-        }
-        console.log(productos);
-        res.json(productos);
-    });
+
+    const idErrorCompra = validateId(idCompra);
+    if (idErrorCompra) {
+        res.status(400).json({error: true, message: idErrorCompra});
+    }
+
+    try {
+        const data_compra_producto = await CompraProducto.getProductosDeCompraByCompraId(idCompra);
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
+    }
 };

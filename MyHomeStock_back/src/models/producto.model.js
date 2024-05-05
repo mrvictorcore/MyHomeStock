@@ -1,8 +1,7 @@
 import { getConnection } from '../../config/db.config.js';
-import { handleDbResponse } from '../../config/helpers/dbUtils.js';
 
 export class Producto {
-    constructor() {
+    constructor(producto) {
         this.id                     = producto.id;
         this.id_usuario             = producto.id_usuario;
         this.id_categoria           = producto.id_categoria;
@@ -14,135 +13,128 @@ export class Producto {
         this.favorito               = producto.favorito;
     }
 
-    static async create(newProducto, result) {    
-        const dbConn = getConnection();
-
-        try {
-            const [res] = await dbConn.query("INSERT INTO producto SET ?", newProducto);
-            handleDbResponse(null, res, result);
-        } catch (err) {
-            handleDbResponse(err, null, result);
-        }
-    }
-
-    static async findById(idProducto, result) {
-        const dbConn = getConnection();
-
-        try {
-            const [res] = await dbConn.query("SELECT * FROM producto WHERE id = ?", [idProducto]);
-            handleDbResponse(null, res, result);
-        } catch (err) {
-            handleDbResponse(err, null, result);
-        }
-    }
-
-    static async findAll(result) {
+    static async findAll() {
         const dbConn = getConnection();
 
         try {
             const [res] = await dbConn.query("SELECT * FROM producto");
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
-    static async update(id, producto, result){
+    static async create(newProducto) {    
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("UPDATE producto SET nombre=?, descripcion=?, cantidad_stock=?, id_usuario=?, id_categoria=?, cantidad_min_mensual=?, favorito=? WHERE id = ?", 
-            [producto.nombre, producto.descripcion, producto.cantidad_stock, producto.id_usuario, producto.id_categoria, producto.cantidad_min_mensual, producto.favorito, id]);
-            handleDbResponse(null, res, result)
+            const [res] = await dbConn.query("INSERT INTO producto SET ?", newProducto);
+            return { affectedRows: res.affectedRows, insertId: res.insertId };
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
+        }
+    }
+
+    static async findById(idProducto) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("SELECT * FROM producto WHERE id = ?", [idProducto]);
+            return res;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static async update(id, producto){
+        const dbConn = getConnection();
+        const query = `
+            UPDATE producto 
+            SET nombre=?, 
+                descripcion=?, 
+                cantidad_stock=?, 
+                id_usuario=?, 
+                id_categoria=?, 
+                cantidad_min_mensual=?, 
+                favorito=? 
+            WHERE id = ?
+        `;
+
+        try {
+            const [res] = await dbConn.query(query, [producto.nombre, producto.descripcion, producto.cantidad_stock, producto.id_usuario, producto.id_categoria, producto.cantidad_min_mensual, producto.favorito, id]);
+            return { affectedRows: res.affectedRows };
+        } catch (err) {
+            throw err;
         } 
     }
     
-    static async remove(idProducto, result){
+    static async remove(idProducto){
         const dbConn = getConnection();
 
         try {
             const [res] = await dbConn.query("DELETE FROM producto WHERE id = ?", [idProducto]);
-            handleDbResponse(null, res, result);
+            return { affectedRows: res.affectedRows }
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
-    static async findByUsuarioId(id_user, result) {    
+    static async findByUsuarioId(id_user) {    
         const dbConn = getConnection();
 
         try {
             const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ?", id_user);
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
-    static async toggleFavorito(idProducto, result) {
+    static async toggleFavorito(idProducto) {
         const dbConn = getConnection();
 
         try {
             const [resFavorito] = await dbConn.query("SELECT favorito FROM producto WHERE id = ?", [idProducto]);
-            handleDbResponse(null, resFavorito, result);
             let productoFavorito = resFavorito[0].favorito;
             let nuevoEstadoFavorito = !productoFavorito;
 
-            try {
-                const [res] = await dbConn.query("UPDATE producto SET favorito = ? WHERE id = ?", [nuevoEstadoFavorito]);
-                handleDbResponse(null, res, result);
-            } catch (err) {
-                handleDbResponse(err, null, result);
-            }
+            const [res] = await dbConn.query("UPDATE producto SET favorito = ? WHERE id = ?", [nuevoEstadoFavorito]);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
-    static async updateStock(id, cantidad, result) {
-        var dbConn = getConnection();
-        dbConn.query("UPDATE producto SET cantidad_stock = cantidad_stock + ? WHERE id = ?", [cantidad, id], function(err, res) {
-            dbConn.end();
-            if (err) {
-                result(err, null);
-            } else {
-                result(null, res);
-            }
-        });
+    static async updateStock(id, cantidad) {
+        const dbConn = getConnection();
+        try {
+            const [res] = await dbConn.query("UPDATE producto SET cantidad_stock = cantidad_stock + ? WHERE id = ?", [cantidad, id]);
+            return res;
+        } catch (err) {
+            throw err;
+        }
     }
 
-    static async adjustStock(ID_producto, cantidadAjuste, result) {
-        var dbConn = getConnection();
-        dbConn.query("SELECT cantidad_stock FROM producto WHERE id = ?", [ID_producto], function(err, res) {
-            if (err) {
-                dbConn.end();
-                result(err, null);
-                return;
+    static async adjustStock(idProducto, cantidadAjuste) {
+        const dbConn = getConnection();
+        try {
+            // Realizar la actualización del stock asegurando que no caiga por debajo de cero GREATEST(0, cantidad_stock + ?).
+            const queryUpdate = `
+                UPDATE producto 
+                SET cantidad_stock = GREATEST(0, cantidad_stock + ?) 
+                WHERE id = ?
+            `;
+            
+            const [updateResult] = await dbConn.query(queryUpdate, [cantidadAjuste, idProducto]);
+
+            if (updateResult.affectedRows === 0) {
+                throw new Error("Producto no encontrado o stock insuficiente");
             }
 
-            if (res.length) {
-                let nuevoStock = res[0].cantidad_stock + cantidadAjuste;
-
-                if (nuevoStock < 0) {
-                    dbConn.end();
-                    result({ message: "Stock insuficiente" }, null);
-                    return;
-                }
-
-                dbConn.query("UPDATE producto SET cantidad_stock = ? WHERE id = ?", [nuevoStock, ID_producto], function(err) {
-                    dbConn.end();
-                    if (err) {
-                        result(err, null);
-                    } else {
-                        result(null, { id: ID_producto, cantidad_stock: nuevoStock });
-                    }
-                });
-            } else {
-                dbConn.end();
-                result({ message: "Producto no encontrado" }, null);
-            }
-        });
+            const [newStockResult] = await dbConn.query("SELECT cantidad_stock FROM producto WHERE id = ?", [idProducto]);
+            return { affectedRows: updateResult.affectedRows, id: idProducto, cantidad_stock: newStockResult[0].cantidad_stock };
+        } catch (err) {
+            throw err;
+        }
     }
 }

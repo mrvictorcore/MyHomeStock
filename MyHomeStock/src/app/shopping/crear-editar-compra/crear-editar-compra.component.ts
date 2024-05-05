@@ -92,8 +92,8 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
   loadCompraData(idCompra: number) {
     this.subscription.add(
       this.appService.getCompra(idCompra).subscribe({
-        next: (compra) => {
-          this.compraForm.patchValue(compra);
+        next: (compra: any) => {
+          this.compraForm.patchValue(compra.data[0]);
           this.loadProductosDeCompra(idCompra);
         },
         error: (err) => console.error('Error al cargar la compra:', err)

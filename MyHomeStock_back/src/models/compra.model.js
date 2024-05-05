@@ -1,5 +1,4 @@
 import { getConnection } from '../../config/db.config.js';
-import { handleDbResponse } from '../../config/helpers/dbUtils.js';
 
 /**
  * Clase Compra representa una compra en la base de datos.
@@ -14,100 +13,101 @@ export class Compra {
     /**
      * Recupera todas las compras de la base de datos.
     */
-    static async findAll(result) {
+    static async findAll() {
         const dbConn = getConnection();
 
         try {
             const [res] = await dbConn.query("SELECT * FROM compra");
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Inserta una nueva compra en la base de datos y devuelve el objeto insertado.
     */
-    static async create(newCompra, result) {
+    static async create(newCompra) {
         const dbConn = getConnection();
-        
+
         try {
             const [res] = await dbConn.query("INSERT INTO compra SET ?", newCompra);
             const insertedId = res.insertId;
             const [compraDetails] = await dbConn.query("SELECT * FROM compra WHERE id = ?", [insertedId]);
-            handleDbResponse(null, compraDetails, result);
+            return { affectedRows: res.affectedRows, insertId: res.insertId, compraDetails };
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Busca una compra por ID.
     */
-    static async findById(id, result) {
+    static async findById(idCompra) {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM compra WHERE id = ?", id);
-            handleDbResponse(null, res, result);
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE id = ?", idCompra);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Actualiza la descripción de una compra por su ID.
     */
-    static async update(id, compra, result) {
+    static async update(idCompra, compra) {
         const dbConn = getConnection();
+        const newDescripcion = compra.descripcion;
 
         try {
-            const [res] = await dbConn.query("UPDATE compra SET descripcion = ? WHERE id = ?", [compra.descripcion, id]);
-            handleDbResponse(null, res, result);
+            const [res] = await dbConn.query("UPDATE compra SET descripcion = ? WHERE id = ?", [newDescripcion, idCompra]);
+            return { affectedRows: res.affectedRows };
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Elimina una compra por ID.
     */
-    static async remove(id, result) {
+    static async remove(idCompra) {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("DELETE FROM compra WHERE id = ?", id);
-            handleDbResponse(null, res, result);
+            const [res] = await dbConn.query("DELETE FROM compra WHERE id = ?", idCompra);
+            return { affectedRows: res.affectedRows };
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Busca compras por el ID del usuario.
     */
-    static async findByUsuarioId(usuario_id, result) {
+    static async findByUsuarioId(idUsuario) {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM compra WHERE usuario_id = ?", usuario_id);
-            handleDbResponse(null, res, result);
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE usuario_id = ?", idUsuario);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 
     /**
      * Busca compras por descripción.
     */
-    static async findByDescripcion(descripcion, result) {
+    static async findByDescripcion(descripcion) {
         const dbConn = getConnection();
         
         try {
             const [res] = await dbConn.query("SELECT * FROM compra WHERE descripcion = ?", descripcion);
-            handleDbResponse(null, res, result);
+            return res;
         } catch (err) {
-            handleDbResponse(err, null, result);
+            throw err;
         }
     }
 }
