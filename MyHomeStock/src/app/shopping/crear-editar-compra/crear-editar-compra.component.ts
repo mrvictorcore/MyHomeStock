@@ -6,6 +6,7 @@ import { Observable, Subscription, forkJoin } from 'rxjs';
 import { Compra } from '../../models/compra';
 import { Producto } from '../../models/producto';
 import { ProductoExtendido } from '../../models/producto_extendido';
+import { CompraProductoService } from '../../services/compra-producto.service';
 
 @Component({
   selector: 'app-crear-editar-compra',
@@ -24,6 +25,7 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
   constructor(
     public dialogRef: MatDialogRef<CrearEditarCompraComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
+    private compraProductoService: CompraProductoService,
     private appService: AppService,
     private fb: FormBuilder
   ) {
@@ -92,8 +94,8 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
   loadCompraData(idCompra: number) {
     this.subscription.add(
       this.appService.getCompra(idCompra).subscribe({
-        next: (compra: any) => {
-          this.compraForm.patchValue(compra.data[0]);
+        next: (compra: Compra[]) => {
+          this.compraForm.patchValue(compra[0]);
           this.loadProductosDeCompra(idCompra);
         },
         error: (err) => console.error('Error al cargar la compra:', err)
@@ -102,9 +104,9 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
   }
 
   loadProductosDeCompra(idCompra: number) {
-    this.appService.getProductosDeCompra(idCompra).subscribe({
-      next: (res: any) => {
-        const productosCompra = res.data;
+    this.compraProductoService.getCompraProductoByCompra(idCompra).subscribe({
+      next: (res: any[]) => {
+        const productosCompra = res[0];
         this.productosFormArray.clear();
         productosCompra.forEach( (producto: any) => {
           this.addProductoToFormArray(producto);

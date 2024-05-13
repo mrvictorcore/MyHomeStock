@@ -1,13 +1,14 @@
 import { Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { catchError, map } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+
 import { Usuario } from './models/usuario';
 import { Producto } from './models/producto';
 import { Categoria } from './models/categoria';
 import { TipoCategoria } from './models/tipo_categoria';
 import { CompraProducto } from './models/compra_producto';
-import { Observable, of, throwError } from 'rxjs';
 import { Compra } from './models/compra';
-import { HttpClient } from '@angular/common/http';
-import { catchError, map } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root'

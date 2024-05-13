@@ -26,13 +26,13 @@
           <tbody formArrayName="productosFormArray">
             <tr *ngFor="let control of productosFormArray.controls; let i = index" [formGroupName]="i">
               <td class="text-center">{{ control.get('nombreProducto')?.value }}</td>
-              <td class="text-center">{{ control.get('cantidad')?.value }}</td>
+              <td class="text-center">{{ control.get('cantidad_comprar')?.value }}</td>
               <td class="text-center">
                 <div class="d-flex flex-row align-items-center justify-content-center mb-2">
                   <div class="form-group mb-0 mr-2" style="text-align: center;">
-                    <select class="form-control form-control-sm" formControlName="cantidadSeleccionada">
-                      <option *ngFor="let cantidad of generarRangoCantidadRestar(control.get('cantidad')?.value)" [value]="cantidad">{{ cantidad }}</option>
-                    </select>                  
+                    <select class="form-control form-control-sm" formControlName="cantidad_disponible">
+                      <option *ngFor="let cantidad_disponible of generarRangoCantidadDisponible(control.get('cantidad_comprar')?.value)" [value]="cantidad_disponible">{{ cantidad_disponible }}</option>
+                    </select>
                   </div>
                 </div>
               </td>

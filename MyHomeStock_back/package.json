@@ -2,11 +2,11 @@
   "name": "myhomestock",
   "version": "1.0.0",
   "type": "module",
-  "description": "Esta es una aplicación para el contro del Stock de productos del Hogar",
+  "description": "Esta es una aplicación para el control del Stock de productos del Hogar",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon --inspect server"
+    "start": "nodemon --inspect=9229 server.js"
   },
   "keywords": [
     "nodejs",
@@ -29,3 +29,4 @@
     "nodemon": "^1.19.4"
   }
 }
+

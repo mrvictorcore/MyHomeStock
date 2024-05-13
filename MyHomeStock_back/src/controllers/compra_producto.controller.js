@@ -1,5 +1,6 @@
 import { CompraProducto } from '../models/compra_producto.model.js';
 import { handleResponse, validateFields, validateId } from '../../config/helpers/dbUtils.js';
+import { Producto } from '../models/producto.model.js';
 
 export const findAll = async (req, res) => {
     try {
@@ -28,7 +29,7 @@ export const create = async (req, res) => {
     }
 
     if (errores.length) {
-        res.status(400).send({ error: true, message: 'Por favor añada todos los campos requeridos: ' + errores.join(', ') });
+        res.status(400).json({ error: true, message: 'Por favor añada todos los campos requeridos: ' + errores.join(', ') });
     } else{
         try {
             const data_compra_producto = await CompraProducto.create(newCompraProducto);
@@ -62,49 +63,57 @@ export const findById = async (req, res) => {
 };
 
 export const update = async (req, res) => {
-    const updateCompraProducto = req.body;
-    const idCompra = req.body.id_compra;
-    const idProducto = req.body.id_producto;
+    const idCompra = req.params.id_compra;
+    const idProducto = req.params.id_producto;
+    const { cantidad_disponible, cantidad_comprar } = req.body;
     let errores = [];
 
-    if (!updateCompraProducto || typeof updateCompraProducto !== 'object' || Object.keys(updateCompraProducto).length === 0) {
-        errores.push('No se recibieron datos completos');
-    }
-    
-    const idErrorCompra = validateId(idCompra);
-    if (idErrorCompra) {
-        return res.status(400).json({ error: true, message: idErrorCompra});
+    const errorIdCompra = validateId(idCompra);
+    if (errorIdCompra) {
+        errores.push(errorIdCompra);
     }
 
-    const idErrorProducto = validateId(idProducto);
-    if (idErrorProducto) {
-        return res.status(400).json({ error: true, message: idErrorProducto});
+    const errorIdProducto = validateId(idProducto);
+    if (errorIdProducto) {
+        errores.push(errorIdProducto);
     }
 
-    if (!Number.isInteger(updateCompraProducto.cantidad) || updateCompraProducto.cantidad <= 0) {
-        errores.push('La cantidad debe ser un número entero positivo');
+    if (!Number.isInteger(cantidad_disponible) || cantidad_disponible <= 0) {
+        errores.push('La Cantidad disponible debe ser un número entero mayor que cero.');
     }
 
-    if (!errores.length) {
-        let erroresCampos = validateFields(updateCompraProducto, ['id_compra', 'id_producto', 'cantidad'])
-        errores = [...errores, ...erroresCampos];
+    if (cantidad_disponible > cantidad_comprar) {
+        errores.push('La cantidad disponible no puede exceder la cantidad a comprar.');
     }
 
     if (errores.length) {
-        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
-    } else {
+        return res.status(400).json({ error: true, message: errores.join(", ") });
+    }
+
+    const nuevaCantidad = cantidad_comprar - cantidad_disponible;
+
+    if (nuevaCantidad <= 0) {
         try {
-            const data_compra_producto = await CompraProducto.update(idCompra, idProducto, updateCompraProducto);
-            handleResponse(res, null, data_compra_producto);
+            const remove_compra_producto = await CompraProducto.remove(idCompra, idProducto);
+            await Producto.adjustStock(idProducto, cantidad_disponible);
+            return handleResponse(res, null, remove_compra_producto);
         } catch (err) {
-            handleResponse(res, err);
+            return handleResponse(res, err);
         }
+    }
+
+    try {
+        const data_compra_producto = await CompraProducto.updateCompraProducto(idCompra, idProducto, nuevaCantidad);
+        await Producto.adjustStock(idProducto, cantidad_disponible);
+        handleResponse(res, null, data_compra_producto);
+    } catch (err) {
+        handleResponse(res, err);
     }
 };
 
 export const remove = async (req, res) => {
-    const idCompra = req.params.idCompra;
-    const idProducto = req.params.idProducto;
+    const idCompra = req.params.id_compra;
+    const idProducto = req.params.id_producto;
 
     const idErrorCompra = validateId(idCompra);
     if (idErrorCompra) {
@@ -125,7 +134,9 @@ export const remove = async (req, res) => {
 };
 
 export const findByUsuarioId = async (req, res) => {
-    const idUser = req.query.id_usuario;
+    console.log(req.params);
+    const idUser = req.params.id_usuario;
+    console.log("ID Usuario Recibido:", idUser);
 
     const idErrorUser = validateId(idUser);
     if (idErrorUser) {
@@ -157,7 +168,7 @@ export const findByCompraId = async (req, res) => {
 };
 
 export const getProductosDeCompra = async (req, res) => {
-    const idCompra = req.params.id;
+    const idCompra = req.params.id_compra;
 
     const idErrorCompra = validateId(idCompra);
     if (idErrorCompra) {

@@ -9,17 +9,17 @@ router.get('/', findAll);
 // Crear una nueva compra
 router.post('/', create);
 
-// Devuelve una única compra por su id
-router.get('/:id', findById);
+// Devuelve una única compra por su id_compra
+router.get('/:id_compra', findById);
 
-// Actualizar una compra por su id
-router.put('/:id', update);
+// Actualiza la descripcion de una compra por su id_compra
+router.patch('/:id_compra', update);
 
-// Borrar una compra por su id
-router.delete('/:id', remove);
+// Borrar una compra por su id_compra
+router.delete('/:id_compra', remove);
 
-// Todos los gastos por usuario_id y null
-router.get('/find', findByUsuarioId);
+// Todas las compras por id_usuario
+router.get('/usuario/:id_usuario', findByUsuarioId);
 
 // Ruta para obtener la descripción de una compra
 router.get('/:descripcion', findByDescripcion);

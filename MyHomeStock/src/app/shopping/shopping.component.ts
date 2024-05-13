@@ -1,13 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
-import { AppService } from '../app.service';
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { Compra } from '../models/compra';
-import { ProductoExtendido } from '../models/producto_extendido';
 import { CompraProducto } from '../models/compra_producto';
 import { CrearEditarCompraComponent } from './crear-editar-compra/crear-editar-compra.component';
 import { ConfirmarCompraComponent } from './confirmar-compra/confirmar-compra.component';
 import { BorrarCompraComponent } from './borrar-compra/borrar-compra.component';
+import { CompraProductoService } from '../services/compra-producto.service';
+import { CompraService } from '../services/compra.service';
 
 @Component({
   selector: 'app-shopping',
@@ -20,7 +20,8 @@ export class ShoppingComponent implements OnInit {
   selectCompraId: number | null = null;
 
   constructor(
-    private appService: AppService, 
+    private compraService: CompraService,
+    private compraProductoService: CompraProductoService,
     private dialog: MatDialog,
     private fb: FormBuilder,
   ) {
@@ -42,7 +43,7 @@ export class ShoppingComponent implements OnInit {
   }
 
   loadCompraData() {
-    this.appService.getCompras().subscribe({
+    this.compraService.getAllCompras().subscribe({
       next: compras => {
         this.compraList = compras;
         this.selectCompraId = compras[0].id;
@@ -54,9 +55,8 @@ export class ShoppingComponent implements OnInit {
   }
 
   loadProductosComprar(idCompra: number) {
-    this.appService.getProductosDeCompra(idCompra).subscribe({
-        next: (res: any) => {
-          const productos = res.data;
+    this.compraProductoService.getCompraProductoWithCantidad(idCompra).subscribe({
+        next: (productos: any[]) => {
           if (productos.length > 0) {
               this.setProductosFormArray(productos);
           } else {
@@ -68,16 +68,16 @@ export class ShoppingComponent implements OnInit {
     });
   }
 
-  setProductosFormArray(productos: ProductoExtendido[]) {
+  setProductosFormArray(productos: any[]) {
     const formArray = this.compraForm.get('productosFormArray') as FormArray;
     formArray.clear();
     productos.forEach(producto => {
       formArray.push(this.fb.group({
         id_compra: [this.selectCompraId],
-        id_producto: [producto.id],
+        id_producto: [producto.id_producto],
         nombreProducto: [producto.nombre],
-        cantidad: [producto.cantidad],
-        cantidadSeleccionada: [1],
+        cantidad_comprar: [producto.cantidad_comprar],
+        cantidad_disponible: [producto.cantidad_comprar],
         seleccionado: [false]
       }));
     });
@@ -89,11 +89,12 @@ export class ShoppingComponent implements OnInit {
 
   getProductosSeleccionados(): CompraProducto[] {
     return (this.compraForm.get('productosFormArray') as FormArray).value
-      .filter((p: any) => p.seleccionado)
-      .map((p: any) => ({
-        id_compra: this.compraForm.get('listaCompraSeleccionada')?.value,
+      .filter((p: CompraProducto) => p.seleccionado)
+      .map((p: CompraProducto) => ({
+        id_compra: p.id_compra,
         id_producto: p.id_producto,
-        cantidad: p.cantidadSeleccionada,
+        cantidad_comprar: p.cantidad_comprar,
+        cantidad_disponible: +p.cantidad_disponible,
         seleccionado: p.seleccionado
     }));
   }
@@ -105,7 +106,7 @@ export class ShoppingComponent implements OnInit {
     this.loadProductosComprar(idCompra);
   }
 
-  generarRangoCantidadRestar(cantidad: number): number[] {
+  generarRangoCantidadDisponible(cantidad: number): number[] {
     return Array.from({ length: cantidad }, (_, i) => i + 1).reverse();
   }
 
@@ -166,7 +167,34 @@ export class ShoppingComponent implements OnInit {
     }
   }
   
-  updateCompra() {}
+  updateCompra() {
+    if (!this.selectCompraId) {
+      console.error('No hay compra seleccionada');
+      return;
+    }
+
+    const productosUpdate = this.getProductosSeleccionados();
+
+    if (productosUpdate.length === 0) {
+      console.log('No hay productos seleccionados');
+      return;
+    }
+
+    productosUpdate.forEach((compraProducto: CompraProducto) => {
+      this.compraProductoService.updateCompraProducto(compraProducto).subscribe({
+        next: () => {
+          console.log(`El producto ${compraProducto.id_producto} de la compra ${compraProducto.id_compra} ha sido actualizado`);
+        },
+        error: err => {
+          console.error('Error al actualizar el producto: ', err);
+        },
+        complete: () => {
+          console.log('Todos los productos seleccionados han sido actualizados');
+          this.loadCompraData();
+        }
+      });
+    });
+  }
 
   deleteCompra() {}
 }

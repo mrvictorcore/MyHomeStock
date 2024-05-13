@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { AppService } from '../../app.service';
+import { AppService } from '../app.service';
 import { EditarStockComponent } from './editar-stock/editar-stock.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Producto } from '../../models/producto';
+import { Producto } from '../models/producto';
 
 @Component({
   selector: 'app-stock-producto',

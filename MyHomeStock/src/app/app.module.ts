@@ -11,8 +11,8 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatDialogModule } from '@angular/material/dialog';
 import { ProductosComponent } from './productos/productos.component';
 import { EditarCrearProductoComponent } from './productos/crear-editar-producto/editar-crear-producto.component';
-import { StockProductoComponent } from './stock/stock-producto/stock-producto.component';
-import { EditarStockComponent } from './stock/stock-producto/editar-stock/editar-stock.component';
+import { StockProductoComponent } from './stock/stock-producto.component';
+import { EditarStockComponent } from './stock/editar-stock/editar-stock.component';
 import { ShoppingComponent } from './shopping/shopping.component';
 import { CrearEditarCompraComponent } from './shopping/crear-editar-compra/crear-editar-compra.component';
 import { HttpClientModule } from '@angular/common/http';
@@ -20,6 +20,11 @@ import { LoginComponent } from './login/login.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CuentaUsuarioComponent } from './cuenta-usuario/cuenta-usuario.component';
 import { MatIconModule } from '@angular/material/icon';
+import { CompraProductoService } from './services/compra-producto.service';
+import { CompraService } from './services/compra.service';
+import { ProductoService } from './services/producto.service';
+import { UsuarioService } from './services/usuario.service';
+import { HandlerService } from './services/handler.service';
 
 
 @NgModule({
@@ -48,7 +53,7 @@ import { MatIconModule } from '@angular/material/icon';
     ReactiveFormsModule,
     MatIconModule
   ],
-  providers: [AppService],
+  providers: [AppService, CompraProductoService, CompraService, ProductoService, UsuarioService, HandlerService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

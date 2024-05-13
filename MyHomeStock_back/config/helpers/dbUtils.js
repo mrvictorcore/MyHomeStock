@@ -103,7 +103,9 @@ export function validateFields(obj, campos) {
  * @returns {string|null} Devuelve un mensaje de error si el ID es inválido o no ha sido proporcionado, de lo contrario devuelve null.
  */
 export function validateId(id) {
-    if (!id || isNaN(parseInt(id))) {
+    const trimmedId = String(id).trim();
+
+    if (!id || isNaN(Number(trimmedId))) {
         return 'ID inválido o no proporcionado.';
     }
     return null;

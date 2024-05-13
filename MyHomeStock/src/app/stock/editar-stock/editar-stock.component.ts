@@ -1,6 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { Producto } from '../../../models/producto';
+import { Producto } from '../../models/producto';
 
 @Component({
   selector: 'app-editar-stock',

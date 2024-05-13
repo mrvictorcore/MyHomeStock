@@ -3,28 +3,28 @@ import { findAll, create, findById, update, remove, findByUsuarioId, findByCompr
 
 const router = Router()
 
-// Todas las CompraProducto
+// Todos los compra_producto
 router.get('/', findAll);
 
-// Crear una nueva CompraProducto
+// Crear un nuevo compra_producto
 router.post('/', create);
 
-// Obtener una CompraProducto específica por idCompra e idProducto
-router.get('/:idCompra/:idProducto', findById);
+// Obtener un compra_producto específico por id_compra e id_producto
+router.get('/detalle/:id_compra/:id_producto', findById);
 
-// Actualizar una CompraProducto específica por idCompra e idProducto
-router.put('/:idCompra/:idProducto', update);
+// Actualizar un compra_producto específico por id_compra e id_producto. Además, actualiza el stock de productos y borra los compra_producto si se compra la cantidad_comprar deseada en totalidad.
+router.patch('/detalle/:id_compra/:id_producto', update);
 
-// Eliminar una CompraProducto específica por idCompra e idProducto
-router.delete('/:idCompra/:idProducto', remove);
+// Eliminar una compra_producto específica por id_compra e id_producto
+router.delete('/detalle/:id_compra/:id_producto', remove);
 
-// Todos los gastos por usuario_id y null
-router.post('/find', findByUsuarioId);
+// Todos los compra_producto por id_usuario
+router.get('/usuario/:id_usuario', findByUsuarioId);
 
-// Todos los productos de una compra específica por ID de la compra
-router.get('/:id/compra_producto', findByCompraId);
+// Todos los compra_productos de una compra específica por ID de la compra
+router.get('/compra/:id_compra', findByCompraId);
 
-// Obtener todos los productos de una compra específica por ID de la compra y le añade la cantidad del compraProducto
-router.get('/compras/:id/productosConCantidad', getProductosDeCompra);
+// Obtener todos los productos y compra_productos de una compra específica por ID.
+router.get('/compra/:id_compra/productos_with_CP', getProductosDeCompra);
 
 export default router
