@@ -79,11 +79,11 @@ export class Producto {
         }
     }
 
-    static async findByUsuarioId(id_user) {    
+    static async findByUsuarioId(id_usuario) {    
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ?", id_user);
+            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ?", id_usuario);
             return res;
         } catch (err) {
             throw err;
@@ -99,7 +99,7 @@ export class Producto {
             let nuevoEstadoFavorito = !productoFavorito;
 
             const [res] = await dbConn.query("UPDATE producto SET favorito = ? WHERE id = ?", [nuevoEstadoFavorito]);
-            return res;
+            return { affectedRows: res.affectedRows };
         } catch (err) {
             throw err;
         }
@@ -132,7 +132,7 @@ export class Producto {
             }
 
             const [newStockResult] = await dbConn.query("SELECT cantidad_stock FROM producto WHERE id = ?", [idProducto]);
-            return { affectedRows: updateResult.affectedRows, id: idProducto, cantidad_stock: newStockResult[0].cantidad_stock };
+            return { affectedRows: updateResult.affectedRows };
         } catch (err) {
             throw err;
         }

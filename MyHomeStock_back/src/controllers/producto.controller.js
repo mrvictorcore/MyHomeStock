@@ -93,7 +93,7 @@ export const remove = async (req, res) => {
 };
 
 export const findByUsuarioId = async (req, res) => {
-  const idUser = req.body.usuario_id;
+  const idUser = req.params.id_usuario;
 
   const idError = validateId(idUser);
   if (idError) {

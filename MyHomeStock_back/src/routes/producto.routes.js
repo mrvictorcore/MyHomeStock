@@ -18,13 +18,13 @@ router.put('/:id', update);
 // Borrar un producto por su id
 router.delete('/:id', remove);
 
-// Todos los productos por usuario_id y null
-router.get('/find', findByUsuarioId);
+// Todos los productos por id_usuario y null
+router.get('/usuario/:id_usuario', findByUsuarioId);
 
 // Ruta para ajustar el stock de un producto
-router.patch('/ajustarStock/:id', ajustarStock);
+router.patch('/ajustar_stock/:id', ajustarStock);
 
 // Cambiar el estado de favorito de un producto
-router.patch('/:id/toggleFavorito', toggleFavorito);
+router.patch('/toggle_favorito/:id', toggleFavorito);
 
 export default router
