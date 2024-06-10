@@ -1,32 +1,34 @@
 <div class="container">
   <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded">
     <h1 class="mt-4 text-center display-4 custom-title">Inventario</h1>
-    <table class="table table-borderless table-hover mt-3">
-      <thead>
-        <tr>
-          <th class="text-center">Producto</th>
-          <th class="text-center">Stock</th>
-          <th class="text-center">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let producto of productos" class="table-row">
-          <td class="text-center">{{ producto.nombre }}</td>
-          <td class="text-center">{{ producto.cantidad_stock }}</td>
-          <td class="text-center">
-            <div class="d-flex flex-row align-items-center justify-content-center mb-2">
-              <div class="form-group mb-0 mr-2">
-                <select class="form-control form-control-sm" [(ngModel)]="cantidadSeleccionada[producto.id]" (change)="cambiarCantidadRestar(producto, $event)">
-                  <option *ngFor="let cantidad of cantidadRestar" [value]="cantidad">{{ cantidad }}</option>
-                </select>
+    <form [formGroup]="formGroup">
+      <table class="table table-borderless table-hover mt-3">
+        <thead>
+          <tr>
+            <th class="text-center">Producto</th>
+            <th class="text-center">Stock</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="productos">
+          <tr *ngFor="let producto of productosArray.controls; let i = index" [formGroupName]="i" class="table-row">
+            <td class="text-center">{{ producto.value.nombre }}</td>
+            <td class="text-center">{{ producto.value.cantidad_stock }}</td>
+            <td class="text-center">
+              <div class="d-flex flex-row align-items-center justify-content-center mb-2">
+                <div class="form-group mb-0 mr-2">
+                  <select class="form-control form-control-sm" formControlName="cantidad_seleccionada">
+                    <option *ngFor="let cantidad of cantidadRestar" [value]="cantidad">{{ cantidad }}</option>
+                  </select>
+                </div>
+                <button class="btn btn-light btn-sm" (click)="restarStock(i)">
+                  <i class="fa fa-minus" aria-hidden="true"></i>
+                </button>
               </div>
-              <button class="btn btn-light btn-sm" (click)="restarStock(producto)">
-                <i class="fa fa-minus" aria-hidden="true"></i>
-              </button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
   </div>
 </div>

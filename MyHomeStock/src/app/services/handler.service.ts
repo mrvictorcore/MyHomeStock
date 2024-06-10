@@ -2,7 +2,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { throwError, Observable } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { ApiResponse } from '../models/api-response';
+import { ApiResponse } from '../models/estructure-response/api-response';
 
 @Injectable({
   providedIn: 'root'

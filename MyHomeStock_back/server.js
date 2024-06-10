@@ -1,6 +1,12 @@
 import express, { urlencoded, json } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import categoriaRoutes from './src/routes/categoria.routes.js';
+import CompraProductoRoutes from './src/routes/compra_producto.routes.js';
+import productoRoutes from './src/routes/producto.routes.js';
+import TipoCategoriaRoutes from './src/routes/tipo_categoria.routes.js';
+import compraRoutes from './src/routes/compra.routes.js';
+import usuarioRoutes from './src/routes/usuario.routes.js';
 
 dotenv.config();
 
@@ -27,22 +33,11 @@ app.get('/', (req, res) => {
  * ENRUTAMIENTOS A LAS ENTIDADES DE LA APLICACIÓN
  */
 
-import categoriaRoutes from './src/routes/categoria.routes.js';
 app.use('/api/v1/categoria', categoriaRoutes);
-
-import CompraProductoRoutes from './src/routes/compra_producto.routes.js';
 app.use('/api/v1/compra_producto', CompraProductoRoutes);
-
-import productoRoutes from './src/routes/producto.routes.js';
 app.use('/api/v1/producto', productoRoutes);
-
-import TipoCategoriaRoutes from './src/routes/tipo_categoria.routes.js';
 app.use('/api/v1/tipo_categoria', TipoCategoriaRoutes);
-
-import compraRoutes from './src/routes/compra.routes.js';
 app.use('/api/v1/compra', compraRoutes);
-
-import usuarioRoutes from './src/routes/usuario.routes.js';
 app.use('/api/v1/usuario', usuarioRoutes);
 
 /**
@@ -52,7 +47,10 @@ app.use('/api/v1/usuario', usuarioRoutes);
 // Middleware de manejo de errores global
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Algo salió mal!');
+  res.status(err.status || 500).send({
+    error: true,
+    message: err.message || 'Algo salió mal!'
+  });
 });
 
 // Comenzamos a escuchar el puerto definido arriba

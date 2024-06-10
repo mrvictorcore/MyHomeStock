@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HandlerService } from './handler.service';
 import { Observable } from 'rxjs';
 import { Producto } from '../models/producto';
-import { ApiResponse } from '../models/api-response';
+import { ApiResponse } from '../models/estructure-response/api-response';
 
 @Injectable({
   providedIn: 'root'
@@ -30,7 +30,13 @@ export class ProductoService {
 
   getProductoByUser(id_usuario: number): Observable<Producto[]> {
     return this.handlerService.handleResponse(
-      this.http.get<ApiResponse<Producto[]>>(`${this.apiUrl}/usuario/${id_usuario}`)
+      this.http.get<ApiResponse<Producto[]>>(`${this.apiUrl}/usuario/${id_usuario}/all_productos_user`)
+    ) as Observable<Producto[]>;
+  }
+
+  getFavoritesOrStock(id_usuario: number): Observable<Producto[]> {
+    return this.handlerService.handleResponse(
+      this.http.get<ApiResponse<Producto[]>>(`${this.apiUrl}/usuario/${id_usuario}/productos_favoritos_stock`)
     ) as Observable<Producto[]>;
   }
 

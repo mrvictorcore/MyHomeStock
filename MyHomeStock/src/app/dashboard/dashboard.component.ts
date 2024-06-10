@@ -1,9 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { Producto } from '../models/producto';
-import { AppService } from '../app.service';
 import { MatDialog } from '@angular/material/dialog';
 import { AlertBorrarComponent } from './borrar-dashboard/alert-borrar.component';
 import { Router } from '@angular/router';
+import { FormArray, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ProductoService } from '../services/producto.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -11,61 +13,96 @@ import { Router } from '@angular/router';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit {
-  productos: Producto[] = [];
+  formGroup: FormGroup = this.fb.group({});
   cantidadRestar: number[] = Array.from({ length: 10 }, (_, i) => i + 1);
-  cantidadSeleccionada: { [key: number]: number } = {};
 
-  constructor (
-    private appService: AppService, 
+  constructor(
+    private productoService: ProductoService,
+    private authService: AuthService,
     private dialog: MatDialog,
-    private router: Router
-  ) {}
+    private router: Router,
+    private fb: FormBuilder,
+  ) {
+    this.formGroup = this.fb.group({
+      productos: this.fb.array([])
+    });
+  }
 
   ngOnInit(): void {
-    this.appService.isLogin().subscribe(isLogin => {
-      if(!isLogin)
+    if (this.authService.isAuthenticated()) {
+      const user = this.authService.getCurrentUser();
+      if (user && user.id) {
+        this.productoService.getFavoritesOrStock(user.id).subscribe({
+          next: (productos: Producto[]) => {
+            this.cargarProductos(productos);
+          },
+          error: (err) => {
+            console.error('Error en la busqueda de productos del usuario', err);
+            this.router.navigate(['/login']);
+          }
+        });
+      } else {
         this.router.navigate(['/login']);
-      this.cargarProductos();
-    });
-  }
-
-  cargarProductos(): void {
-    this.appService.getProductos().subscribe((productos) => {
-      this.productos = productos.filter(prod => prod.cantidad_stock > 0 || prod.favorito);
-      this.productos.forEach(p => {
-        this.cantidadSeleccionada[p.id] = 1;
-        if (p.cantidad_stock === null) {
-          p.cantidad_stock = 0;
-        }
-      });
-    });
-  }
-
-  cambiarCantidadRestar(producto: Producto, event: any): void {
-    const cantidad = parseInt(event.target.value, 10);
-    this.cantidadSeleccionada[producto.id] = cantidad;
-  }
-
-  restarStock(producto: Producto): void {
-    const cantidadARestar = -Math.abs(this.cantidadSeleccionada[producto.id]);
-    if (-cantidadARestar <= producto.cantidad_stock) {
-      const dialogRef = this.dialog.open(AlertBorrarComponent, {
-        width: '400px',
-        data: { productName: producto.nombre }
-      });
-  
-      dialogRef.afterClosed().subscribe(confirmed => {
-        if (confirmed) {
-          this.appService.ajustarStock(producto.id, cantidadARestar).subscribe(() => {
-            producto.cantidad_stock += cantidadARestar;
-          }, error => {
-            console.error('Error al ajustar el stock del producto:', error);
-          });
-        }
-      });
+      }
     } else {
-      console.error('Operación no permitida: cantidad seleccionada inválida o stock insuficiente.');
+      this.router.navigate(['/login']);
     }
   }
 
+  get productosArray(): FormArray {
+    return this.formGroup.get('productos') as FormArray;
+  }
+
+  cargarProductos(productos: Producto[]): void {
+    this.productosArray.clear();
+    productos.forEach((p) => {
+      this.productosArray.push(this.fb.group({
+        id: [p.id],
+        nombre: [p.nombre],
+        cantidad_stock: [p.cantidad_stock],
+        cantidad_seleccionada: [1, [Validators.required, Validators.min(1)]]
+      }));
+    });
+  }
+
+  restarStock(index: number): void {
+    const productoForm = this.productosArray.at(index) as FormGroup;
+    const cantidadARestar = -Math.abs(productoForm.value.cantidad_seleccionada);
+    const dialogRef = this.dialog.open(AlertBorrarComponent, {
+      width: '400px',
+      data: { productName: productoForm.value.nombre }
+    });
+
+    dialogRef.afterClosed().subscribe(confirmed => {
+      if (confirmed) {
+        this.productoService.updateProductoStock({
+          id: productoForm.value.id,
+          cantidad_stock: cantidadARestar,
+          id_categoria: 0,
+          id_usuario: 0,
+          nombre: '',
+          descripcion: '',
+          cantidad_min_mensual: 0,
+          favorito: false
+        }).subscribe({
+          next: () => {
+            const user = this.authService.getCurrentUser();
+            if (user && user.id) {
+              this.productoService.getFavoritesOrStock(user.id).subscribe({
+                next: (productos) => {
+                  this.cargarProductos(productos);
+                },
+                error: (err) => {
+                  console.error('Error fetching products for user:', err);
+                }
+              });
+            }
+          },
+          error: (error) => {
+            console.error('Error al ajustar el stock del producto:', error);
+          }
+        });
+      }
+    });
+  }
 }

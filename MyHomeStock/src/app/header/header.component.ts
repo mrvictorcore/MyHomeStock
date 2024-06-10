@@ -1,6 +1,5 @@
-import { ChangeDetectorRef, Component, HostListener, OnInit } from '@angular/core';
-import { AppService } from '../app.service';
-import { Subject } from 'rxjs';
+import { Component, HostListener, OnInit } from '@angular/core';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-header',
@@ -13,27 +12,21 @@ export class HeaderComponent implements OnInit{
   nombreUsuario!: string;
 
   constructor (
-    private appService: AppService,
-    private cdr: ChangeDetectorRef
+    private authService: AuthService
   ){}
 
   ngOnInit(): void {
-    this.appService.isLogin().subscribe(isLogin => {
-      if(!isLogin) {
-        this.isRegister = false;
-      } else {
-        this.isRegister = true;
-        const usuario: any = this.appService.getUsuarioEnSession();
-        this.appService.getUsuario(usuario).subscribe((user: any)  => {
-          this.nombreUsuario = user ? user[0]['nombre'] : 'Nombre Usuario';
-        });
-        
-      }
-    });
+    if (this.authService.isAuthenticated()) {
+      this.isRegister = true;
+      const usuario = this.authService.getCurrentUser();
+      this.nombreUsuario = usuario ? `${usuario.nombre} ${usuario.apellido}` : 'Nombre Usuario';
+    } else {
+      this.isRegister = false;
+    }
   }
   
   sessionOff(){
-    this.appService.removeUsuarioEnSession();
+    this.authService.logout();
   }
   
   @HostListener('document:click', ['$event'])

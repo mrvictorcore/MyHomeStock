@@ -1,58 +1,75 @@
 import { Component, OnInit } from '@angular/core';
-import { AppService } from '../app.service';
 import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Usuario } from '../models/usuario';
+import { UsuarioService } from '../services/usuario.service';
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css']
 })
 
 export class LoginComponent implements OnInit {
   isLogin: boolean = true;
   registroExitoso: boolean = false;
   usuarioExistente: boolean = false;
-  formGroup: FormGroup = this.fb.group({});
+  formGroup: FormGroup;
 
   constructor(
-    private appService: AppService,
+    private usuarioService: UsuarioService,
     private router: Router,
     private fb: FormBuilder
   ) { 
-    this.inicializarFormulario();
+    this.formGroup = this.fb.group({
+      nombre: [''],
+      apellido: [''],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required]]
+    });
   }
 
   ngOnInit(): void {
-    this.appService.isLogin().subscribe(isLogin => {
-      if (isLogin)
+    this.usuarioService.isLogin().subscribe(isLogin => {
+      if (isLogin) {
         this.router.navigate(['/inventario']);
-      if (this.router.url.indexOf('register') != -1) {
-        this.alterLoginRegister();
       }
     });
+
+    if (this.router.url.indexOf('register') !== -1) {
+      this.isLogin = false;
+    }
+    this.setFormValidators();
   }
 
-  inicializarFormulario() {
-    this.formGroup = this.fb.group({
-      nombre: ['', Validators.required],
-      apellido: ['', Validators.required],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
-    });
+  setFormValidators() {
+    if (this.isLogin) {
+      this.formGroup.get('nombre')?.clearValidators();
+      this.formGroup.get('apellido')?.clearValidators();
+    } else {
+      this.formGroup.get('nombre')?.setValidators([Validators.required]);
+      this.formGroup.get('apellido')?.setValidators([Validators.required]);
+    }
+    this.formGroup.get('nombre')?.updateValueAndValidity();
+    this.formGroup.get('apellido')?.updateValueAndValidity();
   }
 
   loginRegister() {
-    // if (this.formGroup.invalid) {
-    //   return;
-    // }
-    
+    if (this.formGroup.invalid) {
+      return;
+    }
+
     if (this.isLogin) {
-      this.appService.login(this.formGroup.value.email, this.formGroup.value.password).subscribe((result: any) => {
-        if (result && result.data && result.data.length) {
-          this.appService.setUsuarioEnSession(result.data[0] as Usuario);
-          this.router.navigate(['/inventario']);
+      this.usuarioService.login(this.formGroup.value.email, this.formGroup.value.password).subscribe({
+        next: (result: any) => {
+          if (result && result.token) {
+            localStorage.setItem('auth-token', result.token);
+            this.usuarioService.setUsuarioEnSession(result.user);
+            this.router.navigate(['/inventario']);
+          }
+        },
+        error: (error) => {
+          console.error('Error al iniciar sesión:', error);
         }
       });
     } else {
@@ -63,18 +80,20 @@ export class LoginComponent implements OnInit {
         password: this.formGroup.value.password,
         email: this.formGroup.value.email || ''
       };
-      if (nuevoUsuario.email !== null) {
-        this.appService.existeUsuario(nuevoUsuario.email).subscribe((existe: any) => {
+      this.usuarioService.existeUsuario(nuevoUsuario.email).subscribe({
+        next: (existe: boolean) => {
           if (existe) {
             this.usuarioExistente = true;
             this.registroExitoso = false;
           } else {
-            this.appService.registrarUsuario(nuevoUsuario).subscribe(
-              (result: any) => {
+            this.usuarioService.createUsuario(nuevoUsuario).subscribe({
+              next: (result: any) => {
                 this.registroExitoso = true;
                 this.usuarioExistente = false;
+                this.isLogin = true; // Cambia el estado a login después de registrar exitosamente
+                this.setFormValidators();
               },
-              (error) => {
+              error: (error) => {
                 if (error && error.error && error.error.message === 'Usuario ya existente') {
                   this.usuarioExistente = true;
                   this.registroExitoso = false;
@@ -82,22 +101,18 @@ export class LoginComponent implements OnInit {
                   console.error('Error al registrar usuario:', error);
                 }
               }
-            );
+            });
           }
-        });
-      }
+        },
+        error: (error) => {
+          console.error('Error al verificar existencia de usuario:', error);
+        }
+      });
     }
   }
 
   alterLoginRegister() {
     this.isLogin = !this.isLogin;
-  }
-
-  irRegister() {
-    this.router.navigate(['/register']);
-  }
-
-  irLogin() {
-    this.router.navigate(['/login']);
+    this.setFormValidators();
   }
 }

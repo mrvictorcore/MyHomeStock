@@ -29,8 +29,11 @@
     </form>
 
     <div class="links text-center mt-3">
+      <ng-template [ngIf]="isLogin" [ngIfElse]="registerLink">
+        <p>¿No tienes una cuenta? <a class="regisLogin-link" (click)="alterLoginRegister()">Regístrate aquí</a></p>
+      </ng-template>
       <ng-template #registerLink>
-        <p>¿Ya tienes una cuenta? <a class="regisLogin-link" (click)="irLogin()">Inicia sesión</a></p>
+        <p>¿Ya tienes una cuenta? <a class="regisLogin-link" (click)="alterLoginRegister()">Inicia sesión</a></p>
       </ng-template>
       <a class="forgot-password">Recuperar contraseña</a>
     </div>

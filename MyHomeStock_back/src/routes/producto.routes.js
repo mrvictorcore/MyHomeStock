@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { findAll, create, findById, update, remove, findByUsuarioId, ajustarStock, toggleFavorito } from '../controllers/producto.controller.js';
+import { findAll, create, findById, update, remove, findByUsuarioId, ajustarStock, toggleFavorito, findFavoritesOrStock } from '../controllers/producto.controller.js';
 
 const router = Router()
 
@@ -18,8 +18,11 @@ router.put('/:id', update);
 // Borrar un producto por su id
 router.delete('/:id', remove);
 
-// Todos los productos por id_usuario y null
-router.get('/usuario/:id_usuario', findByUsuarioId);
+// Todos los productos por id_usuario
+router.get('/usuario/:id_usuario/all_productos_user', findByUsuarioId);
+
+// Todos los productos por id_usuario que sean favoritos y tengan stock superior a cero
+router.get('/usuario/:id_usuario/productos_favoritos_stock', findFavoritesOrStock);
 
 // Ruta para ajustar el stock de un producto
 router.patch('/ajustar_stock/:id', ajustarStock);

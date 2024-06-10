@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HandlerService } from './handler.service';
 import { CompraProducto } from '../models/compra_producto';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '../models/api-response';
+import { ApiResponse } from '../models/estructure-response/api-response';
 
 @Injectable({
   providedIn: 'root'

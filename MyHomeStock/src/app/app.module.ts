@@ -15,7 +15,7 @@ import { StockProductoComponent } from './stock/stock-producto.component';
 import { EditarStockComponent } from './stock/editar-stock/editar-stock.component';
 import { ShoppingComponent } from './shopping/shopping.component';
 import { CrearEditarCompraComponent } from './shopping/crear-editar-compra/crear-editar-compra.component';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { LoginComponent } from './login/login.component';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { CuentaUsuarioComponent } from './cuenta-usuario/cuenta-usuario.component';
@@ -25,6 +25,7 @@ import { CompraService } from './services/compra.service';
 import { ProductoService } from './services/producto.service';
 import { UsuarioService } from './services/usuario.service';
 import { HandlerService } from './services/handler.service';
+import { JwtInterceptorService } from './services/jwt-interceptor.service';
 
 
 @NgModule({
@@ -53,7 +54,15 @@ import { HandlerService } from './services/handler.service';
     ReactiveFormsModule,
     MatIconModule
   ],
-  providers: [AppService, CompraProductoService, CompraService, ProductoService, UsuarioService, HandlerService],
+  providers: [
+    AppService, 
+    CompraProductoService, 
+    CompraService, 
+    ProductoService, 
+    UsuarioService, 
+    HandlerService,
+    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true},
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

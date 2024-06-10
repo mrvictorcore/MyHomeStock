@@ -90,6 +90,17 @@ export class Producto {
         }
     }
 
+    static async findFavoritesOrStock(id_usuario) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ? AND (cantidad_stock > 0 OR favorito = 1)", [id_usuario]);
+            return res;
+        } catch (err) {
+            throw err;
+        }
+    }
+
     static async toggleFavorito(idProducto) {
         const dbConn = getConnection();
 

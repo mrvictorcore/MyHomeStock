@@ -1,5 +1,6 @@
 import { Usuario } from '../models/usuario.model.js';
 import { handleResponse, validateFields, validateId } from '../../config/helpers/dbUtils.js';
+import { generateToken } from '../../config/helpers/auth.js';
 
 export const findAll = async (req, res) => {
     try {
@@ -100,16 +101,22 @@ export const remove = async (req, res) => {
 };
 
 export const login = async (req, res) => {
-    const usuario = req.body;
+    const {email, password } = req.body;
 
-    if (!usuario || typeof usuario !== 'object' || Object.keys(usuario).length === 0) {
+    if (!email || !password) {
         res.status(400).json({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    } else {
-        try {
-            const data_usuario = await Usuario.login(usuario);
-            handleResponse(res, null, data_usuario);
-        } catch (err) {
-            handleResponse(res, err);
+    }
+    
+    try {
+        const data_usuario = await Usuario.login(email, password);
+        const token = generateToken(data_usuario);
+        
+        return res.status(200).json({ message: 'Login exitoso', token: token, user: data_usuario });
+    } catch (err) {
+        if (err.message === 'Contraseña invalida' || err.message === 'Usuario no encontrado') {
+            return res.status(404).json({ error: true, message: 'Usuario o contraseña incorrecto' });
+        } else {
+            return handleResponse(res, err);
         }
     }
 };

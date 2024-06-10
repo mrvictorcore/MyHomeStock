@@ -85,7 +85,7 @@ export const remove = async (req, res) => {
   }
 
   try {
-    const data_producto = await Compra.remove(idCompra);
+    const data_producto = await Producto.remove(idCompra);
     handleResponse(res, null, data_producto);
   } catch (err) {
     handleResponse(res, err);
@@ -101,7 +101,23 @@ export const findByUsuarioId = async (req, res) => {
   }
 
   try {
-    const data_producto = await Compra.findByUsuarioId(idUser);
+    const data_producto = await Producto.findByUsuarioId(idUser);
+    handleResponse(res, null, data_producto);
+  } catch (err) {
+    handleResponse(res, err);
+  }
+};
+
+export const findFavoritesOrStock = async (req, res) => {
+  const idUser = req.params.id_usuario;
+
+  const idError = validateId(idUser);
+  if (idError) {
+    return res.status(400).json({ error: true, message: idError });
+  }
+
+  try {
+    const data_producto = await Producto.findFavoritesOrStock(idUser);
     handleResponse(res, null, data_producto);
   } catch (err) {
     handleResponse(res, err);
