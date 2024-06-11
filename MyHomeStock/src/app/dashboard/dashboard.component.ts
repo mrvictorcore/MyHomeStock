@@ -65,9 +65,11 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  restarStock(index: number): void {
+  restarStock(index: number) {
     const productoForm = this.productosArray.at(index) as FormGroup;
+    const idProducto = Number(productoForm.value.id);
     const cantidadARestar = -Math.abs(productoForm.value.cantidad_seleccionada);
+
     const dialogRef = this.dialog.open(AlertBorrarComponent, {
       width: '400px',
       data: { productName: productoForm.value.nombre }
@@ -75,16 +77,7 @@ export class DashboardComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
-        this.productoService.updateProductoStock({
-          id: productoForm.value.id,
-          cantidad_stock: cantidadARestar,
-          id_categoria: 0,
-          id_usuario: 0,
-          nombre: '',
-          descripcion: '',
-          cantidad_min_mensual: 0,
-          favorito: false
-        }).subscribe({
+        this.productoService.updateProductoStock(idProducto, cantidadARestar).subscribe({
           next: () => {
             const user = this.authService.getCurrentUser();
             if (user && user.id) {

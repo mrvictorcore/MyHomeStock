@@ -42,25 +42,25 @@ export class ProductoService {
 
   creteProducto(newProducto: Producto): Observable<Producto[]> {
     return this.handlerService.handleResponse(
-      this.http.post<ApiResponse<Producto[]>>(`this.apiUrl`, newProducto)
+      this.http.post<ApiResponse<Producto[]>>(`this.apiUrl`, { newProducto })
     ) as Observable<Producto[]>;
   }
 
   updateProducto(producto: Producto): Observable<void> {
     return this.handlerService.handleResponse(
-      this.http.put<ApiResponse<void>>(`${this.apiUrl}/${producto.id}`, producto)
+      this.http.put<ApiResponse<void>>(`${this.apiUrl}/${producto.id}`, { producto })
     ) as Observable<void>;
   }
 
-  updateProductoStock(producto: Producto): Observable<void> {
+  updateProductoStock(idProducto: number, cantidadAjuste: number): Observable<void> {
     return this.handlerService.handleResponse(
-      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/ajustar_stock/${producto.id}`, producto)
+      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/ajustar_stock/${idProducto}`, { idProducto, cantidadAjuste })
     ) as Observable<void>;
   }
 
   toggleFavorito(producto: Producto): Observable<void> {
     return this.handlerService.handleResponse(
-      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/toggle_favorito/${producto.id}`, producto)
+      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/toggle_favorito/${producto.id}`, { producto })
     ) as Observable<void>;
   }
 
