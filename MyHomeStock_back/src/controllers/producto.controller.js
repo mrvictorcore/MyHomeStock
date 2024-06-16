@@ -140,32 +140,57 @@ export const toggleFavorito = async (req, res) => {
   }
 };
 
-export const ajustarStock = async (req, res) => {
+export const ajustarStockRestar = async (req, res) => {
   const { idProducto, cantidadAjuste } = req.body;
   let errores = [];
 
-  // Verificar que se haya recibido un objeto con datos para el ajuste de stock
   if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
     errores.push('No se recibieron datos completos para el ajuste de stock');
   }
 
-  // Validar los campos necesarios para la operación
   if (!errores.length) {
     let erroresCampos = validateFields(req.body, ['idProducto', 'cantidadAjuste']);
     errores = [...errores, ...erroresCampos];
   }
 
-  // Validar que cantidadAjuste sea un número y no nulo
   if (!errores.length && (typeof cantidadAjuste !== 'number' || cantidadAjuste == null)) {
     errores.push('La cantidad de ajuste debe ser un número válido');
   }
 
-  // Manejar los errores acumulados o proceder con el ajuste de stock
   if (errores.length) {
     res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
   } else {
     try {
-      const resultadoAjuste = await Producto.adjustStock(idProducto, cantidadAjuste);
+      const resultadoAjuste = await Producto.adjustStockRestar(idProducto, cantidadAjuste);
+      handleResponse(res, null, resultadoAjuste);
+    } catch (err) {
+      handleResponse(res, err);
+    }
+  }
+};
+
+export const ajustarStockSumar = async (req, res) => {
+  const { idProducto, cantidadAjuste } = req.body;
+  let errores = [];
+
+  if (!req.body || typeof req.body !== 'object' || Object.keys(req.body).length === 0) {
+    errores.push('No se recibieron datos completos para el ajuste de stock');
+  }
+
+  if (!errores.length) {
+    let erroresCampos = validateFields(req.body, ['idProducto', 'cantidadAjuste']);
+    errores = [...errores, ...erroresCampos];
+  }
+
+  if (!errores.length && (typeof cantidadAjuste !== 'number' || cantidadAjuste == null)) {
+    errores.push('La cantidad de ajuste debe ser un número válido');
+  }
+
+  if (errores.length) {
+    res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
+  } else {
+    try {
+      const resultadoAjuste = await Producto.adjustStockSumar(idProducto, cantidadAjuste);
       handleResponse(res, null, resultadoAjuste);
     } catch (err) {
       handleResponse(res, err);

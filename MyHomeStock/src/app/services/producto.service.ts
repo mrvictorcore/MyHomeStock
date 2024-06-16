@@ -52,9 +52,15 @@ export class ProductoService {
     ) as Observable<void>;
   }
 
-  updateProductoStock(idProducto: number, cantidadAjuste: number): Observable<void> {
+  ajustarStockRestar(idProducto: number, cantidadAjuste: number): Observable<void> {
     return this.handlerService.handleResponse(
-      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/ajustar_stock/${idProducto}`, { idProducto, cantidadAjuste })
+      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/ajustar_stock_restar/${idProducto}`, { idProducto, cantidadAjuste })
+    ) as Observable<void>;
+  }
+
+  ajustarStockSumar(idProducto: number, cantidadAjuste: number): Observable<void> {
+    return this.handlerService.handleResponse(
+      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/ajustar_stock_sumar/${idProducto}`, { idProducto, cantidadAjuste })
     ) as Observable<void>;
   }
 

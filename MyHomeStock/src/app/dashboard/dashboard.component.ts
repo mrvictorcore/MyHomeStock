@@ -68,7 +68,7 @@ export class DashboardComponent implements OnInit {
   restarStock(index: number) {
     const productoForm = this.productosArray.at(index) as FormGroup;
     const idProducto = Number(productoForm.value.id);
-    const cantidadARestar = -Math.abs(productoForm.value.cantidad_seleccionada);
+    const cantidadARestar = Number(productoForm.value.cantidad_seleccionada);
 
     const dialogRef = this.dialog.open(AlertBorrarComponent, {
       width: '400px',
@@ -77,7 +77,7 @@ export class DashboardComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(confirmed => {
       if (confirmed) {
-        this.productoService.updateProductoStock(idProducto, cantidadARestar).subscribe({
+        this.productoService.ajustarStockRestar(idProducto, cantidadARestar).subscribe({
           next: () => {
             const user = this.authService.getCurrentUser();
             if (user && user.id) {

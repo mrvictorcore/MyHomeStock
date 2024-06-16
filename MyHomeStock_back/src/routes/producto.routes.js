@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { findAll, create, findById, update, remove, findByUsuarioId, ajustarStock, toggleFavorito, findFavoritesOrStock } from '../controllers/producto.controller.js';
+import { findAll, create, findById, update, remove, findByUsuarioId, ajustarStockRestar, ajustarStockSumar, toggleFavorito, findFavoritesOrStock } from '../controllers/producto.controller.js';
 
 const router = Router()
 
@@ -24,8 +24,11 @@ router.get('/usuario/:id_usuario/all_productos_user', findByUsuarioId);
 // Todos los productos por id_usuario que sean favoritos y tengan stock superior a cero
 router.get('/usuario/:id_usuario/productos_favoritos_stock', findFavoritesOrStock);
 
-// Ruta para ajustar el stock de un producto
-router.patch('/ajustar_stock/:id', ajustarStock);
+// Ruta para restar el stock de un producto
+router.patch('/ajustar_stock_restar/:id', ajustarStockRestar);
+
+// Ruta para sumar el stock de un producto
+router.patch('/ajustar_stock_sumar/:id', ajustarStockSumar);
 
 // Cambiar el estado de favorito de un producto
 router.patch('/toggle_favorito/:id', toggleFavorito);

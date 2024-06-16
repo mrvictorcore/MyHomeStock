@@ -126,13 +126,13 @@ export class Producto {
         }
     }
 
-    static async adjustStock(idProducto, cantidadAjuste) {
+    static async adjustStockRestar(idProducto, cantidadAjuste) {
         const dbConn = getConnection();
         try {
             // Realizar la actualización del stock asegurando que no caiga por debajo de cero GREATEST(0, cantidad_stock + ?).
             const queryUpdate = `
                 UPDATE producto 
-                SET cantidad_stock = GREATEST(0, cantidad_stock + ?) 
+                SET cantidad_stock = GREATEST(0, cantidad_stock - ?) 
                 WHERE id = ?
             `;
             
@@ -142,7 +142,29 @@ export class Producto {
                 throw new Error("Producto no encontrado o stock insuficiente");
             }
 
-            const [newStockResult] = await dbConn.query("SELECT cantidad_stock FROM producto WHERE id = ?", [idProducto]);
+            // const [newStockResult] = await dbConn.query("SELECT cantidad_stock FROM producto WHERE id = ?", [idProducto]);
+            return { affectedRows: updateResult.affectedRows };
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static async adjustStockSumar(idProducto, cantidadAjuste) {
+        const dbConn = getConnection();
+        try {
+            const queryUpdate = `
+                UPDATE producto 
+                SET cantidad_stock = cantidad_stock + ? 
+                WHERE id = ?
+            `;
+            
+            const [updateResult] = await dbConn.query(queryUpdate, [cantidadAjuste, idProducto]);
+
+            if (updateResult.affectedRows === 0) {
+                throw new Error("Producto no encontrado");
+            }
+
+            // const [newStockResult] = await dbConn.query("SELECT cantidad_stock FROM producto WHERE id = ?", [idProducto]);
             return { affectedRows: updateResult.affectedRows };
         } catch (err) {
             throw err;
