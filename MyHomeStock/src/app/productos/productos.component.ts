@@ -9,7 +9,9 @@ import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { ProductoService } from '../services/producto.service';
 import { AuthService } from '../services/auth.service';
 import { Router } from '@angular/router';
-import { AppService } from '../app.service';
+import { CategoriaService } from '../services/categoria.service';
+import { TipoCategoriaService } from '../services/tipo-categoria.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-productos',
@@ -22,12 +24,10 @@ export class ProductosComponent implements OnInit {
   categorias: Categoria[] = [];
   tipos_categoria: TipoCategoria[] = [];
 
-  nombresCategorias: { [key: number]: string } = {};
-  nombresTipos: { [key: number]: string } = {};
-
   constructor(
-    private appService: AppService,
     private productoService: ProductoService, 
+    private categoriaService: CategoriaService,
+    private tipoCategoriaService: TipoCategoriaService,
     private dialog: MatDialog,
     private authService: AuthService,
     private router: Router,
@@ -47,19 +47,20 @@ export class ProductosComponent implements OnInit {
   }
 
   cargarDatos() {
-    this.productoService.getAllProductos().subscribe({
-      next: (productos: Producto[]) => {
+    forkJoin([
+      this.categoriaService.getAllCategorias(),
+      this.tipoCategoriaService.getAllTipoCategorias(),
+      this.productoService.getAllProductos()
+    ]).subscribe({
+      next: ([categorias, tipos_categoria, productos]) => {
+        this.categorias = categorias;
+        this.tipos_categoria = tipos_categoria;
         this.cargarProductos(productos);
       },
       error: (err) => {
-        console.error('Error al obtener productos: ', err);
-        // this.router.navigate(['/login']);
+        console.error('Error al obtener datos: ', err);
       }
     });
-
-    // Faltan los servicios para obtener categorias y tipos
-    this.appService.getCategorias().subscribe(categorias => this.categorias = categorias);
-    this.appService.getTiposCategorias().subscribe(tipos_categoria => this.tipos_categoria = tipos_categoria);
   }
 
   cargarProductos(productos: Producto[]) {
@@ -157,8 +158,9 @@ export class ProductosComponent implements OnInit {
 
   onFavoritosClick(index: number) {
     const productoForm = this.productosArray.at(index) as FormGroup;
+    const idProducto = productoForm.value.id;
 
-    this.productoService.toggleFavorito(productoForm.value).subscribe({
+    this.productoService.toggleFavorito(idProducto).subscribe({
       next: () => {
         const favorito = !productoForm.value.favorito;
         productoForm.patchValue({ favorito });

@@ -1,9 +1,12 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { Producto } from '../../models/producto';
-import { AppService } from '../../app.service';
 import { Categoria } from '../../models/categoria';
 import { TipoCategoria } from '../../models/tipo_categoria';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { CategoriaService } from '../../services/categoria.service';
+import { ProductoService } from '../../services/producto.service';
+import { TipoCategoriaService } from '../../services/tipo-categoria.service';
 
 @Component({
   selector: 'app-editar-crear-producto',
@@ -12,49 +15,64 @@ import { TipoCategoria } from '../../models/tipo_categoria';
 })
 export class EditarCrearProductoComponent implements OnInit {
   isNew: boolean;
-  productoOriginal: Producto;
-  productoTemp: Producto;
-  categorias: Categoria[] | undefined;
-  tipos: TipoCategoria[] | undefined;
+  productoForm: FormGroup = this.fb.group({});
+  categorias: Categoria[] = [];
+  tipos: TipoCategoria[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<EditarCrearProductoComponent>,
     @Inject(MAT_DIALOG_DATA) public data: { producto: Producto, isNew: boolean },
-    private appService: AppService
+    private fb: FormBuilder,
+    private categoriaService: CategoriaService,
+    private tipoCategoriaService: TipoCategoriaService,
+    private productoService: ProductoService
   ) {
-    this.productoOriginal = data.producto;
-    // Copia el producto original en una variable temporal
-    this.productoTemp = { ...data.producto };
     this.isNew = data.isNew;
+    this.productoForm = this.fb.group({
+      id: [data.producto.id],
+      nombre: [data.producto.nombre, Validators.required],
+      id_categoria: [data.producto.id_categoria, Validators.required],
+      descripcion: [data.producto.descripcion, Validators.required],
+      cantidad_stock: [data.producto.cantidad_stock ?? 0, [Validators.required, Validators.min(0)]],
+      cantidad_min_mensual: [data.producto.cantidad_min_mensual ?? 0, [Validators.required, Validators.min(0)]],
+      favorito: [data.producto.favorito]
+    });
   }
 
   ngOnInit(): void {
-    this.appService.getCategorias().subscribe(categorias => {
-      this.categorias = categorias;
+    this.categoriaService.getAllCategorias().subscribe({
+      next: (categorias: Categoria[]) => this.categorias = categorias,
+      error: (err) => console.error('Error al obtener categorías: ', err)
     });
 
-    this.appService.getTiposCategorias().subscribe(tipos => {
-      this.tipos = tipos;
+    this.tipoCategoriaService.getAllTipoCategorias().subscribe({
+      next: (tipos: TipoCategoria[]) => this.tipos = tipos,
+      error: (err) => console.error('Error al obtener tipos de categorías: ', err)
     });
   }
 
   guardarCrearProducto(): void {
+    if (this.productoForm.invalid) return;
+
+    const producto = this.productoForm.value as Producto;
+
     if (this.isNew) {
-      this.appService.addProductos(this.productoTemp).subscribe(newProducto => {
-        if (newProducto) {
+      this.productoService.createProducto(producto).subscribe({
+        next: (newProducto: Producto[]) => {
           this.dialogRef.close(true);
-        } else {
-          console.log('Error al crear el producto.');
+        },
+        error: (err) => {
+          console.error('Error al crear el producto: ', err);
           this.dialogRef.close(false);
         }
       });
     } else {
-      this.appService.updateProducto(this.productoTemp).subscribe(updatedProducto => {
-        if (updatedProducto) {
-          this.productoOriginal = { ...this.productoTemp };
+      this.productoService.updateProducto(producto).subscribe({
+        next: () => {
           this.dialogRef.close(true);
-        } else {
-          console.log('Error al actualizar el producto.');
+        },
+        error: (err) => {
+          console.error('Error al actualizar el producto: ', err);
           this.dialogRef.close(false);
         }
       });

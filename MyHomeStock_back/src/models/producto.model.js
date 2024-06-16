@@ -101,15 +101,22 @@ export class Producto {
         }
     }
 
-    static async toggleFavorito(idProducto) {
+    static async getFavorito(idProducto) {
         const dbConn = getConnection();
-
+    
         try {
             const [resFavorito] = await dbConn.query("SELECT favorito FROM producto WHERE id = ?", [idProducto]);
-            let productoFavorito = resFavorito[0].favorito;
-            let nuevoEstadoFavorito = !productoFavorito;
-
-            const [res] = await dbConn.query("UPDATE producto SET favorito = ? WHERE id = ?", [nuevoEstadoFavorito]);
+            return resFavorito;
+        } catch (err) {
+            throw err;
+        }
+    }
+    
+    static async toggleFavorito(idProducto, nuevoEstadoFavorito) {
+        const dbConn = getConnection();
+    
+        try {
+            const [res] = await dbConn.query("UPDATE producto SET favorito = ? WHERE id = ?", [nuevoEstadoFavorito, idProducto]);
             return { affectedRows: res.affectedRows };
         } catch (err) {
             throw err;

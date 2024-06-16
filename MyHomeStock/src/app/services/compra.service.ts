@@ -36,7 +36,7 @@ export class CompraService {
 
   getCompraByUser(id_usuario: number): Observable<Compra[]> {
     return this.handlerService.handleResponse(
-      this.http.get<ApiResponse<Compra[]>>(`${this.apiUrl}/usuarui/${id_usuario}`)
+      this.http.get<ApiResponse<Compra[]>>(`${this.apiUrl}/usuario/${id_usuario}`)
     ) as Observable<Compra[]>;
   }
 

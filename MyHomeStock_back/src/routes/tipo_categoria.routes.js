@@ -9,16 +9,16 @@ router.get('/', findAll);
 // Crear una nueva TipoCategoria
 router.post('/', create);
 
-// Devuelve una única TipoCategoria por su id
-router.get('/:id', findById);
+// Devuelve una única TipoCategoria por su id_tipo_categoria
+router.get('/:id_tipo_categoria', findById);
 
-// Actualizar una TipoCategoria por su id
-router.put('/:id', update);
+// Actualizar una TipoCategoria por su id_tipo_categoria
+router.patch('/:id_tipo_categoria', update);
 
-// Borrar una TipoCategoria por su id
-router.delete('/:id', remove);
+// Borrar una TipoCategoria por su id_tipo_categoria
+router.delete('/:id_tipo_categoria', remove);
 
-// Todos los gastos por usuario_id y null
-router.post('/find', findByUsuarioId);
+// Todos los tipo_categoria por id_usuario y null
+router.get('/usuario/:id_usuario', findByUsuarioId);
 
 export default router

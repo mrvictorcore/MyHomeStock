@@ -125,7 +125,7 @@ export const findFavoritesOrStock = async (req, res) => {
 };
 
 export const toggleFavorito = async (req, res) => {
-  const idProducto =req.params.id;
+  const idProducto = req.params.id;
 
   const idError = validateId(idProducto);
   if (idError) {
@@ -133,10 +133,19 @@ export const toggleFavorito = async (req, res) => {
   }
 
   try {
-    const data_producto = await Producto.toggleFavorito(idProducto);
-    handleResponse(res, null, data_producto);
+      const resFavorito = await Producto.getFavorito(idProducto);
+
+      if (!resFavorito || resFavorito.length === 0) {
+        return res.status(404).json({ error: true, message: "Producto no encontrado" });
+      }
+
+      let productoFavorito = resFavorito[0].favorito;
+      let nuevoEstadoFavorito = productoFavorito ? 0 : 1; // true/false = 1/0
+
+      const data_producto = await Producto.toggleFavorito(idProducto, nuevoEstadoFavorito);
+      handleResponse(res, null, data_producto);
   } catch (err) {
-    handleResponse(err);
+      handleResponse(res, err);
   }
 };
 

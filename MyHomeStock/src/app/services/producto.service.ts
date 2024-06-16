@@ -18,7 +18,7 @@ export class ProductoService {
 
   getAllProductos(): Observable<Producto[]> {
     return this.handlerService.handleResponse(
-      this.http.get<ApiResponse<Producto[]>>(`this.apiUrl`)
+      this.http.get<ApiResponse<Producto[]>>(this.apiUrl)
     ) as Observable<Producto[]>;
   }
 
@@ -64,9 +64,9 @@ export class ProductoService {
     ) as Observable<void>;
   }
 
-  toggleFavorito(producto: Producto): Observable<void> {
+  toggleFavorito(idProducto: number): Observable<void> {
     return this.handlerService.handleResponse(
-      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/toggle_favorito/${producto.id}`, { producto })
+      this.http.patch<ApiResponse<void>>(`${this.apiUrl}/toggle_favorito/${idProducto}`, {})
     ) as Observable<void>;
   }
 
