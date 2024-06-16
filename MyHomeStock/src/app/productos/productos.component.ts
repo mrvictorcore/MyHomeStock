@@ -1,61 +1,89 @@
 import { Component, OnInit } from '@angular/core';
-import { AppService } from '../app.service';
 import { Producto } from '../models/producto';
-import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Categoria } from '../models/categoria';
 import { TipoCategoria } from '../models/tipo_categoria';
 import { EditarCrearProductoComponent } from './crear-editar-producto/editar-crear-producto.component';
 import { AlertBorrarProductoComponent } from './borrar-producto/alert-borrar-producto.component';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { ProductoService } from '../services/producto.service';
+import { AuthService } from '../services/auth.service';
+import { Router } from '@angular/router';
+import { AppService } from '../app.service';
 
 @Component({
   selector: 'app-productos',
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css']
 })
+
 export class ProductosComponent implements OnInit {
-  productos: any[] = [];
+  formGroup: FormGroup = this.fb.group({});
   categorias: Categoria[] = [];
   tipos_categoria: TipoCategoria[] = [];
 
   nombresCategorias: { [key: number]: string } = {};
   nombresTipos: { [key: number]: string } = {};
 
-  constructor(private appService: AppService, private dialog: MatDialog) {}
+  constructor(
+    private appService: AppService,
+    private productoService: ProductoService, 
+    private dialog: MatDialog,
+    private authService: AuthService,
+    private router: Router,
+    private fb: FormBuilder
+  ) {
+    this.formGroup = this.fb.group({
+      productos: this.fb.array([])
+    });
+  }
 
   ngOnInit(): void {
     this.cargarDatos();
   }
 
-  cargarDatos(): void {
-    this.appService.getTiposCategorias().subscribe(tipos => {
-      this.tipos_categoria = tipos;
-      this.appService.getCategorias().subscribe(categorias => {
-        this.categorias = categorias;
-        this.obtenerProductos();
-      });
+  get productosArray(): FormArray {
+    return this.formGroup.get('productos') as FormArray;
+  }
+
+  cargarDatos() {
+    this.productoService.getAllProductos().subscribe({
+      next: (productos: Producto[]) => {
+        this.cargarProductos(productos);
+      },
+      error: (err) => {
+        console.error('Error al obtener productos: ', err);
+        // this.router.navigate(['/login']);
+      }
+    });
+
+    // Faltan los servicios para obtener categorias y tipos
+    this.appService.getCategorias().subscribe(categorias => this.categorias = categorias);
+    this.appService.getTiposCategorias().subscribe(tipos_categoria => this.tipos_categoria = tipos_categoria);
+  }
+
+  cargarProductos(productos: Producto[]) {
+    this.productosArray.clear();
+    productos.forEach((p) => {
+      const categoria = this.categorias.find(c => c.id === p.id_categoria);
+      const tipoCategoria = categoria ? this.tipos_categoria.find(t => t.id === +categoria.id_tipo) : null;
+
+      this.productosArray.push(this.fb.group({
+        id: [p.id],
+        nombre: [p.nombre],
+        nombreTipoCategoria: [tipoCategoria ? tipoCategoria.nombre : 'Desconocido'],
+        nombreCategoria: [categoria ? categoria.nombre : 'Desconocido'],
+        descripcion: [p.descripcion],
+        favorito: [p.favorito]
+      }));
     });
   }
 
-  obtenerProductos(): void {
-    this.appService.getProductos().subscribe(productos => {
-      this.productos = productos.map(producto => {
-        const categoria = this.categorias.find(c => c.id === producto.id_categoria);
-        const tipoCategoria = categoria ? this.tipos_categoria.find(t => t.id === +categoria.id_tipo) : null;
-        return {
-          ...producto,
-          nombreCategoria: categoria ? categoria.nombre : 'Desconocida',
-          nombreTipoCategoria: tipoCategoria ? tipoCategoria.nombre : 'Desconocido'
-        };
-      });
-    });
-  }
-
-
- onCrearProductoClick(): void {
+  onCrearProductoClick() {
     const nuevoProducto: Producto = {
       id: 0, 
       id_categoria: 0, 
-      id_usuario: 1, 
+      id_usuario: this.authService.getCurrentUser()?.id || 0, 
       nombre: '', 
       descripcion: '', 
       cantidad_stock: 0, 
@@ -63,70 +91,81 @@ export class ProductosComponent implements OnInit {
       favorito: false,
     };
 
-    const dialogRef: MatDialogRef<EditarCrearProductoComponent> = this.dialog.open(EditarCrearProductoComponent, {
+    const dialogRef = this.dialog.open(EditarCrearProductoComponent, {
       width: '400px',
       data: { producto: nuevoProducto, isNew: true } 
     });
 
     dialogRef.afterClosed().subscribe(result => {
-      if (result && typeof result === 'object') {
-        this.appService.addProductos(result).subscribe(newProduct => {
-          if (newProduct) {
-            this.obtenerProductos();
-          } else {
-            console.log('Error al crear el producto.');
+      if (result) {
+        this.productoService.createProducto(result).subscribe({
+          next: (newProduct: Producto[]) => {
+            console.log(newProduct);
+            this.cargarDatos();
+          },
+          error: (err) => {
+            console.error('Error al crear el producto: ', err)
           }
         });
       }
     });
   }
 
-  onBorrarClick(producto: Producto): void {
+  onBorrarClick(index: number) {
+    const productoForm = this.productosArray.at(index) as FormGroup;
+
     const dialogRef = this.dialog.open(AlertBorrarProductoComponent, {
       width: '400px',
-      data: { producto }
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result === true) {
-        this.appService.deleteProducto(producto.id).subscribe({
-          next: () => {
-            this.productos = this.productos.filter(p => p.id !== producto.id);
-          },
-          error: (error) => {
-            console.error('Error al eliminar el producto: ', error);
-          }
-        });
-      }
-    });
-  }
-
-  onEditarClick(producto: Producto): void {
-    const dialogRef = this.dialog.open(EditarCrearProductoComponent, {
-      width: '400px',
-      data: { producto }
+      data: { producto: productoForm.value }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        console.log('Actualizando producto con ID:', producto.id);
-        this.obtenerProductos();
-      } else {
-        console.log('Actualizando producto con ID:', producto.id, result);
-        console.log('No se proporcionó un producto válido para actualizar.');
+        this.productoService.deleteProducto(productoForm.value.id).subscribe({
+          next: () => {
+            this.productosArray.removeAt(index);
+          },
+          error: (err) => {
+            console.error('Error al eliminar el producto: ', err);
+          }
+        });
       }
     });
   }
 
+  onEditarClick(index: number) {
+    const productoForm = this.productosArray.at(index) as FormGroup;
 
-  onFavoritosClick(producto: Producto): void {
-    this.appService.toggleFavoritoProducto(producto.id).subscribe(() => {
-      const index = this.productos.findIndex(p => p.id === producto.id);
-      if (index !== -1) {
-        this.productos[index].favorito = !this.productos[index].favorito;
+    const dialogRef = this.dialog.open(EditarCrearProductoComponent, {
+      width: '400px',
+      data: { producto: productoForm.value }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.productoService.updateProducto(result).subscribe({
+          next: () => {
+            this.productosArray.at(index).patchValue(result);
+          },
+          error: (err) => {
+            console.error('Error al actualizar el producto: ', err);
+          }
+        });
+      }  
+    });
+  }
+
+  onFavoritosClick(index: number) {
+    const productoForm = this.productosArray.at(index) as FormGroup;
+
+    this.productoService.toggleFavorito(productoForm.value).subscribe({
+      next: () => {
+        const favorito = !productoForm.value.favorito;
+        productoForm.patchValue({ favorito });
+      },
+      error: (err) => {
+        console.error('Error al actualizar el estado de favorito: ', err);
       }
-    }, error => {
-      console.log('Error al actualizar el estado de favoritos del producto: ', error);
     });
   }
 }

@@ -1,96 +1,81 @@
 import { getConnection } from '../../config/db.config.js';
 
 export class TipoCategoria {
-    constructor() {
+    constructor(tipo_categoria) {
         this.id             = tipo_categoria.id;
         this.id_usuario     = tipo_categoria.id_usuario;
-
         this.nombre         = tipo_categoria.nombre;
     }
 
-    static async create (newEmp, result) {    
-        var dbConn = getConnection();
-        dbConn.query("INSERT INTO tipo_categoria set ?", newEmp, function (err, res) {
-        dbConn.end();
-            if(err) {
-                console.log("error: ", err);
-                result(err, null);
-            }
-            else{
-                console.log(res.insertId);
-                result(null, res.insertId);
-            }
-        });           
+    static async findAll () {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("SELECT * FROM tipo_categoria");
+            return res;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+    static async create (newTipoCategoria) {    
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("INSERT INTO tipo_categoria SET ?", newTipoCategoria);
+            return { affectedRows: res.affectedRows, insertId: res.insertId };
+        } catch (err) {
+            throw err;
+        }
     }
     
-    static async findById (id, result) {
-        var dbConn = getConnection();
-        dbConn.query("Select * from tipo_categoria where id = ? ", id, function (err, res) {             
-        dbConn.end();
-            if(err) {
-                console.log("error: ", err);
-                result(err, null);
-            }
-            else{
-                result(null, res);
-            }
-        });   
+    static async findById (idTipoCategoria) {
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("SELECT * FROM tipor_categoria WHERE id = ?", idTipoCategoria);
+            return res;
+        } catch (err) {
+            throw err;
+        }
     }
 
-    static async findAll (result) {
-        var dbConn = getConnection();
-        dbConn.query("Select * from tipo_categoria", function (err, res) {
-        dbConn.end();
-            if(err) {
-                console.log("error: ", err);
-                result(null, err);
-            }
-            else{
-                console.log('tipo_categoria : ', res);  
-                result(null, res);
-            }
-        });   
+    static async update(id, tipo_categoria){
+        const dbConn = getConnection();
+        const query = `
+            UPDATE tipo_categoria 
+            SET id_usuario=?,
+                nombre=?, 
+            WHERE id = ?
+        `;
+
+        try {
+            const [res] = await dbConn.query(query, tipo_categoria.id_usuario, tipo_categoria.nombre, id);
+            return { affectedRows: res.affectedRows };
+        } catch (err) {
+            throw err;
+        }
     }
 
-    static async update(id, tipo_categoria, result){
-    var dbConn = getConnection();
-        dbConn.query("UPDATE tipo_categoria SET descripcion=?,fecha_tipo_categoria=?,cantidad=?,usuario_id=? WHERE id = ?", [tipo_categoria.descripcion,tipo_categoria.fecha_tipo_categoria,tipo_categoria.cantidad,tipo_categoria.usuario_id, id], function (err, res) {
-        dbConn.end();
-            if(err) {
-                console.log("error: ", err);
-                result(null, err);
-            }else{   
-                result(null, res);
-            }
-        }); 
+    static async delete(idTipoCategoria){
+        const dbConn = getConnection();
+
+        try {
+            const [res] = await dbConn.query("DELETE FROM tipo_categoria WHERE id = ?", [idTipoCategoria]);
+            return { affectedRows: res.affectedRows };
+        } catch (err) {
+            throw err;
+        }
     }
 
-    static async delete(id, result){
-        var dbConn = getConnection(); 
-        dbConn.query("DELETE FROM tipo_categoria WHERE id = ?", [id], function (err, res) {
-        dbConn.end();
-            if(err) {
-                console.log("error: ", err);
-                result(null, err);
-            }
-            else{
-                result(null, res);
-            }
-        }); 
-    }
+    static async findByUsuarioId(idUser) {    
+        const dbConn = getConnection();
 
-    static async findByUsuarioId(req, result) {    
-        var dbConn = getConnection();
-        dbConn.query("Select * from tipo_categoria where usuario_id = ? ", req.usuario_id, function (err, res) {
-        dbConn.end();
-            if(err) {
-                console.log("error: ", err);
-                result(null, err);
-            }
-            else{
-                console.log('tipo_categoria : ', res);  
-                result(null, res);
-            }
-        });           
+        try {
+            const [res] = await dbConn.query("SELECT * FROM tipo_categoria WHERE id_usuario = ?", idUser);
+            return res;
+        } catch (err) {
+            throw err;
+        }
     }
 }

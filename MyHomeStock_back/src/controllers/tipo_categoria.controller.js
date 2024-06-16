@@ -1,73 +1,115 @@
 import { TipoCategoria } from '../models/tipo_categoria.model.js';
+import { handleResponse, validateFields, validateId } from '../../config/helpers/dbUtils.js';
 
-export const findAll = function(req, res) {
-  TipoCategoria.findAll(function(err, tipo_categoria) {
-    console.log('controller')
-    if (err)
-    res.send(err);
-    console.log('res', tipo_categoria);
-    res.send(tipo_categoria);
-  });
-};
-
-
-export const create = function(req, res) {
-    const new_tipo_categoria = new TipoCategoria(req.body);
-
-    //handles null error 
-   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        TipoCategoria.create(new_tipo_categoria, function(err, tipo_categoria) {
-            if (err)
-            res.send(err);
-            res.json({error:false,message:"TipoCategoria añadido correctamente!",data:tipo_categoria});
-        });
+export const findAll = async (req, res) => {
+    try {
+        const data_tipo_categoria = await TipoCategoria.findAll();
+        handleResponse(res, null, data_tipo_categoria);
+    } catch (err) {
+        handleResponse(res, err);
     }
 };
 
+export const create = async (req, res) => {
+    const newTipoCategoria = req.body;
+    let errores = [];
 
-export const findById = function(req, res) {
-    TipoCategoria.findById(req.params.id, function(err, tipo_categoria) {
-        if (err)
-        res.send(err);
-        res.json(tipo_categoria);
-    });
-};
-
-
-export const update = function(req, res) {
-    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        TipoCategoria.update(req.params.id, new TipoCategoria(req.body), function(err, tipo_categoria) {
-            if (err)
-            res.send(err);
-            res.json({ error:false, message: 'TipoCategoria actualizado correctamente' });
-        });
+    if (!newTipoCategoria || typeof newTipoCategoria !== 'object' || Object.keys(newTipoCategoria).length === 0) {
+        errores.push('No se recibieron datos completos');
     }
-  
+
+    if (!errores.length) {
+        let erroresCampos = validateFields(newTipoCategoria, ['id_usuario', 'nombre']);
+        errores = [...errores, ...erroresCampos];
+    }
+
+    if (errores.length) {
+        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
+    } else {
+        try {
+            const data_tipo_categoria = await TipoCategoria.create(newTipoCategoria);
+            handleResponse(res, null, data_tipo_categoria);
+        } catch (err) {
+            handleResponse(res, err);
+        }
+    }
 };
 
+export const findById = async (req, res) => {
+    const idTipoCategoria = req.params.id;
 
-export const remove = function(req, res) {
-  TipoCategoria.remove( req.params.id, function(err, tipo_categoria) {
-    if (err)
-    res.send(err);
-    res.json({ error:false, message: 'TipoCategoria successfully deleted' });
-  });
+    const idError = validateId(idTipoCategoria);
+    if (idError) {
+        return res.status(400).json({ error: true, message: idError });
+    }
+
+    try {
+        const data_tipo_categoria = await TipoCategoria.findById(idTipoCategoria);
+        handleResponse(res, null, data_tipo_categoria);
+    } catch (err) {
+        handleResponse(res, err);
+    }
 };
 
-export const findByUsuarioId = function(req, res) {
-    const criteriosBusqueda = new TipoCategoria(req.body);
-    //handles null error
-   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        TipoCategoria.findByUsuarioId(criteriosBusqueda, function(err, tipo_categorias) {
-            if (err)
-            res.send(err);
-            res.json(tipo_categorias);
-        });
+export const update = async (req, res) => {
+    const updateTipoCategoria = req.body;
+    const idTipoCategoria = req.params.id;
+    let errores = [];
+
+    if (!updateTipoCategoria || typeof updateTipoCategoria !== 'object' || Object.keys(updateTipoCategoria).length === 0) {
+        errores.push('No se recibieron datos completos');
+    }
+
+    const idError = validateId(idTipoCategoria);
+    if (idError) {
+        errores.push(idError);
+    }
+
+    if (!errores.length) {
+        let erroresCampos = validateFields(updateTipoCategoria, ['nombre']);
+        errores = [...errores, ...erroresCampos];
+    }
+
+    if (errores.length) {
+        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
+    } else {
+        try {
+            const data_tipo_categoria = await TipoCategoria.update(idTipoCategoria, updateTipoCategoria);
+            handleResponse(res, null, data_tipo_categoria);
+        } catch (err) {
+            handleResponse(res, err);
+        }
+    }
+};
+
+export const remove = async (req, res) => {
+    const idTipoCategoria = req.params.id;
+
+    const idError = validateId(idTipoCategoria);
+    if (idError) {
+        return res.status(400).json({ error: true, message: idError });
+    }
+
+    try {
+        const data_tipo_categoria = await TipoCategoria.remove(idTipoCategoria);
+        handleResponse(res, null, data_tipo_categoria);
+    } catch (err) {
+        handleResponse(res, err);
+    }
+};
+
+export const findByUsuarioId = async (req, res) => {
+    const idUser = req.body.usuario_id;
+
+    const idError = validateId(idUser);
+    if (idError) {
+        return res.status(400).json({ error: true, message: idError });
+    }
+
+    try {
+        const data_tipo_categoria = await TipoCategoria.findByUsuarioId(idUser);
+        handleResponse(res, null, data_tipo_categoria);
+    } catch (err) {
+        handleResponse(res, err);
     }
 };

@@ -86,11 +86,11 @@ export class Compra {
     /**
      * Busca compras por el ID del usuario.
     */
-    static async findByUsuarioId(idUsuario) {
+    static async findByUsuarioId(idUser) {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM compra WHERE usuario_id = ?", idUsuario);
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE usuario_id = ?", idUser);
             return res;
         } catch (err) {
             throw err;

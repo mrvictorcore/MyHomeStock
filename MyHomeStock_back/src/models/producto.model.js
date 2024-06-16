@@ -79,22 +79,22 @@ export class Producto {
         }
     }
 
-    static async findByUsuarioId(id_usuario) {    
+    static async findByUsuarioId(idUser) {    
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ?", id_usuario);
+            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ?", idUser);
             return res;
         } catch (err) {
             throw err;
         }
     }
 
-    static async findFavoritesOrStock(id_usuario) {
+    static async findFavoritesOrStock(idUser) {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ? AND (cantidad_stock > 0 OR favorito = 1)", [id_usuario]);
+            const [res] = await dbConn.query("SELECT * FROM producto WHERE id_usuario = ? AND (cantidad_stock > 0 OR favorito = 1)", [idUser]);
             return res;
         } catch (err) {
             throw err;

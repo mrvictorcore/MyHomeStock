@@ -40,7 +40,7 @@ export class ProductoService {
     ) as Observable<Producto[]>;
   }
 
-  creteProducto(newProducto: Producto): Observable<Producto[]> {
+  createProducto(newProducto: Producto): Observable<Producto[]> {
     return this.handlerService.handleResponse(
       this.http.post<ApiResponse<Producto[]>>(`this.apiUrl`, { newProducto })
     ) as Observable<Producto[]>;

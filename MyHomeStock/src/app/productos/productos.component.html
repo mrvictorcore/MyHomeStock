@@ -1,48 +1,50 @@
 <div class="container">
   <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded">
     <h1 class="mt-4 text-center display-4 custom-title">Productos</h1>
-    <div class="table-responsive">
-      <table class="table table-borderless table-hover mt-3">
-        <thead>
-          <tr>
-            <th class="text-center">Nombre</th>
-            <th class="text-center">Tipo</th>
-            <th class="text-center">Categoría</th>
-            <th class="text-center">Descripción</th>
-            <th class="text-center">Favorito</th>
-            <th class="text-center">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let producto of productos" class="table-row">
-            <td class="text-center">{{ producto.nombre }}</td>
-            <td class="text-center">{{ producto.nombreTipoCategoria }}</td>
-            <td class="text-center">{{ producto.nombreCategoria }}</td>
-            <td class="text-center">{{ producto.descripcion }}</td>
-            <td class="text-center">{{ producto.favorito ? 'Sí' : 'No' }}</td>
-            <td class="text-center">
-              <div class="d-flex flex-row align-items-center justify-content-center mb-2">
-                <div class="form-group mb-0 mr-2">
-                  <button class="btn btn-light mx-1" (click)="onBorrarClick(producto)">
-                    <i class="fas fa-trash-alt"></i>
-                  </button>
+    <form [formGroup]="formGroup">
+      <div class="table-responsive">
+        <table class="table table-borderless table-hover mt-3">
+          <thead>
+            <tr>
+              <th class="text-center">Nombre</th>
+              <th class="text-center">Tipo</th>
+              <th class="text-center">Categoría</th>
+              <th class="text-center">Descripción</th>
+              <th class="text-center">Favorito</th>
+              <th class="text-center">Acciones</th>
+            </tr>
+          </thead>
+          <tbody formArrayName="productos">
+            <tr *ngFor="let producto of productosArray.controls; let i = index" [formGroupName]="i" class="table-row">
+              <td class="text-center">{{ producto.value.nombre }}</td>
+              <td class="text-center">{{ producto.value.nombreTipoCategoria }}</td>
+              <td class="text-center">{{ producto.value.nombreCategoria }}</td>
+              <td class="text-center">{{ producto.value.descripcion }}</td>
+              <td class="text-center">{{ producto.value.favorito ? 'Sí' : 'No' }}</td>
+              <td class="text-center">
+                <div class="d-flex flex-row align-items-center justify-content-center mb-2">
+                  <div class="form-group mb-0 mr-2">
+                    <button class="btn btn-light mx-1" (click)="onBorrarClick(i)">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                  <div class="form-group mb-0 mr-2">
+                    <button class="btn btn-light mx-1" (click)="onEditarClick(i)">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                  </div>
+                  <div class="form-group mb-0 mr-2">
+                    <button class="btn btn-light mx-1 btn-favoritos" (click)="onFavoritosClick(i)">
+                      <i [ngClass]="{'bi bi-suit-heart-fill': producto.value.favorito, 'bi bi-suit-heart': !producto.value.favorito}"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="form-group mb-0 mr-2">
-                  <button class="btn btn-light mx-1" (click)="onEditarClick(producto)">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                </div>
-                <div class="form-group mb-0 mr-2">
-                  <button class="btn btn-light mx-1 btn-favoritos" (click)="onFavoritosClick(producto)">
-                    <i [ngClass]="{'bi bi-suit-heart-fill': producto.favorito, 'bi bi-suit-heart': !producto.favorito}"></i>
-                  </button>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </form>
     <div class="float-left">
       <button class="btn btn-light" (click)="onCrearProductoClick()">
         <i class="fas fa-plus"></i>

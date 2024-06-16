@@ -93,7 +93,7 @@ export class CompraProducto {
     /**
      * Busca compraProductos por el ID del usuario.
     */
-    static async findByUsuarioId(idUsuario) {
+    static async findByUsuarioId(idUser) {
         const dbConn = getConnection();
 
         try {
@@ -104,7 +104,7 @@ export class CompraProducto {
                 WHERE c.id_usuario = ?
             `;
 
-            const [res] = await dbConn.query(query, [idUsuario]);
+            const [res] = await dbConn.query(query, [idUser]);
             return res;
         } catch (err) {
             throw err;

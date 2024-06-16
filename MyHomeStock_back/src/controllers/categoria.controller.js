@@ -1,76 +1,115 @@
-'use strict';
-
 import { Categoria } from '../models/categoria.model.js';
+import { handleResponse, validateFields, validateId } from '../../config/helpers/dbUtils.js';
 
-export const findAll = function(req, res) {
-  Categoria.findAll(function(err, categoria) {
-    console.log('controller')
-    if (err)
-    res.send(err);
-    console.log('res', categoria);
-    res.send(categoria);
-  });
-};
-
-
-export const create = function(req, res) {
-    const new_categoria = new Categoria(req.body);
-
-    //handles null error 
-   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        Categoria.create(new_categoria, function(err, categoria) {
-            if (err)
-            res.send(err);
-            res.json({error:false,message:"Categoria añadido correctamente!",data:categoria});
-        });
+export const findAll = async (req, res) => {
+    try {
+        const data_categoria = await Categoria.findAll();
+        handleResponse(res, null, data_categoria);
+    } catch (err) {
+        handleResponse(res, err);
     }
 };
 
+export const create = async (req, res) => {
+    const newCategoria = req.body;
+    let errores = [];
 
-export const findById = function(req, res) {
-    Categoria.findById(req.params.id, function(err, categoria) {
-        if (err)
-        res.send(err);
-        res.json(categoria);
-    });
-};
-
-
-export const update = function(req, res) {
-    if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        Categoria.update(req.params.id, new Categoria(req.body), function(err, categoria) {
-            if (err)
-            res.send(err);
-            res.json({ error:false, message: 'Categoria actualizado correctamente' });
-        });
+    if (!newCategoria || typeof newCategoria !== 'object' || Object.keys(newCategoria).length === 0) {
+        errores.push('No se recibieron datos completos');
     }
-  
+
+    if (!errores.length) {
+        let erroresCampos = validateFields(newCategoria, ['id_tipo', 'id_usuario', 'nombre']);
+        errores = [...errores, ...erroresCampos];
+    }
+
+    if (errores.length) {
+        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
+    } else {
+        try {
+            const data_categoria = await Categoria.create(newCategoria);
+            handleResponse(res, null, data_categoria);
+        } catch (err) {
+            handleResponse(res, err);
+        }
+    }
 };
 
+export const findById = async (req, res) => {
+    const idCategoria = req.params.id;
 
-export const remove = function(req, res) {
-  Categoria.remove( req.params.id, function(err, categoria) {
-    if (err)
-    res.send(err);
-    res.json({ error:false, message: 'Categoria successfully deleted' });
-  });
+    const idError = validateId(idCategoria);
+    if (idError) {
+        return res.status(400).json({ error: true, message: idError });
+    }
+
+    try {
+        const data_categoria = await Categoria.findById(idCategoria);
+        handleResponse(res, null, data_categoria);
+    } catch (err) {
+        handleResponse(res, err);
+    }
 };
 
-export const findByUsuarioId = function(req, res) {
-    const criteriosBusqueda = new Categoria(req.body);
+export const update = async (req, res) => {
+    const updateCategoria = req.body;
+    const idCategoria = req.params.id;
+    let errores = [];
 
-    //handles null error 
-   if(req.body.constructor === Object && Object.keys(req.body).length === 0){
-        res.status(400).send({ error:true, message: 'Por favor añada todos los campos requeridos' });
-    }else{
-        Categoria.findByUsuarioId(criteriosBusqueda, function(err, categorias) {
-            if (err)
-            res.send(err);
-            res.json(categorias);
-        });
+    if (!updateCategoria || typeof updateCategoria !== 'object' || Object.keys(updateCategoria).length === 0) {
+        errores.push('No se recibieron datos completos');
+    }
+
+    const idError = validateId(idCategoria);
+    if (idError) {
+        errores.push(idError);
+    }
+
+    if (!errores.length) {
+        let erroresCampos = validateFields(updateCategoria, ['nombre']);
+        errores = [...errores, ...erroresCampos];
+    }
+
+    if (errores.length) {
+        res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
+    } else {
+        try {
+            const data_categoria = await Categoria.update(idCategoria, updateCategoria);
+            handleResponse(res, null, data_categoria);
+        } catch (err) {
+            handleResponse(res, err);
+        }
+    }
+};
+
+export const remove = async (req, res) => {
+    const idCategoria = req.params.id;
+
+    const idError = validateId(idCategoria);
+    if (idError) {
+        return res.status(400).json({ error: true, message: idError });
+    }
+
+    try {
+        const data_categoria = await Categoria.remove(idCategoria);
+        handleResponse(res, null, data_categoria);
+    } catch (err) {
+        handleResponse(res, err);
+    }
+};
+
+export const findByUsuarioId = async (req, res) => {
+    const idUser = req.body.usuario_id;
+
+    const idError = validateId(idUser);
+    if (idError) {
+        return res.status(400).json({ error: true, message: idError });
+    }
+
+    try {
+        const data_categoria = await Categoria.findByUsuarioId(idUser);
+        handleResponse(res, null, data_categoria);
+    } catch (err) {
+        handleResponse(res, err);
     }
 };
