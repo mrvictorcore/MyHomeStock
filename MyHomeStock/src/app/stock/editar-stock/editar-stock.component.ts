@@ -1,5 +1,6 @@
 import { Component, Inject } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Producto } from '../../models/producto';
 
 @Component({
@@ -8,20 +9,26 @@ import { Producto } from '../../models/producto';
   styleUrls: ['./editar-stock.component.css']
 })
 export class EditarStockComponent {
-  producto: Producto;
+  productoForm: FormGroup;
 
   constructor(
     public dialogRef: MatDialogRef<EditarStockComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { producto: Producto }
+    @Inject(MAT_DIALOG_DATA) public data: { producto: Producto },
+    private fb: FormBuilder
   ) {
-    this.producto = { ...data.producto };
+    this.productoForm = this.fb.group({
+      id: [data.producto.id],
+      nombre: [data.producto.nombre, Validators.required],
+      cantidad_stock: [data.producto.cantidad_stock, [Validators.required, Validators.min(0)]],
+      cantidad_min_mensual: [data.producto.cantidad_min_mensual, [Validators.required, Validators.min(0)]],
+    });
   }
 
   onSaveClick(): void {
-    if (this.producto.cantidad_stock >= 0 && this.producto.cantidad_min_mensual >= 0) {
-      this.dialogRef.close(this.producto);
+    if (this.productoForm.valid) {
+      this.dialogRef.close(this.productoForm.value);
     } else {
-      console.log('Los valores de stock no pueden ser negativos.');
+      console.log('El formulario no es válido');
     }
   }
 
@@ -29,4 +36,3 @@ export class EditarStockComponent {
     this.dialogRef.close();
   }
 }
-

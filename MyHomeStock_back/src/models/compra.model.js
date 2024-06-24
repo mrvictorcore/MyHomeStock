@@ -32,9 +32,7 @@ export class Compra {
 
         try {
             const [res] = await dbConn.query("INSERT INTO compra SET ?", newCompra);
-            const insertedId = res.insertId;
-            const [compraDetails] = await dbConn.query("SELECT * FROM compra WHERE id = ?", [insertedId]);
-            return { affectedRows: res.affectedRows, insertId: res.insertId, compraDetails };
+            return { affectedRows: res.affectedRows, insertId: res.insertId };
         } catch (err) {
             throw err;
         }
@@ -90,7 +88,7 @@ export class Compra {
         const dbConn = getConnection();
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM compra WHERE usuario_id = ?", idUser);
+            const [res] = await dbConn.query("SELECT * FROM compra WHERE id_usuario = ?", idUser);
             return res;
         } catch (err) {
             throw err;

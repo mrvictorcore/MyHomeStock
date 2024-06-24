@@ -11,19 +11,30 @@ export const generateToken = (user) => {
 
 // Middleware para verificar el token JWT
 export const verifyToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+  const authHeader = req.headers['authorization'];
+  console.log('Received auth header:', authHeader);
 
-    if (!token) {
-        return res.status(403).send('Token es requerido');
+  if (!authHeader) {
+    return res.status(401).json({ error: true, message: 'No autorizado' });
+  }
+
+  const tokenParts = authHeader.split(' ');
+  if (tokenParts.length !== 2 || tokenParts[0] !== 'Bearer') {
+    return res.status(401).json({ error: true, message: 'Token inválido' });
+  }
+
+  const token = tokenParts[1];
+
+  jwt.verify(token, secretkey, (err, decoded) => {
+    if (err) {
+      console.error('Error verifying token:', err);
+      return res.status(401).json({ error: true, message: 'No autorizado' });
     }
 
-    jwt.verify(token, secretkey, (err, decoded) => {
-        if (err) {
-            return res.status(401).send('No autorizado');
-        }
-
-        req.userId = decoded.id;
-        next();
-    });
+    console.log('Token decoded:', decoded);
+    console.log('Setting req.userId to:', decoded.id);
+    req.userId = decoded.id;
+    console.log('Setting asignado req.userId to:', req.userId);
+    next();
+  });
 };

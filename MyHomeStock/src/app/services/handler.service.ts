@@ -13,9 +13,9 @@ export class HandlerService {
 
   private handleError(error: HttpErrorResponse) {
     if (error.error instanceof ErrorEvent) {
-      console.error('A ocurrido un error: ', error.error.message);
+      console.error('A ocurrido un error del lado del cliente:', error.error.message);
     } else {
-      console.error(`El backend devolvió: ${error.status}, body: ${error.error}`);
+      console.error(`El backend devolvió un código ${error.status}, body fue: ${JSON.stringify(error.error)}`);
     }
 
     return throwError(() => new Error('Algo malo ha ocurrido; por favor, inténtalo de nuevo más tarde.'));

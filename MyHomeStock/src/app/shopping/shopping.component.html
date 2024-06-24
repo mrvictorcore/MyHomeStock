@@ -1,5 +1,5 @@
 <div class="container">
-  <form [formGroup]="compraForm">
+  <form [formGroup]="formGroup">
     <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded">
       <h1 class="mt-4 text-center display-4 custom-title">Compra</h1>
 
@@ -25,7 +25,7 @@
           </thead>
           <tbody formArrayName="productosFormArray">
             <tr *ngFor="let control of productosFormArray.controls; let i = index" [formGroupName]="i">
-              <td class="text-center">{{ control.get('nombreProducto')?.value }}</td>
+              <td class="text-center">{{ control.get('nombre')?.value }}</td>
               <td class="text-center">{{ control.get('cantidad_comprar')?.value }}</td>
               <td class="text-center">
                 <div class="d-flex flex-row align-items-center justify-content-center mb-2">

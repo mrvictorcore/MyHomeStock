@@ -61,7 +61,7 @@ import { JwtInterceptorService } from './services/jwt-interceptor.service';
     ProductoService, 
     UsuarioService, 
     HandlerService,
-    {provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true},
+    { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptorService, multi: true },
   ],
   bootstrap: [AppComponent]
 })

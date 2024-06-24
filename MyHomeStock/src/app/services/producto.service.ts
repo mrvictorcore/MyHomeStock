@@ -22,10 +22,10 @@ export class ProductoService {
     ) as Observable<Producto[]>;
   }
 
-  getProducto(id_prducto: number): Observable<Producto[]> {
+  getProducto(id_prducto: number): Observable<Producto> {
     return this.handlerService.handleResponse(
-      this.http.get<ApiResponse<Producto[]>>(`${this.apiUrl}/${id_prducto}`)
-    ) as Observable<Producto[]>;
+      this.http.get<ApiResponse<Producto>>(`${this.apiUrl}/${id_prducto}`)
+    ) as Observable<Producto>;
   }
 
   getProductoByUser(id_usuario: number): Observable<Producto[]> {
@@ -42,14 +42,20 @@ export class ProductoService {
 
   createProducto(newProducto: Producto): Observable<Producto[]> {
     return this.handlerService.handleResponse(
-      this.http.post<ApiResponse<Producto[]>>(`this.apiUrl`, { newProducto })
+      this.http.post<ApiResponse<Producto[]>>(this.apiUrl, newProducto)
     ) as Observable<Producto[]>;
   }
 
-  updateProducto(producto: Producto): Observable<void> {
+  updateProducto(idProducto: number, producto: Producto): Observable<Producto> {
     return this.handlerService.handleResponse(
-      this.http.put<ApiResponse<void>>(`${this.apiUrl}/${producto.id}`, { producto })
-    ) as Observable<void>;
+      this.http.put<ApiResponse<Producto>>(`${this.apiUrl}/update_producto/${idProducto}`, producto)
+    ) as Observable<Producto>;
+  }
+
+  updateStock(idProducto: number, cantidad_stock: number, cantidad_min_mensual: number): Observable<Producto> {
+    return this.handlerService.handleResponse(
+      this.http.patch<ApiResponse<Producto>>(`${this.apiUrl}/update_stock/${idProducto}`, { cantidad_stock, cantidad_min_mensual })
+    ) as Observable<Producto>;
   }
 
   ajustarStockRestar(idProducto: number, cantidadAjuste: number): Observable<void> {
@@ -72,7 +78,7 @@ export class ProductoService {
 
   deleteProducto(id_producto: number): Observable<void> {
     return this.handlerService.handleResponse(
-      this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id_producto}`)
+      this.http.delete<ApiResponse<void>>(`${this.apiUrl}/delete_producto/${id_producto}`)
     ) as Observable<void>;
   }
 }

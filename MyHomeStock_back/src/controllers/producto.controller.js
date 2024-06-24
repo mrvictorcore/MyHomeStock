@@ -12,6 +12,7 @@ export const findAll = async (req, res) => {
 
 export const create = async (req, res) => {
   const newProducto = req.body;
+  newProducto.id_usuario = req.userId;
   let errores = [];
 
   if (!newProducto || typeof newProducto !== 'object' || Object.keys(newProducto).length === 0) {
@@ -36,7 +37,7 @@ export const create = async (req, res) => {
 };
 
 export const findById = async (req, res) => {
-  const idProducto = req.params.id
+  const idProducto = req.params.id;
   
   const idError = validateId(idProducto);
   if (idError) {
@@ -52,6 +53,7 @@ export const findById = async (req, res) => {
 };
 
 export const update = async (req, res) => {
+  console.log('Cuerpo de la solicitud:', req.body);
   const updateProducto = req.body;
   let errores = [];
 
@@ -65,16 +67,26 @@ export const update = async (req, res) => {
   }
 
   if (errores.length) {
-    res.status(400).json({error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ')});
-  } else {
-    try {
-      const data_producto = await Producto.update(updateProducto);
-      handleResponse(res, null, data_producto);
-    } catch (err) {
-      handleResponse(res, err);
+    return res.status(400).json({ error: true, message: 'Por favor añade todos los campos requeridos: ' + errores.join(', ') });
+  }
+
+  try {
+    const producto = await Producto.findById(updateProducto.id);
+    if (!producto || producto.id_usuario !== req.userId) {
+      return res.status(403).json({ error: true, message: 'No autorizado para actualizar este producto' });
     }
+
+    if (typeof updateProducto.favorito === 'boolean') {
+      updateProducto.favorito = updateProducto.favorito ? 1 : 0;
+    }
+
+    const updatedProducto = await Producto.update(updateProducto.id, updateProducto);
+    handleResponse(res, null, updatedProducto);
+  } catch (err) {
+    handleResponse(res, err);
   }
 };
+
 
 export const remove = async (req, res) => {
   const idProducto = req.params.id;
@@ -85,7 +97,12 @@ export const remove = async (req, res) => {
   }
 
   try {
-    const data_producto = await Producto.remove(idCompra);
+    const producto = await Producto.findById(idProducto);
+    if (!producto || producto.id_usuario !== req.userId) {
+      return res.status(403).json({ error: true, message: 'No autorizado para eliminar este producto' });
+    }
+
+    const data_producto = await Producto.remove(idProducto);
     handleResponse(res, null, data_producto);
   } catch (err) {
     handleResponse(res, err);
@@ -133,19 +150,41 @@ export const toggleFavorito = async (req, res) => {
   }
 
   try {
-      const resFavorito = await Producto.getFavorito(idProducto);
+    const resFavorito = await Producto.getFavorito(idProducto);
 
-      if (!resFavorito || resFavorito.length === 0) {
-        return res.status(404).json({ error: true, message: "Producto no encontrado" });
-      }
+    if (!resFavorito || resFavorito.length === 0) {
+      return res.status(404).json({ error: true, message: "Producto no encontrado" });
+    }
 
-      let productoFavorito = resFavorito[0].favorito;
-      let nuevoEstadoFavorito = productoFavorito ? 0 : 1; // true/false = 1/0
+    let productoFavorito = resFavorito[0].favorito;
+    let nuevoEstadoFavorito = productoFavorito ? 0 : 1; // true/false = 1/0
 
-      const data_producto = await Producto.toggleFavorito(idProducto, nuevoEstadoFavorito);
-      handleResponse(res, null, data_producto);
+    const data_producto = await Producto.toggleFavorito(idProducto, nuevoEstadoFavorito);
+    handleResponse(res, null, data_producto);
   } catch (err) {
-      handleResponse(res, err);
+    handleResponse(res, err);
+  }
+};
+
+export const updateStock = async (req, res) => {
+  const idProducto = req.params.id;
+  const { cantidad_stock, cantidad_min_mensual } = req.body;
+
+  const idError = validateId(idProducto);
+  if (idError) {
+    return res.status(400).json({ error: true, message: idError });
+  }
+
+  try {
+    const producto = await Producto.findById(idProducto);
+    if (!producto) {
+      return res.status(404).json({ error: true, message: "Producto no encontrado" });
+    }
+
+    const updatedProducto = await Producto.updateStock(idProducto, cantidad_stock, cantidad_min_mensual);
+    handleResponse(res, null, updatedProducto);
+  } catch (err) {
+    handleResponse(res, err);
   }
 };
 
@@ -167,14 +206,19 @@ export const ajustarStockRestar = async (req, res) => {
   }
 
   if (errores.length) {
-    res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
-  } else {
-    try {
-      const resultadoAjuste = await Producto.adjustStockRestar(idProducto, cantidadAjuste);
-      handleResponse(res, null, resultadoAjuste);
-    } catch (err) {
-      handleResponse(res, err);
+    return res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
+  }
+
+  try {
+    const producto = await Producto.findById(idProducto);
+    if (!producto || producto.id_usuario !== req.userId) {
+      return res.status(403).json({ error: true, message: 'No autorizado para ajustar el stock de este producto' });
     }
+
+    const resultadoAjuste = await Producto.adjustStockRestar(idProducto, cantidadAjuste);
+    handleResponse(res, null, resultadoAjuste);
+  } catch (err) {
+    handleResponse(res, err);
   }
 };
 
@@ -196,13 +240,18 @@ export const ajustarStockSumar = async (req, res) => {
   }
 
   if (errores.length) {
-    res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
-  } else {
-    try {
-      const resultadoAjuste = await Producto.adjustStockSumar(idProducto, cantidadAjuste);
-      handleResponse(res, null, resultadoAjuste);
-    } catch (err) {
-      handleResponse(res, err);
+    return res.status(400).json({error: true, message: 'Por favor revisa los campos requeridos: ' + errores.join(', ')});
+  }
+
+  try {
+    const producto = await Producto.findById(idProducto);
+    if (!producto || producto.id_usuario !== req.userId) {
+      return res.status(403).json({ error: true, message: 'No autorizado para ajustar el stock de este producto' });
     }
+
+    const resultadoAjuste = await Producto.adjustStockSumar(idProducto, cantidadAjuste);
+    handleResponse(res, null, resultadoAjuste);
+  } catch (err) {
+    handleResponse(res, err);
   }
 };

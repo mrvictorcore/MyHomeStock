@@ -8,6 +8,7 @@ import { ConfirmarCompraComponent } from './confirmar-compra/confirmar-compra.co
 import { BorrarCompraComponent } from './borrar-compra/borrar-compra.component';
 import { CompraProductoService } from '../services/compra-producto.service';
 import { CompraService } from '../services/compra.service';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-shopping',
@@ -15,7 +16,11 @@ import { CompraService } from '../services/compra.service';
   styleUrls: ['./shopping.component.css']
 })
 export class ShoppingComponent implements OnInit {
-  compraForm: FormGroup = this.fb.group({});
+  formGroup: FormGroup = this.fb.group({
+    compraListSelect: [''],
+    todosSeleccionados: [false],
+    productosFormArray: this.fb.array([])
+  });
   compraList: Compra[] = [];
   selectCompraId: number | null = null;
 
@@ -24,85 +29,72 @@ export class ShoppingComponent implements OnInit {
     private compraProductoService: CompraProductoService,
     private dialog: MatDialog,
     private fb: FormBuilder,
-  ) {
-    this.initializeForm();
-  }
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
     this.loadCompraData();
   }
 
-  initializeForm() {
-    this.compraForm = this.fb.group({
-      compraListSelect: [''],
-      todosSeleccionados: [false],
-      productosFormArray: this.fb.array([])
-    });
-
-    this.loadCompraData();
+  get productosFormArray(): FormArray {
+    return this.formGroup.get('productosFormArray') as FormArray;
   }
 
   loadCompraData() {
-    this.compraService.getAllCompras().subscribe({
-      next: compras => {
-        this.compraList = compras;
-        this.selectCompraId = compras[0].id;
-        this.compraForm.get('compraListSelect')?.setValue(this.selectCompraId);
-        this.loadProductosComprar(this.selectCompraId || 0)
-      },
-      error: err => console.error('No se pudieron cargar las compras: ', err)
-    });
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.id) {
+      this.compraService.getCompraByUser(currentUser.id).subscribe({
+        next: compras => {
+          this.compraList = compras;
+          this.selectCompraId = compras.length > 0 ? compras[0].id : null;
+          if (this.selectCompraId) {
+            this.formGroup.get('compraListSelect')?.setValue(this.selectCompraId);
+            this.loadProductosComprar(this.selectCompraId);
+          }
+        },
+        error: err => console.error('No se pudieron cargar las compras: ', err)
+      });
+    }
   }
 
   loadProductosComprar(idCompra: number) {
     this.compraProductoService.getCompraProductoWithCantidad(idCompra).subscribe({
-        next: (productos: any[]) => {
-          if (productos.length > 0) {
-              this.setProductosFormArray(productos);
-          } else {
-              console.log('No hay productos asociados a esta compra:', idCompra);
-              console.log(productos);
-          }
-        },
-        error: (err) => console.error('Error al cargar los productos de la compra', err)
+      next: productos => this.setProductosFormArray(productos),
+      error: err => console.error('Error al cargar los productos de la compra', err)
     });
   }
 
-  setProductosFormArray(productos: any[]) {
-    const formArray = this.compraForm.get('productosFormArray') as FormArray;
+  setProductosFormArray(productos: CompraProducto[]) {
+    const formArray = this.productosFormArray;
     formArray.clear();
     productos.forEach(producto => {
       formArray.push(this.fb.group({
         id_compra: [this.selectCompraId],
         id_producto: [producto.id_producto],
-        nombreProducto: [producto.nombre],
+        nombre: [producto.nombre],
         cantidad_comprar: [producto.cantidad_comprar],
-        cantidad_disponible: [producto.cantidad_comprar],
+        cantidad_disponible: [producto.cantidad_disponible ? producto.cantidad_disponible : producto.cantidad_comprar],
         seleccionado: [false]
       }));
     });
   }
 
-  get productosFormArray(): FormArray {
-    return this.compraForm.get('productosFormArray') as FormArray;
-  }
-
   getProductosSeleccionados(): CompraProducto[] {
-    return (this.compraForm.get('productosFormArray') as FormArray).value
+    return this.productosFormArray.value
       .filter((p: CompraProducto) => p.seleccionado)
       .map((p: CompraProducto) => ({
         id_compra: p.id_compra,
         id_producto: p.id_producto,
         cantidad_comprar: p.cantidad_comprar,
-        cantidad_disponible: +p.cantidad_disponible,
+        cantidad_disponible: p.cantidad_disponible,
         seleccionado: p.seleccionado
-    }));
+      }));
   }
 
   onListCompraChange(event: Event) {
     const target = event.target as HTMLSelectElement;
     const idCompra = Number(target.value);
-    this.selectCompraId = idCompra
+    this.selectCompraId = idCompra;
     this.loadProductosComprar(idCompra);
   }
 
@@ -111,8 +103,8 @@ export class ShoppingComponent implements OnInit {
   }
 
   seleccionarTodos() {
-    const todosSeleccionados = this.compraForm.get('todosSeleccionados')?.value;
-    (this.compraForm.get('productosFormArray') as FormArray).controls.forEach(control => {
+    const todosSeleccionados = this.formGroup.get('todosSeleccionados')?.value;
+    this.productosFormArray.controls.forEach(control => {
       control.get('seleccionado')?.setValue(todosSeleccionados);
     });
   }
@@ -144,7 +136,7 @@ export class ShoppingComponent implements OnInit {
   }
 
   onConfirmarClick() {
-    if (this.compraForm.valid) {
+    if (this.formGroup.valid) {
       this.dialog.open(ConfirmarCompraComponent, {
         width: "400px"
       }).afterClosed().subscribe(result => {
@@ -155,8 +147,8 @@ export class ShoppingComponent implements OnInit {
     }
   }
 
-  onBorrarClick(){
-    if (this.compraForm.valid) {
+  onBorrarClick() {
+    if (this.formGroup.valid) {
       this.dialog.open(BorrarCompraComponent, {
         width: "400px"
       }).afterClosed().subscribe(result => {
@@ -166,7 +158,7 @@ export class ShoppingComponent implements OnInit {
       });
     }
   }
-  
+
   updateCompra() {
     if (!this.selectCompraId) {
       console.error('No hay compra seleccionada');

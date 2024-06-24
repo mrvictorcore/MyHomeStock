@@ -6,6 +6,6 @@ export interface CompraProducto {
     cantidad_disponible: number;
     seleccionado: boolean;
 
-    nombre_producto?: string;
-    stock_producto?: number;
+    nombre?: string;
+    cantidad_stock?: number;
 }

@@ -9,7 +9,7 @@
     <div class="row" *ngIf="editMode">
       <div class="col-12">
         <div class="form-group">
-          <select id="listaCompraSelect" class="form-control custom-select" formControlName="listaCompraSeleccionadaId">
+          <select id="listaCompraSelect" class="form-control custom-select" formControlName="id" (change)="onCompraSelect($event)">
             <option value="null" disabled hidden selected>Seleccionar lista de compra</option>
             <option *ngFor="let compra of compraList" [ngValue]="compra.id">{{ compra.descripcion }}</option>
           </select>
@@ -36,7 +36,6 @@
       </div>
     </div>
 
-
     <div class="row">
       <div class="col-12">
         <div class="table-responsive">
@@ -50,11 +49,11 @@
               </tr>
             </thead>
             <tbody formArrayName="productosFormArray">
-              <tr *ngFor="let productoCtrl  of productosFormArray.controls; let i = index" [formGroupName]="i">
-                <td>{{ productoCtrl.get('nombreProducto')!.value }}</td>
-                <td>{{ productoCtrl.get('stockProducto')!.value }}</td>
+              <tr *ngFor="let productoCtrl of productosFormArray.controls; let i = index" [formGroupName]="i">
+                <td>{{ productoCtrl.get('nombre')!.value }}</td>
+                <td>{{ productoCtrl.get('cantidad_stock')!.value }}</td>
                 <td>
-                  <input type="number" class="form-control" formControlName="cantidad">
+                  <input type="number" class="form-control" formControlName="cantidad_comprar">
                 </td>
                 <td>
                   <button type="button" class="btn btn-light mx-1" (click)="deleteProductoCompra(i)">

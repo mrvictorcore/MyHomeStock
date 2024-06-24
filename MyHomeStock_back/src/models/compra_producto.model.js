@@ -38,9 +38,13 @@ export class CompraProducto {
     */
     static async create(newCompraProducto) {
         const dbConn = getConnection();
+        const query = `
+            INSERT INTO compra_producto 
+            SET id_compra = ?, id_producto = ?, cantidad_comprar = ?, cantidad_disponible = ?
+        `;
 
         try {
-            const [res] = await dbConn.query("INSERT INTO compra_producto set ?", newCompraProducto);
+            const [res] = await dbConn.query(query, [newCompraProducto.id_compra, newCompraProducto.id_producto, newCompraProducto.cantidad_comprar, newCompraProducto.cantidad_disponible]);
             return { affectedRows: res.affectedRows, insertId: res.insertId };
         } catch (err) {
             throw err;
@@ -116,9 +120,16 @@ export class CompraProducto {
     */
     static async findByCompraId(idCompra) {
         const dbConn = getConnection();
+        const query = `
+            SELECT cp.id_compra, cp.id_producto, cp.cantidad_comprar, cp.cantidad_disponible, p.nombre, p.cantidad_stock 
+            FROM compra_producto cp 
+            JOIN producto p 
+            ON cp.id_producto = p.id
+            WHERE id_compra = ?
+        `;
 
         try {
-            const [res] = await dbConn.query("SELECT * FROM compra_producto WHERE id_compra = ?", [idCompra]);
+            const [res] = await dbConn.query(query, [idCompra]);
             return res;
         } catch (err) {
             throw err;
@@ -131,7 +142,7 @@ export class CompraProducto {
     static async getProductosDeCompraByCompraId(idCompra) {
         const dbConn = getConnection();
         const query = `
-            SELECT p.*, cp.*
+            SELECT p.*, cp.cantidad_comprar, cp.cantidad_disponible
             FROM compra_producto AS cp
             JOIN producto AS p ON cp.id_producto = p.id
             WHERE cp.id_compra = ?
@@ -139,7 +150,13 @@ export class CompraProducto {
 
         try {
             const [res] = await dbConn.query(query, [idCompra]);
-            return res;
+            return res.map(producto => ({
+                id_producto: producto.id,
+                cantidad_comprar: producto.cantidad_comprar,
+                cantidad_disponible: producto.cantidad_disponible,
+                nombre: producto.nombre,
+                cantidad_stock: producto.cantidad_stock
+            }));
         } catch (err) {
             throw err;
         }

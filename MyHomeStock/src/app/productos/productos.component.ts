@@ -8,7 +8,6 @@ import { AlertBorrarProductoComponent } from './borrar-producto/alert-borrar-pro
 import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { ProductoService } from '../services/producto.service';
 import { AuthService } from '../services/auth.service';
-import { Router } from '@angular/router';
 import { CategoriaService } from '../services/categoria.service';
 import { TipoCategoriaService } from '../services/tipo-categoria.service';
 import { forkJoin } from 'rxjs';
@@ -18,7 +17,6 @@ import { forkJoin } from 'rxjs';
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css']
 })
-
 export class ProductosComponent implements OnInit {
   formGroup: FormGroup = this.fb.group({});
   categorias: Categoria[] = [];
@@ -30,7 +28,6 @@ export class ProductosComponent implements OnInit {
     private tipoCategoriaService: TipoCategoriaService,
     private dialog: MatDialog,
     private authService: AuthService,
-    private router: Router,
     private fb: FormBuilder
   ) {
     this.formGroup = this.fb.group({
@@ -80,6 +77,20 @@ export class ProductosComponent implements OnInit {
     });
   }
 
+  actualizarProductoEnVista(index: number, productoActualizado: Producto) {
+    const categoria = this.categorias.find(c => c.id === productoActualizado.id_categoria);
+    const tipoCategoria = categoria ? this.tipos_categoria.find(t => t.id === +categoria.id_tipo) : null;
+
+    this.productosArray.at(index).patchValue({
+      id: productoActualizado.id,
+      nombre: productoActualizado.nombre,
+      nombreTipoCategoria: tipoCategoria ? tipoCategoria.nombre : 'Desconocido',
+      nombreCategoria: categoria ? categoria.nombre : 'Desconocido',
+      descripcion: productoActualizado.descripcion,
+      favorito: productoActualizado.favorito
+    });
+  }
+
   onCrearProductoClick() {
     const nuevoProducto: Producto = {
       id: 0, 
@@ -101,7 +112,6 @@ export class ProductosComponent implements OnInit {
       if (result) {
         this.productoService.createProducto(result).subscribe({
           next: (newProduct: Producto[]) => {
-            console.log(newProduct);
             this.cargarDatos();
           },
           error: (err) => {
@@ -136,23 +146,39 @@ export class ProductosComponent implements OnInit {
 
   onEditarClick(index: number) {
     const productoForm = this.productosArray.at(index) as FormGroup;
+    const producto = productoForm.value;
 
-    const dialogRef = this.dialog.open(EditarCrearProductoComponent, {
-      width: '400px',
-      data: { producto: productoForm.value }
-    });
+    this.productoService.getProducto(producto.id).subscribe({
+      next: (productoData) => {
+        if (productoData) {
+          const dialogRef = this.dialog.open(EditarCrearProductoComponent, {
+            width: '400px',
+            data: { producto: productoData, isNew: false }
+          });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.productoService.updateProducto(result).subscribe({
-          next: () => {
-            this.productosArray.at(index).patchValue(result);
-          },
-          error: (err) => {
-            console.error('Error al actualizar el producto: ', err);
-          }
-        });
-      }  
+          dialogRef.afterClosed().subscribe(result => {
+            if (result) {
+              if (result.id) {
+                this.productoService.updateProducto(result.id, result).subscribe({
+                  next: (updatedProduct) => {
+                    this.actualizarProductoEnVista(index, updatedProduct);
+                  },
+                  error: (err) => {
+                    console.error('Error al actualizar el producto: ', err);
+                  }
+                });
+              } else {
+                console.error('El producto devuelto no tiene un id válido:', result);
+              }
+            }
+          });
+        } else {
+          console.error('No se encontró el producto con id: ', producto.id);
+        }
+      },
+      error: (err) => {
+        console.error('Error al obtener el producto: ', err);
+      }
     });
   }
 

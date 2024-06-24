@@ -9,7 +9,7 @@
  */
 export function handleResponse(res, err, data = null) {
     if (err) {
-        console.error("Error al procesar la solicitud:",err);
+        console.error("Error al procesar la solicitud:", err);
 
         switch (err.code) {
             case 'ER_DUP_ENTRY':
@@ -22,7 +22,7 @@ export function handleResponse(res, err, data = null) {
                 res.status(403).json({ error: true, message: "No autorizado." });
                 break;
             default:
-                res.status(500).json({ error: true, message: err.message || "Error desconocido."});
+                res.status(500).json({ error: true, message: err.message || "Error desconocido." });
         }
     } else if (data && data.affectedRows === 0) {
         res.status(404).json({ error: true, message: "El registro solicitado no fue encontrado o no se modificó." });
@@ -63,7 +63,7 @@ function serializeItem(item) {
     });
 
     if (item.hasOwnProperty('dateField') && item.dateField.toISOString) {
-        item.dateField = item.dateField.toISOString(); // Asegurarse que las fechas están en formato ISO 8601. '2020-05-18T12:00:00.000Z'
+        item.dateField = item.dateField.toISOString();
     }
     return item;
 }
@@ -84,7 +84,7 @@ export function validateFields(obj, campos) {
     let errores = [];
 
     campos.forEach(campo => {
-        if (!obj[campo]) {
+        if (obj[campo] === undefined || obj[campo] === null) {
             errores.push(`falta el campo ${campo}`);
         }
     });
@@ -103,12 +103,13 @@ export function validateFields(obj, campos) {
  * @returns {string|null} Devuelve un mensaje de error si el ID es inválido o no ha sido proporcionado, de lo contrario devuelve null.
  */
 export function validateId(id) {
-    const trimmedId = String(id).trim();
+  const trimmedId = String(id).trim();
+  console.log('Validating ID:', trimmedId);
 
-    if (!id || isNaN(Number(trimmedId))) {
-        return 'ID inválido o no proporcionado.';
-    }
-    return null;
+  if (!id || isNaN(Number(trimmedId))) {
+    return 'ID inválido o no proporcionado.';
+  }
+  return null;
 }
 
 /**

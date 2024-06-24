@@ -1,12 +1,14 @@
 import { Component, Inject, OnDestroy, OnInit } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { AppService } from '../../app.service';
-import { FormBuilder, FormGroup, Validators, FormArray, AbstractControl } from '@angular/forms';
-import { Observable, Subscription, forkJoin } from 'rxjs';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { Compra } from '../../models/compra';
 import { Producto } from '../../models/producto';
-import { ProductoExtendido } from '../../models/producto_extendido';
+import { CompraProducto } from '../../models/compra_producto';
 import { CompraProductoService } from '../../services/compra-producto.service';
+import { CompraService } from '../../services/compra.service';
+import { ProductoService } from '../../services/producto.service';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-crear-editar-compra',
@@ -15,59 +17,45 @@ import { CompraProductoService } from '../../services/compra-producto.service';
 })
 export class CrearEditarCompraComponent implements OnInit, OnDestroy {
   private subscription = new Subscription();
-  compraForm: FormGroup = this.fb.group({});
+  compraForm: FormGroup;
   productosList: Producto[] = [];
   compraList: Compra[] = [];
-  editMode: boolean = false;
+  editMode: boolean;
   idCompraSeleccionada: number | null = null;
-  productosEliminaods: Array<{idCompra: number, idProducto: number}> = [];
 
   constructor(
     public dialogRef: MatDialogRef<CrearEditarCompraComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
+    @Inject(MAT_DIALOG_DATA) public data: { edit: boolean, listaCompraSelect?: Compra, idCompraSelect?: number },
     private compraProductoService: CompraProductoService,
-    private appService: AppService,
-    private fb: FormBuilder
+    private productoService: ProductoService,
+    private compraService: CompraService,
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {
     this.editMode = data.edit;
+    this.compraForm = this.fb.group({
+      id: [null],
+      descripcion: ['', Validators.required],
+      id_usuario: [this.authService.getCurrentUser()?.id, Validators.required],
+      productosFormArray: this.fb.array([])
+    });
   }
 
   ngOnInit(): void {
-    this.initializeForm();
+    this.loadProductosList();
+    this.loadComprasList();
+    if (this.editMode && this.data.idCompraSelect) {
+      this.loadCompraData(this.data.idCompraSelect);
+    }
   }
 
-  initializeForm() {
-    this.loadProductosList();
-
-    let formModelCompra = {
-      id: [null],
-      descripcion: ['', Validators.required],
-      id_usuario: [1, Validators.required],
-      listaCompraSeleccionadaId: [null],
-      productosFormArray: this.fb.array([], Validators.required)
-    };
-
-    if (this.editMode && this.data.listaCompraSelect) {
-      formModelCompra.id = [this.data.listaCompraSelect ? this.data.listaCompraSelect.id : null, Validators.required];
-      formModelCompra.descripcion = [this.data.listaCompraSelect ? this.data.listaCompraSelect.descripcion : '', Validators.required];
-      formModelCompra.id_usuario = [this.data.listaCompraSelect ? this.data.listaCompraSelect.id_usuario : 0, Validators.required];
-      formModelCompra.listaCompraSeleccionadaId = [this.data.listaCompraSelect ? this.data.listaCompraSelect.id : null, Validators.required];
-      this.loadCompraData(this.data.idCompraSelect);
-      this.loadComprasList();
-    }
-
-    this.compraForm = this.fb.group(formModelCompra);
-    if (this.editMode) {
-      this.loadComprasList();
-
+  loadComprasList() {
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser && currentUser.id) {
       this.subscription.add(
-        this.compraForm.get('listaCompraSeleccionadaId')?.valueChanges.subscribe(idCompraSeleccionada => {
-          if (idCompraSeleccionada) {
-            this.data.listaCompraSelect = idCompraSeleccionada;
-            this.idCompraSeleccionada = idCompraSeleccionada;
-            this.productosFormArray.clear();
-            this.loadCompraData(idCompraSeleccionada);
-          }
+        this.compraService.getCompraByUser(currentUser.id).subscribe({
+          next: compras => this.compraList = compras,
+          error: err => console.error('Error al cargar compras:', err)
         })
       );
     }
@@ -75,56 +63,67 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
 
   loadProductosList() {
     this.subscription.add(
-      this.appService.getProductos().subscribe({
-        next: (productos) => this.productosList = productos,
-        error: (err) => console.error('Error al cargar productos:', err)
-      })
-    );
-  }
-
-  loadComprasList() {
-    this.subscription.add(
-      this.appService.getCompras().subscribe({
-        next: (compras) => this.compraList = compras,
-        error: (err) => console.error('Error al cargar compras:', err)
+      this.productoService.getAllProductos().subscribe({
+        next: productos => this.productosList = productos,
+        error: err => console.error('Error al cargar productos:', err)
       })
     );
   }
 
   loadCompraData(idCompra: number) {
+    if (isNaN(idCompra)) {
+      console.error('ID de compra inválido:', idCompra);
+      return;
+    }
+
+    this.idCompraSeleccionada = idCompra;
     this.subscription.add(
-      this.appService.getCompra(idCompra).subscribe({
+      this.compraService.getCompra(idCompra).subscribe({
         next: (compra: Compra[]) => {
-          this.compraForm.patchValue(compra[0]);
-          this.loadProductosDeCompra(idCompra);
+          if (compra.length > 0) {
+            this.setEditForm(compra[0]);
+            this.loadProductosDeCompra(idCompra);
+          } else {
+            console.error('Compra no encontrada');
+          }
         },
-        error: (err) => console.error('Error al cargar la compra:', err)
+        error: err => console.error('Error al cargar la compra:', err)
       })
     );
   }
 
   loadProductosDeCompra(idCompra: number) {
-    this.compraProductoService.getCompraProductoByCompra(idCompra).subscribe({
-      next: (res: any[]) => {
-        const productosCompra = res[0];
-        this.productosFormArray.clear();
-        productosCompra.forEach( (producto: any) => {
-          this.addProductoToFormArray(producto);
-        });
-      },
-      error: (err) => console.error('Error al cargar los productos de la compra', err)
+    this.subscription.add(
+      this.compraProductoService.getCompraProductoByCompra(idCompra).subscribe({
+        next: (productos: CompraProducto[]) => {
+          this.setProductosFormArray(productos);
+        },
+        error: err => console.error('Error al cargar los productos de la compra', err)
+      })
+    );
+  }
+
+  setEditForm(compra: Compra) {
+    this.compraForm.patchValue({
+      id: compra.id,
+      descripcion: compra.descripcion,
+      id_usuario: compra.id_usuario
     });
   }
 
-  addProductoToFormArray(producto: ProductoExtendido) {
-    const productoFormGroup = this.fb.group({
-      id_producto: [producto.id, Validators.required],
-      nombreProducto: [producto.nombre, Validators.required],
-      stockProducto: [ producto.cantidad_stock !== null && producto.cantidad_stock !== undefined ? producto.cantidad_stock : 0, [Validators.required, Validators.min(0)]],
-      cantidad: [producto.cantidad, [Validators.required, Validators.min(1)]],
-      id_compra: [this.idCompraSeleccionada ? this.idCompraSeleccionada : this.data.listaCompraSelect.id]
+  setProductosFormArray(productos: CompraProducto[]) {
+    const formArray = this.productosFormArray;
+    formArray.clear();
+    productos.forEach(producto => {
+      formArray.push(this.fb.group({
+        id_producto: [producto.id_producto, Validators.required],
+        nombre: [producto.nombre, Validators.required],
+        cantidad_stock: [producto.cantidad_stock ?? 0, [Validators.required, Validators.min(0)]],
+        cantidad_comprar: [producto.cantidad_comprar, [Validators.required, Validators.min(1)]],
+        cantidad_disponible: [producto.cantidad_disponible, [Validators.required, Validators.min(1), Validators.max(producto.cantidad_comprar)]],
+        seleccionado: [false]
+      }));
     });
-    this.productosFormArray.push(productoFormGroup);
   }
 
   get productosFormArray(): FormArray {
@@ -141,29 +140,55 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
     }
 
     this.subscription.add(
-      this.appService.getProducto(id_producto).subscribe({
-        next: (respuesta) => {
-          if (respuesta && respuesta.length > 0) {
-            const producto = respuesta[0];
-            const productoExtendido: ProductoExtendido = {
-              ...producto,
-              cantidad: 1,
-              id_compra: null
-            };
-            this.addProductoToFormArray(productoExtendido);
-          } else {
-            console.error('No se encontraron productos con el ID:', id_producto);
-          }
+      this.productoService.getProducto(id_producto).subscribe({
+        next: producto => {
+          const compraProducto: CompraProducto = {
+            id_compra: this.idCompraSeleccionada!,
+            id_producto: producto.id,
+            cantidad_comprar: 1,
+            cantidad_disponible: 1,
+            seleccionado: false,
+            nombre: producto.nombre,
+            cantidad_stock: producto.cantidad_stock
+          };
+          this.addProductoToFormArray(compraProducto);
         },
-        error: (err) => console.error('Error al seleccionar producto:', err)
+        error: err => console.error('Error al seleccionar producto:', err)
       })
     );
   }
 
   isProductoEnCompra(id_producto: number): boolean {
-    return this.productosFormArray.controls.some(
-      control => control.value.id_producto === id_producto
-    );
+    return this.productosFormArray.controls.some(control => control.value.id_producto === id_producto);
+  }
+
+  addProductoToFormArray(producto: CompraProducto) {
+    const productoFormGroup = this.fb.group({
+      id_producto: [producto.id_producto, Validators.required],
+      nombre: [producto.nombre, Validators.required],
+      cantidad_stock: [producto.cantidad_stock ?? 0, [Validators.required, Validators.min(0)]],
+      cantidad_comprar: [producto.cantidad_comprar, [Validators.required, Validators.min(1)]],
+      cantidad_disponible: [producto.cantidad_disponible, [Validators.required, Validators.min(1), Validators.max(producto.cantidad_comprar)]],
+      seleccionado: [false]
+    });
+    this.productosFormArray.push(productoFormGroup);
+  }
+
+  onCompraSelect(event: Event) {
+    const target = event.target as HTMLSelectElement;
+    const rawValue = target.value;
+    console.log('El target.value es:', rawValue);
+
+    // Extraer solo el número correcto del valor seleccionado
+    const parts = rawValue.split(':');
+    const idCompra = parts.length > 1 ? Number(parts[1].trim()) : NaN;
+
+    console.log('El idCompra es:', idCompra);
+    if (!isNaN(idCompra)) {
+      this.loadCompraData(idCompra);
+    } else {
+      console.error('ID de compra inválido seleccionado:', rawValue);
+    }
   }
 
   saveCompra() {
@@ -171,115 +196,49 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
       console.error('El formulario no es válido');
       return;
     }
-    
+
     const compraData = this.compraForm.value;
-    const productos = this.productosFormArray.value as ProductoExtendido[];
 
     if (this.editMode) {
       this.updateCompra(compraData);
-      this.manageProductosInCompra(compraData.id, productos).subscribe({
-        next: (res) => {
-          console.log('Producto eliminado con éxito: ', res);
-          this.deleteProductoCompraDefinitivo();
-        },
-        error: (err) => console.error('Error al eliminar el producto: ', err)
-      });
     } else {
-      this.addNewCompra();
+      this.addNewCompra(compraData);
     }
   }
 
-  manageProductosInCompra(idCompra: number, productos: any[]): Observable<any> {
-    const updates = productos.map(producto => {
-      if (producto.id_producto && producto.id_compra === idCompra && this.editMode) {
-        return this.appService.updateCompraProducto(idCompra, producto.id_producto, producto);
-      } else {
-        return this.appService.addCompraProducto({...producto, id_compra: idCompra});
-      }
-    });
-
-    return forkJoin(updates);
-  }
-
-  updateCompra(compraData: any) {
+  updateCompra(compraData: Compra) {
     this.subscription.add(
-      this.appService.updateCompra(compraData).subscribe({
-        next: (res) => {
-          console.log('Compra actualizada con éxito:', res);
-          const productos = this.productosFormArray.value as ProductoExtendido[];
-          this.manageProductosInCompra(compraData.id, productos).subscribe({
-            next: (res) => {
-              console.log('Producto actualizado con éxito: ', res);
-            },
-            error: (err) => console.error('Error al actualizar los productos: ', err)  
-          });
-        },
-        error: (err) => console.error('Error al actualizar la compra:', err)
+      this.compraService.updateCompra(compraData).subscribe({
+        next: () => this.dialogRef.close(compraData),
+        error: err => console.error('Error al actualizar la compra:', err)
       })
     );
   }
 
-  addNewCompra() {
-    const compraData = this.compraForm.getRawValue();
-    delete compraData.productosFormArray;
-  
+  addNewCompra(compraData: Compra) {
     this.subscription.add(
-      this.appService.addCompras(compraData).subscribe({
+      this.compraService.createCompra(compraData).subscribe({
         next: (res: any) => {
-          if (res && res.data && res.data.id) {
-            const idCompra = res.data.id;
-            const productos = (this.productosFormArray.value as ProductoExtendido[]).map(producto => {
-              return { ...producto, id_compra: idCompra };
-            });
-  
-            this.manageProductosInCompra(idCompra, productos).subscribe({
-              next: () => {
-                console.log('Productos añadidos con éxito.');
-                this.dialogRef.close();
-              },
-              error: (err) => console.error('Error al añadir productos a la compra: ', err)
-            });
+          if (res && res.idCompra) {
+            this.dialogRef.close();
           } else {
             console.error('No se pudo obtener el ID de la compra nueva.');
             alert('Error al crear la compra. Por favor, inténtelo de nuevo.');
           }
         },
-        error: (err) => {
+        error: err => {
           console.error('Error al crear la compra: ', err);
           alert('Error al crear la compra. Por favor, inténtelo de nuevo.');
         }
       })
     );
-  }  
+  }
 
   deleteProductoCompra(index: number) {
-    const idCompra = this.productosFormArray.at(index).value.id_compra;
-    const idProducto = this.productosFormArray.at(index).value.id_producto;
-
-    if (idCompra && idProducto) {
-      this.productosEliminaods.push({idCompra, idProducto});
-    }
     this.productosFormArray.removeAt(index);
   }
 
-  deleteProductoCompraDefinitivo() {
-    const eliminaciones = this.productosEliminaods.map(eliminar => {
-      this.appService.deleteCompraProducto(eliminar.idCompra, eliminar.idProducto).toPromise()
-      this.dialogRef.close();
-    });
-
-    Promise.all(eliminaciones)
-      .then(res => {
-        console.log('Todos los productos han sido eliminados con éxito: ', res);
-        this.productosEliminaods = [];
-      })
-      .catch(err => {
-        console.error('Error al eliminar los productos: ', err);
-      })
-  }
-
   abort() {
-    this.productosEliminaods = [];
     this.dialogRef.close();
   }
 

@@ -20,11 +20,11 @@ export const create = async (req, res) => {
     }
 
     if (!errores.length) {
-        let erroresCampos = validateFields(newCompraProducto, ['id_compra', 'id_producto', 'cantidad']);
+        let erroresCampos = validateFields(newCompraProducto, ['id_compra', 'id_producto', 'cantidad_comprar', 'cantidad_disponible']);
         errores = [...errores, ...erroresCampos];
     }
 
-    if (!Number.isInteger(newCompraProducto.cantidad) || newCompraProducto.cantidad <= 0) {
+    if (!Number.isInteger(newCompraProducto.cantidad_comprar) || newCompraProducto.cantidad_comprar <= 0) {
         errores.push('La cantidad debe ser un número entero positivo');
     }
 
@@ -33,6 +33,7 @@ export const create = async (req, res) => {
     } else{
         try {
             const data_compra_producto = await CompraProducto.create(newCompraProducto);
+            console.log("Productos Creados:", data_compra_producto);
             handleResponse(res, null, data_compra_producto);
         } catch (err) {
             handleResponse(res, err);
@@ -172,12 +173,17 @@ export const getProductosDeCompra = async (req, res) => {
 
     const idErrorCompra = validateId(idCompra);
     if (idErrorCompra) {
-        res.status(400).json({error: true, message: idErrorCompra});
+        return res.status(400).json({ error: true, message: idErrorCompra });
     }
 
     try {
         const data_compra_producto = await CompraProducto.getProductosDeCompraByCompraId(idCompra);
-        handleResponse(res, null, data_compra_producto);
+        const productosTransformados = data_compra_producto.map(producto => ({
+            ...producto,
+            nombreProducto: producto.nombre,
+            stockProducto: producto.cantidad_stock
+        }));
+        handleResponse(res, null, productosTransformados);
     } catch (err) {
         handleResponse(res, err);
     }

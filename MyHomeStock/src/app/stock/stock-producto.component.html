@@ -1,32 +1,31 @@
 <div class="container">
-    <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded">
-      <h1 class="mt-4 text-center display-4 custom-title">Stock</h1>
-      <div class="table-responsive">
-        <table class="table table-borderless table-hover mt-3">
-          <thead>
-            <tr>
-              <th class="text-center">Nombre</th>
-              <th class="text-center">Stock Existente</th>
-              <th class="text-center">Stock Mínimo</th>
-              <th class="text-center">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let producto of productos" class="table-row">
-              <td class="text-center">{{ producto.nombre }}</td>
-              <td class="text-center">{{ producto.cantidad_stock }}</td>
-              <td class="text-center">{{ producto.cantidad_min_mensual }}</td>
-              <td class="text-center">
-                <div class="form-group mb-0 mr-2">
-                  <button class="btn btn-light mx-1" (click)="onUpdateStockClick(producto)">
-                    <i class="fas fa-edit"></i>
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+  <div class="table-responsive shadow-lg p-3 mb-5 bg-white rounded">
+    <h1 class="mt-4 text-center display-4 custom-title">Stock</h1>
+    <form [formGroup]="formGroup">
+      <table class="table table-borderless table-hover mt-3">
+        <thead>
+          <tr>
+            <th class="text-center">Nombre</th>
+            <th class="text-center">Stock Existente</th>
+            <th class="text-center">Stock Mínimo</th>
+            <th class="text-center">Acciones</th>
+          </tr>
+        </thead>
+        <tbody formArrayName="productos">
+          <tr *ngFor="let producto of productosArray.controls; let i = index" [formGroupName]="i" class="table-row">
+            <td class="text-center">{{ producto.value.nombre }}</td>
+            <td class="text-center">{{ producto.value.cantidad_stock }}</td>
+            <td class="text-center">{{ producto.value.cantidad_min_mensual }}</td>
+            <td class="text-center">
+              <div class="form-group mb-0 mr-2">
+                <button class="btn btn-light mx-1" (click)="onUpdateStockClick(i)">
+                  <i class="fas fa-edit"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </form>
+  </div>
 </div>
-  
