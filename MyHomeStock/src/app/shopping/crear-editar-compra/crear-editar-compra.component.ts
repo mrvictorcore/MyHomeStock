@@ -120,7 +120,6 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
         nombre: [producto.nombre, Validators.required],
         cantidad_stock: [producto.cantidad_stock ?? 0, [Validators.required, Validators.min(0)]],
         cantidad_comprar: [producto.cantidad_comprar, [Validators.required, Validators.min(1)]],
-        cantidad_disponible: [producto.cantidad_disponible, [Validators.required, Validators.min(1), Validators.max(producto.cantidad_comprar)]],
         seleccionado: [false]
       }));
     });
@@ -146,10 +145,9 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
             id_compra: this.idCompraSeleccionada!,
             id_producto: producto.id,
             cantidad_comprar: 1,
-            cantidad_disponible: 1,
-            seleccionado: false,
             nombre: producto.nombre,
-            cantidad_stock: producto.cantidad_stock
+            cantidad_stock: producto.cantidad_stock,
+            seleccionado: false
           };
           this.addProductoToFormArray(compraProducto);
         },
@@ -168,7 +166,6 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
       nombre: [producto.nombre, Validators.required],
       cantidad_stock: [producto.cantidad_stock ?? 0, [Validators.required, Validators.min(0)]],
       cantidad_comprar: [producto.cantidad_comprar, [Validators.required, Validators.min(1)]],
-      cantidad_disponible: [producto.cantidad_disponible, [Validators.required, Validators.min(1), Validators.max(producto.cantidad_comprar)]],
       seleccionado: [false]
     });
     this.productosFormArray.push(productoFormGroup);
@@ -176,18 +173,11 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
 
   onCompraSelect(event: Event) {
     const target = event.target as HTMLSelectElement;
-    const rawValue = target.value;
-    console.log('El target.value es:', rawValue);
-
-    // Extraer solo el número correcto del valor seleccionado
-    const parts = rawValue.split(':');
-    const idCompra = parts.length > 1 ? Number(parts[1].trim()) : NaN;
-
-    console.log('El idCompra es:', idCompra);
+    const idCompra = Number(target.value);
     if (!isNaN(idCompra)) {
       this.loadCompraData(idCompra);
     } else {
-      console.error('ID de compra inválido seleccionado:', rawValue);
+      console.error('ID de compra inválido seleccionado:', idCompra);
     }
   }
 
@@ -220,7 +210,7 @@ export class CrearEditarCompraComponent implements OnInit, OnDestroy {
       this.compraService.createCompra(compraData).subscribe({
         next: (res: any) => {
           if (res && res.idCompra) {
-            this.dialogRef.close();
+            this.dialogRef.close(compraData);
           } else {
             console.error('No se pudo obtener el ID de la compra nueva.');
             alert('Error al crear la compra. Por favor, inténtelo de nuevo.');

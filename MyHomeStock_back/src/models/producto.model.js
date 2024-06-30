@@ -131,24 +131,25 @@ export class Producto {
         }
     }
 
-    static async updateStock(id, cantidad_stock, cantidad_min_mensual) {
+    static async updateStock(id, cantidad_stock) {
         const dbConn = getConnection();
-        try {
+
         const query = `
             UPDATE producto 
-            SET cantidad_stock = ?, 
-                cantidad_min_mensual = ? 
+            SET cantidad_stock = ? 
             WHERE id = ?
         `;
-        const [res] = await dbConn.query(query, [cantidad_stock, cantidad_min_mensual, id]);
-        if (res.affectedRows > 0) {
-            const [updatedProducto] = await dbConn.query("SELECT * FROM producto WHERE id = ?", [id]);
-            return updatedProducto[0];
-        } else {
-            throw new Error("Producto no encontrado o no se pudo actualizar");
-        }
+
+        try {
+            const [res] = await dbConn.query(query, [cantidad_stock, id]);
+            if (res.affectedRows > 0) {
+                const [updatedProducto] = await dbConn.query("SELECT * FROM producto WHERE id = ?", [id]);
+                return updatedProducto[0];
+            } else {
+                throw new Error("Producto no encontrado o no se pudo actualizar");
+            }
         } catch (err) {
-        throw err;
+            throw err;
         }
     }
 

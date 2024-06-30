@@ -8,7 +8,6 @@ export class CompraProducto {
         this.id_compra      = compra_producto.id_compra;
         this.id_producto    = compra_producto.id_producto;
         this.cantidad_comprar       = compra_producto.cantidad_comprar;
-        this.cantidad_disponible       = compra_producto.cantidad_disponible;
     }
 
     /**
@@ -17,8 +16,8 @@ export class CompraProducto {
     static async findAll() {
         const dbConn = getConnection();
         const query = `
-            SELECT cp.id_compra, cp.id_producto, cp.cantidad_comprar, cp.cantidad_disponible, p.nombre 
-            AS nombre_producto, p.cantidad_stock 
+            SELECT cp.id_compra, cp.id_producto, cp.cantidad_comprar, p.nombre 
+            AS nombre, p.cantidad_stock 
             AS stock_producto 
             FROM compra_producto cp 
             JOIN producto p 
@@ -40,11 +39,11 @@ export class CompraProducto {
         const dbConn = getConnection();
         const query = `
             INSERT INTO compra_producto 
-            SET id_compra = ?, id_producto = ?, cantidad_comprar = ?, cantidad_disponible = ?
+            SET id_compra = ?, id_producto = ?, cantidad_comprar = ?
         `;
 
         try {
-            const [res] = await dbConn.query(query, [newCompraProducto.id_compra, newCompraProducto.id_producto, newCompraProducto.cantidad_comprar, newCompraProducto.cantidad_disponible]);
+            const [res] = await dbConn.query(query, [newCompraProducto.id_compra, newCompraProducto.id_producto, newCompraProducto.cantidad_comprar]);
             return { affectedRows: res.affectedRows, insertId: res.insertId };
         } catch (err) {
             throw err;
@@ -95,6 +94,20 @@ export class CompraProducto {
     }
 
     /**
+     * Elimina todos los productos asociados a una compra por su id_compra.
+    */
+    static async removeByCompraId(idCompra) {
+        const dbConn = getConnection();
+
+        try {
+        const [res] = await dbConn.query("DELETE FROM compra_producto WHERE id_compra = ?", [idCompra]);
+        return { affectedRows: res.affectedRows };
+        } catch (err) {
+        throw err;
+        }
+    }
+
+    /**
      * Busca compraProductos por el ID del usuario.
     */
     static async findByUsuarioId(idUser) {
@@ -121,7 +134,7 @@ export class CompraProducto {
     static async findByCompraId(idCompra) {
         const dbConn = getConnection();
         const query = `
-            SELECT cp.id_compra, cp.id_producto, cp.cantidad_comprar, cp.cantidad_disponible, p.nombre, p.cantidad_stock 
+            SELECT cp.id_compra, cp.id_producto, cp.cantidad_comprar, p.nombre, p.cantidad_stock 
             FROM compra_producto cp 
             JOIN producto p 
             ON cp.id_producto = p.id
@@ -142,7 +155,7 @@ export class CompraProducto {
     static async getProductosDeCompraByCompraId(idCompra) {
         const dbConn = getConnection();
         const query = `
-            SELECT p.*, cp.cantidad_comprar, cp.cantidad_disponible
+            SELECT p.*, cp.cantidad_comprar
             FROM compra_producto AS cp
             JOIN producto AS p ON cp.id_producto = p.id
             WHERE cp.id_compra = ?
@@ -153,7 +166,6 @@ export class CompraProducto {
             return res.map(producto => ({
                 id_producto: producto.id,
                 cantidad_comprar: producto.cantidad_comprar,
-                cantidad_disponible: producto.cantidad_disponible,
                 nombre: producto.nombre,
                 cantidad_stock: producto.cantidad_stock
             }));

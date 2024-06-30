@@ -14,10 +14,10 @@ router.post('/', verifyToken, create);
 router.get('/:id_compra', verifyToken, findById);
 
 // Actualiza la descripcion de una compra por su id_compra
-router.patch('/:id_compra', verifyToken, update);
+router.patch('/:id', verifyToken, update);
 
 // Borrar una compra por su id_compra
-router.delete('/:id_compra', verifyToken, remove);
+router.delete('/:id', verifyToken, remove);
 
 // Todas las compras por id_usuario
 router.get('/usuario/:id_usuario', verifyToken, findByUsuarioId);

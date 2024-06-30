@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { findAll, create, findById, update, remove, findByUsuarioId, findByCompraId, getProductosDeCompra } from '../controllers/compra_producto.controller.js';
+import { findAll, create, findById, update, remove, findByUsuarioId, findByCompraId, getProductosDeCompra, confirmarCompra } from '../controllers/compra_producto.controller.js';
 
 const router = Router()
 
@@ -26,5 +26,8 @@ router.get('/compra/:id_compra', findByCompraId);
 
 // Obtener todos los productos y compra_productos de una compra específica por ID.
 router.get('/compra/:id_compra/productos_with_CP', getProductosDeCompra);
+
+// Actualiza el stock de los productos comprados y borra los compraProductos comprados de la lista de la compra
+router.post('/confirmar/:id_compra', confirmarCompra);
 
 export default router

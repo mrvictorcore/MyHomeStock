@@ -53,7 +53,7 @@
                 <td>{{ productoCtrl.get('nombre')!.value }}</td>
                 <td>{{ productoCtrl.get('cantidad_stock')!.value }}</td>
                 <td>
-                  <input type="number" class="form-control" formControlName="cantidad_comprar">
+                  <input type="number" class="form-control" formControlName="cantidad_comprar" min="1">
                 </td>
                 <td>
                   <button type="button" class="btn btn-light mx-1" (click)="deleteProductoCompra(i)">

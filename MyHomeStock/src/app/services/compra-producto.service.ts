@@ -63,4 +63,10 @@ export class CompraProductoService {
       this.http.delete<ApiResponse<void>>(`${this.apiUrl}/detalle/${id_compra}/${id_producto}`)
     ) as Observable<void>;
   }
+
+  confirmarCompra(id_compra: number, productos: CompraProducto[]): Observable<void> {
+    return this.handlerService.handleResponse(
+      this.http.post<ApiResponse<void>>(`${this.apiUrl}/confirmar/${id_compra}`, productos)
+    ) as Observable<void>;
+  }
 }

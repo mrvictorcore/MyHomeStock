@@ -73,7 +73,6 @@ export class ShoppingComponent implements OnInit {
         id_producto: [producto.id_producto],
         nombre: [producto.nombre],
         cantidad_comprar: [producto.cantidad_comprar],
-        cantidad_disponible: [producto.cantidad_disponible ? producto.cantidad_disponible : producto.cantidad_comprar],
         seleccionado: [false]
       }));
     });
@@ -86,7 +85,6 @@ export class ShoppingComponent implements OnInit {
         id_compra: p.id_compra,
         id_producto: p.id_producto,
         cantidad_comprar: p.cantidad_comprar,
-        cantidad_disponible: p.cantidad_disponible,
         seleccionado: p.seleccionado
       }));
   }
@@ -96,10 +94,6 @@ export class ShoppingComponent implements OnInit {
     const idCompra = Number(target.value);
     this.selectCompraId = idCompra;
     this.loadProductosComprar(idCompra);
-  }
-
-  generarRangoCantidadDisponible(cantidad: number): number[] {
-    return Array.from({ length: cantidad }, (_, i) => i + 1).reverse();
   }
 
   seleccionarTodos() {
@@ -112,7 +106,7 @@ export class ShoppingComponent implements OnInit {
   onCrearCompra() {
     this.dialog.open(CrearEditarCompraComponent, {
       width: "400px",
-      data: {edit: false}
+      data: { edit: false }
     }).afterClosed().subscribe(result => {
       if (result) {
         this.loadCompraData();
@@ -126,7 +120,7 @@ export class ShoppingComponent implements OnInit {
 
       this.dialog.open(CrearEditarCompraComponent, {
         width: "400px",
-        data: {edit: true, listaCompraSelect: compraSeleccionada, idCompraSelect: this.selectCompraId}
+        data: { edit: true, listaCompraSelect: compraSeleccionada, idCompraSelect: this.selectCompraId }
       }).afterClosed().subscribe(result => {
         if (result) {
           this.loadCompraData();
@@ -141,7 +135,7 @@ export class ShoppingComponent implements OnInit {
         width: "400px"
       }).afterClosed().subscribe(result => {
         if (result) {
-          this.updateCompra();
+          this.confirmarCompra();
         }
       });
     }
@@ -159,7 +153,7 @@ export class ShoppingComponent implements OnInit {
     }
   }
 
-  updateCompra() {
+  confirmarCompra() {
     if (!this.selectCompraId) {
       console.error('No hay compra seleccionada');
       return;
@@ -172,21 +166,31 @@ export class ShoppingComponent implements OnInit {
       return;
     }
 
-    productosUpdate.forEach((compraProducto: CompraProducto) => {
-      this.compraProductoService.updateCompraProducto(compraProducto).subscribe({
-        next: () => {
-          console.log(`El producto ${compraProducto.id_producto} de la compra ${compraProducto.id_compra} ha sido actualizado`);
-        },
-        error: err => {
-          console.error('Error al actualizar el producto: ', err);
-        },
-        complete: () => {
-          console.log('Todos los productos seleccionados han sido actualizados');
-          this.loadCompraData();
-        }
-      });
+    this.compraProductoService.confirmarCompra(this.selectCompraId, productosUpdate).subscribe({
+      next: () => {
+        console.log('Compra confirmada exitosamente');
+        this.loadCompraData();
+      },
+      error: err => {
+        console.error('Error al confirmar la compra: ', err);
+      }
     });
   }
 
-  deleteCompra() {}
+  deleteCompra() {
+    if (!this.selectCompraId) {
+      console.error('No hay compra seleccionada');
+      return;
+    }
+
+    this.compraService.deleteCompra(this.selectCompraId).subscribe({
+      next: () => {
+        console.log('Compra eliminada exitosamente');
+        this.loadCompraData();
+      },
+      error: err => {
+        console.error('Error al eliminar la compra: ', err);
+      }
+    });
+  }
 }
